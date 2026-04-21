@@ -88,6 +88,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".activities.BudgetsActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
+        <activity
             android:name=".activities.SendMoneyActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
@@ -107,6 +112,16 @@
 
         <activity
             android:name=".activities.AccountActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
+        <activity
+            android:name=".activities.TopUpActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
+        <activity
+            android:name=".activities.PaymentsActivity"
             android:screenOrientation="portrait"
             android:exported="false" />
 

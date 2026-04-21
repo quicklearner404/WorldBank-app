@@ -1,24 +1,365 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PLACEHOLDER LAYOUT: activity_card_statistic.xml
-     Screen: CardStatisticActivity
-     TODO: Build full UI based on mockup and project documentation. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<!--
+    activity_card_statistic.xml
+    Owner  : Dev 2
+    Mockup : Page 10 (Card Statistic)
+    IDs    : per documentation section 15
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_bg"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding">
+    android:background="@color/gray_bg">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- ── TOP BAR ── -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding">
+
+                <ImageButton
+                    android:id="@+id/ibBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="@string/cd_back_button"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvScreenTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_card_statistic"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- ── CARD CAROUSEL (horizontal scroll) ── -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding"
+                android:clipToPadding="false"
+                android:layout_marginTop="8dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_card_small" />
+
+            <!-- ── DOT INDICATORS ── -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <View
+                    android:id="@+id/dotIndicator1"
+                    android:layout_width="24dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/shape_dot_active" />
+
+                <View
+                    android:id="@+id/dotIndicator2"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/shape_dot_inactive" />
+
+                <View
+                    android:id="@+id/dotIndicator3"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/shape_dot_inactive" />
+
+                <View
+                    android:id="@+id/dotIndicator4"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/shape_dot_inactive" />
+
+            </LinearLayout>
+
+            <!-- ── SPENDING CHART CARD ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Total Spending label -->
+                    <TextView
+                        android:id="@+id/tvTotalSpendingLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_total_spending"
+                        android:textColor="@color/gray_text"
+                        android:textSize="14sp"
+                        android:layout_gravity="center_horizontal" />
+
+                    <!-- Amount -->
+                    <TextView
+                        android:id="@+id/tvTotalSpendingAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="4dp"
+                        tools:text="$90,160.20" />
+
+                    <!-- ── TAB ROW: Day / Week / Month / Year ── -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:orientation="horizontal"
+                        android:layout_gravity="start"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_tab_row"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/tabDay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:paddingHorizontal="18dp"
+                            android:text="@string/tab_day"
+                            android:textSize="14sp"
+                            android:background="@drawable/bg_tab_active"
+                            android:textColor="@color/white"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                        <TextView
+                            android:id="@+id/tabWeek"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:paddingHorizontal="18dp"
+                            android:text="@string/tab_week"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray_text"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                        <TextView
+                            android:id="@+id/tabMonth"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:paddingHorizontal="18dp"
+                            android:text="@string/tab_month"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray_text"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                        <TextView
+                            android:id="@+id/tabYear"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:paddingHorizontal="18dp"
+                            android:text="@string/tab_year"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray_text"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                    </LinearLayout>
+
+                    <!-- ── LINE CHART (MPAndroidChart) ── -->
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/lineChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:layout_marginTop="16dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── SAVINGS + EXPENSES ROW ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:weightSum="2">
+
+                <!-- Savings card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cvSavings"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="10dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_quick_action">
+                            <ImageView
+                                android:id="@+id/ivSavingsIcon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_transfer_home"
+                                android:rotation="-45"
+                                android:tint="@color/white"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvSavingsLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_savings"
+                            android:textColor="@color/gray_text"
+                            android:textSize="14sp"
+                            android:layout_marginTop="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvSavingsAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="6dp"
+                            tools:text="$6,120.10" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Expenses card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cvExpenses"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@color/black"
+                            app:layout_constraintDimensionRatio="1:1"
+                            android:backgroundTint="@color/black">
+                            <!-- Using a simple shape for icon background -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/bg_quick_action"
+                                android:backgroundTint="@color/black" />
+                            <ImageView
+                                android:id="@+id/ivExpensesIcon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_transfer_home"
+                                android:rotation="135"
+                                android:tint="@color/white"
+                                android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvExpensesLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_expenses"
+                            android:textColor="@color/gray_text"
+                            android:textSize="14sp"
+                            android:layout_marginTop="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvExpensesAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="6dp"
+                            tools:text="$2,345.00" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ── BOTTOM NAVIGATION ── -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="CardStatisticActivity — TODO"
-        android:textColor="@color/purple_primary"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        app:itemIconTint="@color/nav_icon_color"
+        app:itemTextColor="@color/nav_icon_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:elevation="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

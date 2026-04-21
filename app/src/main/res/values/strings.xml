@@ -53,6 +53,7 @@
 
     <!-- Card Detail -->
     <string name="label_card_detail">Card Detail</string>
+    <string name="label_visa">VISA</string>
     <string name="label_monthly_limit">Monthly Transfer Limit</string>
     <string name="label_connect_payment">Connect to Payment Service</string>
     <string name="label_transfer_history">Transfer Activity History</string>

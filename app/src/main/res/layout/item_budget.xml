@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="12dp">
+
+    <FrameLayout
+        android:id="@+id/flIconContainer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_transaction_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivBudgetIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:tint="@color/gray_text"
+            tools:src="@drawable/ic_groceries" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvBudgetName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/ivChevron"
+        app:layout_constraintStart_toEndOf="@id/flIconContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Groceries" />
+
+    <ProgressBar
+        android:id="@+id/pbBudget"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="6dp"
+        android:layout_marginTop="8dp"
+        android:progressDrawable="@drawable/shape_circular_progress"
+        app:layout_constraintEnd_toStartOf="@id/ivChevron"
+        app:layout_constraintStart_toStartOf="@id/tvBudgetName"
+        app:layout_constraintTop_toBottomOf="@id/tvBudgetName"
+        tools:progress="80" />
+
+    <TextView
+        android:id="@+id/tvBudgetStats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/gray_text"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvBudgetName"
+        app:layout_constraintTop_toBottomOf="@id/pbBudget"
+        tools:text="$1,250 of $1,500" />
+
+    <ImageView
+        android:id="@+id/ivChevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_chevron_right"
+        android:rotation="90"
+        android:tint="@color/gray_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
