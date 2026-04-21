@@ -1,0 +1,65 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
+}
+
+android {
+    namespace 'com.worldbank.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.worldbank.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // AndroidX
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.recyclerview
+    implementation libs.cardview
+
+    // Material Components
+    implementation libs.material
+
+    // Firebase
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.auth
+    implementation libs.firebase.firestore
+    implementation libs.firebase.storage
+
+    // Google Sign-In
+    implementation libs.play.services.auth
+
+    // Facebook Login
+    implementation libs.facebook.android.sdk
+
+    // Glide — image loading (profile photos)
+    implementation libs.glide
+    annotationProcessor libs.glide.compiler
+
+    // MPAndroidChart — spending chart on CardStatisticActivity
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Testing
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}

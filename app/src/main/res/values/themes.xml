@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme -->
+    <style name="Theme.WorldBank" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_primary</item>
+        <item name="colorPrimaryVariant">@color/purple_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/purple_light</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:colorBackground">@color/gray_bg</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/gray_bg</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowBackground">@color/gray_bg</item>
+    </style>
+
+    <!-- Splash screen theme — no status bar content visible -->
+    <style name="Theme.WorldBank.Splash" parent="Theme.WorldBank">
+        <item name="android:windowBackground">@color/gray_bg</item>
+    </style>
+
+    <!-- Style: Primary Button (purple, filled) -->
+    <style name="Widget.WorldBank.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="backgroundTint">@color/purple_primary</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textStyle">bold</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Style: Secondary Button (white outline) -->
+    <style name="Widget.WorldBank.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="strokeColor">@color/gray_divider</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="android:textColor">@color/purple_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Style: Input Fields -->
+    <style name="Widget.WorldBank.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/white</item>
+        <item name="boxCornerRadiusTopStart">@dimen/input_corner_radius</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/input_corner_radius</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/input_corner_radius</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/input_corner_radius</item>
+        <item name="boxStrokeColor">@color/gray_divider</item>
+        <item name="hintTextColor">@color/gray_hint</item>
+    </style>
+
+</resources>

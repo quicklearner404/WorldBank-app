@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">World Bank</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">Explore now\nto experience the benefits</string>
+    <string name="onboarding_body">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</string>
+
+    <!-- Buttons -->
+    <string name="btn_get_started">Get Started</string>
+    <string name="btn_log_in">Log In</string>
+    <string name="btn_sign_up">Sign Up</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_add_card">Add Card</string>
+    <string name="btn_send_money">Send Money</string>
+    <string name="btn_share">Share</string>
+    <string name="btn_done">Done</string>
+    <string name="btn_change">Change</string>
+
+    <!-- Social Sign-In -->
+    <string name="btn_continue_google">Continue with Google</string>
+    <string name="btn_continue_facebook">Continue with Facebook</string>
+    <string name="label_or">Or</string>
+
+    <!-- Form Labels & Hints -->
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_confirm_password">Confirm password</string>
+    <string name="hint_email">Text your email</string>
+    <string name="hint_password">Text your password</string>
+    <string name="label_remember_me">Remember me</string>
+    <string name="link_forgot_password">Forgot password?</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="link_register">Register</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_desc">Enter the email associated with your account and we\'ll send an email with code to reset your password</string>
+
+    <!-- OTP -->
+    <string name="otp_desc">Enter your OTP which has been sent to your email and completely verify your account.</string>
+    <string name="otp_sent_note">A code has been sent to your phone</string>
+    <string name="otp_resend_prefix">Resend in </string>
+
+    <!-- Home -->
+    <string name="label_total_balance">Total Balance</string>
+    <string name="label_transfers">Transfers</string>
+    <string name="label_payments">Payments</string>
+    <string name="label_top_up">Top up</string>
+    <string name="label_details">Details</string>
+    <string name="label_transactions">Transactions</string>
+    <string name="label_see_more">See More</string>
+
+    <!-- Card Detail -->
+    <string name="label_card_detail">Card Detail</string>
+    <string name="label_monthly_limit">Monthly Transfer Limit</string>
+    <string name="label_connect_payment">Connect to Payment Service</string>
+    <string name="label_transfer_history">Transfer Activity History</string>
+    <string name="label_change_username">Change Card Username</string>
+    <string name="label_transaction_report">Transaction Report</string>
+
+    <!-- Card Statistic -->
+    <string name="label_card_statistic">Card Statistic</string>
+    <string name="label_total_spending">Total Spending</string>
+    <string name="tab_day">Day</string>
+    <string name="tab_week">Week</string>
+    <string name="tab_month">Month</string>
+    <string name="tab_year">Year</string>
+    <string name="label_savings">Savings</string>
+    <string name="label_expenses">Expenses</string>
+
+    <!-- Send Money -->
+    <string name="label_send_money">Send Money</string>
+    <string name="label_recipient">Recipient</string>
+    <string name="label_transfer_amount">Transfer amount</string>
+
+    <!-- Transfer Success -->
+    <string name="label_transfer_success">Transfer Success</string>
+    <string name="label_total">Total</string>
+    <string name="label_transfer_details">Transfer details</string>
+    <string name="label_total_transfer">Total transfer</string>
+    <string name="label_admin_fee">Admin fee</string>
+    <string name="transfer_immediate_note">The money will be transferred immediately after you confirm</string>
+
+    <!-- Transaction History -->
+    <string name="label_transaction_history">Transaction History</string>
+    <string name="label_today">Today</string>
+    <string name="label_yesterday">Yesterday</string>
+
+    <!-- Account -->
+    <string name="label_account">Account</string>
+    <string name="label_your_account">Your Account</string>
+    <string name="label_account_sub">Name, Email, Handphone</string>
+    <string name="label_payment">Payment</string>
+    <string name="label_payment_sub">Card, Method, Wishlist</string>
+    <string name="label_history_activities">History Activities</string>
+    <string name="label_history_sub">Tracking, Alert, Notifications</string>
+    <string name="label_privacy_security">Privacy &amp; Security</string>
+    <string name="label_privacy_sub">Password, Privilige, Locations</string>
+    <string name="label_about_us">About Us</string>
+    <string name="label_about_sub">Explanation of our history</string>
+
+    <!-- Bottom Nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_budgets">Budgets</string>
+    <string name="nav_statistic">Statistic</string>
+    <string name="nav_account">Account</string>
+
+    <!-- Validation Errors -->
+    <string name="error_email_empty">Please enter your email</string>
+    <string name="error_password_empty">Please enter your password</string>
+    <string name="error_passwords_dont_match">Passwords do not match</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Content Descriptions (Accessibility) -->
+    <string name="cd_back_button">Go back</string>
+    <string name="cd_app_logo">World Bank logo</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_profile_photo">Profile photo</string>
+    <string name="cd_edit_photo">Edit profile photo</string>
+    <string name="cd_nfc_icon">Contactless payment</string>
+    <string name="cd_visa_logo">Visa card</string>
+</resources>

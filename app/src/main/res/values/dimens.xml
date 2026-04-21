@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Padding -->
+    <dimen name="screen_horizontal_padding">24dp</dimen>
+    <dimen name="screen_vertical_padding">24dp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="button_corner_radius">16dp</dimen>
+
+    <!-- Input Fields -->
+    <dimen name="input_corner_radius">12dp</dimen>
+    <dimen name="input_height">56dp</dimen>
+    <dimen name="input_padding_horizontal">16dp</dimen>
+
+    <!-- Cards -->
+    <dimen name="card_corner_radius">20dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_height">180dp</dimen>
+
+    <!-- Quick Action Buttons (Home) -->
+    <dimen name="quick_action_size">64dp</dimen>
+    <dimen name="quick_action_icon_size">28dp</dimen>
+    <dimen name="quick_action_icon_bg_corner">16dp</dimen>
+
+    <!-- Bottom Navigation -->
+    <dimen name="bottom_nav_height">72dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="section_spacing">24dp</dimen>
+    <dimen name="item_spacing">16dp</dimen>
+    <dimen name="small_spacing">8dp</dimen>
+    <dimen name="xs_spacing">4dp</dimen>
+
+    <!-- OTP -->
+    <dimen name="otp_box_width">44dp</dimen>
+    <dimen name="otp_underline_height">2dp</dimen>
+    <dimen name="otp_text_size">24sp</dimen>
+
+    <!-- Profile / Account -->
+    <dimen name="avatar_size">80dp</dimen>
+    <dimen name="edit_photo_btn_size">24dp</dimen>
+
+    <!-- Transaction Item -->
+    <dimen name="transaction_icon_size">48dp</dimen>
+    <dimen name="transaction_icon_corner">12dp</dimen>
+
+    <!-- Typography -->
+    <dimen name="text_heading_large">28sp</dimen>
+    <dimen name="text_heading_medium">22sp</dimen>
+    <dimen name="text_heading_small">18sp</dimen>
+    <dimen name="text_body">14sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
+    <dimen name="text_button">16sp</dimen>
+    <dimen name="text_balance_amount">32sp</dimen>
+    <dimen name="text_card_number">18sp</dimen>
+
+    <!-- Menu Items (Account screen) -->
+    <dimen name="menu_item_icon_size">44dp</dimen>
+    <dimen name="menu_item_icon_corner">12dp</dimen>
+    <dimen name="menu_item_height">64dp</dimen>
+
+    <!-- Dot Indicators -->
+    <dimen name="dot_active_width">24dp</dimen>
+    <dimen name="dot_inactive_size">8dp</dimen>
+    <dimen name="dot_height">8dp</dimen>
+</resources>

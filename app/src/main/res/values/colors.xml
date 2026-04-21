@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Brand Colors -->
+    <color name="purple_primary">#7B2FBE</color>
+    <color name="purple_dark">#6A1FA8</color>
+    <color name="purple_light">#9B59D6</color>
+    <color name="purple_card_end">#B07CE8</color>
+    <color name="purple_icon_bg">#7B2FBE</color>
+
+    <!-- Text Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#1A1A1A</color>
+    <color name="gray_text">#9E9E9E</color>
+    <color name="gray_hint">#BDBDBD</color>
+
+    <!-- Backgrounds -->
+    <color name="gray_bg">#F5F5F5</color>
+    <color name="gray_input_bg">#FFFFFF</color>
+    <color name="gray_divider">#E0E0E0</color>
+    <color name="white_card_bg">#FFFFFF</color>
+
+    <!-- Transaction Status Colors -->
+    <color name="green_credit">#4CAF50</color>
+    <color name="red_debit">#F44336</color>
+
+    <!-- Social / Misc -->
+    <color name="blue_resend">#2196F3</color>
+    <color name="pink_edit_btn">#E91E8C</color>
+    <color name="dark_card_bg">#1E1E2E</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- System (required by Material/AppCompat) -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black_system">#FF000000</color>
+    <color name="white_system">#FFFFFFFF</color>
+</resources>
