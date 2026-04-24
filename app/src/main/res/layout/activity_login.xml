@@ -1,24 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PLACEHOLDER LAYOUT: activity_login.xml
-     Screen: LoginActivity
-     TODO: Build full UI based on mockup and project documentation. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray_bg"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="LoginActivity — TODO"
-        android:textColor="@color/purple_primary"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/section_spacing"
+        android:paddingRight="@dimen/section_spacing"
+        android:paddingBottom="40dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_back"
+            app:title="@string/login_header"
+            app:titleTextAppearance="@style/TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:id="@+id/tv_email_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_email"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_body"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/section_spacing" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_email"
+            style="@style/Widget.WorldBank.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_spacing"
+            android:hint="@string/hint_email">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/input_height"
+                android:inputType="textEmailAddress"
+                android:paddingStart="@dimen/input_padding_horizontal"
+                android:paddingEnd="@dimen/input_padding_horizontal" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tv_password_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_password"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_body"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/item_spacing" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_password"
+            style="@style/Widget.WorldBank.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_spacing"
+            android:hint="@string/hint_password"
+            app:endIconMode="password_toggle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_password"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/input_height"
+                android:inputType="textPassword"
+                android:paddingStart="@dimen/input_padding_horizontal"
+                android:paddingEnd="@dimen/input_padding_horizontal" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/small_spacing">
+
+            <CheckBox
+                android:id="@+id/cb_remember_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_remember_me"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_body"
+                android:buttonTint="@color/purple_primary"
+                android:checked="true" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tv_forgot_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/link_forgot_password"
+                android:textColor="@color/gray_hint"
+                android:textSize="@dimen/text_body"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_login"
+            style="@style/Widget.WorldBank.Button.Primary"
+            android:text="@string/btn_log_in"
+            android:layout_marginTop="@dimen/section_spacing" />
+
+        <TextView
+            android:id="@+id/tv_or"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/or"
+            android:textColor="@color/gray_hint"
+            android:textSize="@dimen/text_body"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/item_spacing"
+            android:layout_marginBottom="@dimen/item_spacing" />
+
+        <LinearLayout
+            android:id="@+id/btn_google"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:background="@drawable/bg_social_button"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_google"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_continue_google"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_body"
+                android:layout_marginStart="@dimen/small_spacing" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_facebook"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:background="@drawable/bg_social_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginTop="@dimen/item_spacing">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_facebook"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_continue_facebook"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_body"
+                android:layout_marginStart="@dimen/small_spacing" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/item_spacing"
+            android:textSize="@dimen/text_body"
+            android:textColor="@color/gray_hint" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

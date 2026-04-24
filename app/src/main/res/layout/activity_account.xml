@@ -1,24 +1,348 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PLACEHOLDER LAYOUT: activity_account.xml
-     Screen: AccountActivity
-     TODO: Build full UI based on mockup and project documentation. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<!--
+    activity_account.xml
+    Owner  : Dev 2
+    Mockup : Page 14
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_bg"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding">
+    android:background="@color/gray_bg">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- ── TOP BAR ── -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding">
+
+                <ImageButton
+                    android:id="@+id/ibBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="@string/cd_back_button"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvScreenTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_account"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- ── PROFILE PHOTO + NAME ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="8dp">
+
+                <!-- Avatar + edit button -->
+                <FrameLayout
+                    android:layout_width="@dimen/avatar_size"
+                    android:layout_height="@dimen/avatar_size">
+
+                    <ImageView
+                        android:id="@+id/ivProfilePhoto"
+                        android:layout_width="@dimen/avatar_size"
+                        android:layout_height="@dimen/avatar_size"
+                        android:background="@drawable/shape_avatar_circle"
+                        android:contentDescription="@string/cd_profile_photo"
+                        android:scaleType="centerCrop" />
+
+                    <!-- Pink edit button bottom-right -->
+                    <ImageButton
+                        android:id="@+id/ibEditPhoto"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="bottom|end"
+                        android:background="@drawable/shape_edit_photo_btn"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:tint="@color/white"
+                        android:padding="4dp"
+                        android:contentDescription="@string/cd_edit_photo" />
+
+                </FrameLayout>
+
+                <!-- User name -->
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="12dp"
+                    tools:text="Emmie Watson" />
+
+                <!-- Location -->
+                <TextView
+                    android:id="@+id/tvUserLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_text"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp"
+                    tools:text="Malang, Indonesia" />
+
+            </LinearLayout>
+
+            <!-- ── MENU ITEMS CARD ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:layout_marginTop="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="8dp">
+
+                    <!-- Your Account -->
+                    <LinearLayout
+                        android:id="@+id/llYourAccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/menu_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout
+                            android:layout_width="@dimen/menu_item_icon_size"
+                            android:layout_height="@dimen/menu_item_icon_size"
+                            android:background="@drawable/bg_menu_icon">
+                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_nav_account"
+                                android:tint="@color/white" android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_your_account"
+                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_account_sub"
+                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp" android:background="@color/gray_divider" />
+
+                    <!-- Payment -->
+                    <LinearLayout
+                        android:id="@+id/llPayment"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/menu_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
+                            android:layout_height="@dimen/menu_item_icon_size"
+                            android:background="@drawable/bg_menu_icon">
+                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_payments"
+                                android:tint="@color/white" android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_payment"
+                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_payment_sub"
+                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp" android:background="@color/gray_divider" />
+
+                    <!-- History Activities -->
+                    <LinearLayout
+                        android:id="@+id/llHistoryActivities"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/menu_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
+                            android:layout_height="@dimen/menu_item_icon_size"
+                            android:background="@drawable/bg_menu_icon">
+                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_nav_budgets"
+                                android:tint="@color/white" android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_history_activities"
+                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_history_sub"
+                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp" android:background="@color/gray_divider" />
+
+                    <!-- Privacy & Security -->
+                    <LinearLayout
+                        android:id="@+id/llPrivacySecurity"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/menu_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
+                            android:layout_height="@dimen/menu_item_icon_size"
+                            android:background="@drawable/bg_menu_icon">
+                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_lock"
+                                android:tint="@color/white" android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_privacy_security"
+                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_privacy_sub"
+                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp" android:background="@color/gray_divider" />
+
+                    <!-- About Us -->
+                    <LinearLayout
+                        android:id="@+id/llAboutUs"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/menu_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
+                            android:layout_height="@dimen/menu_item_icon_size"
+                            android:background="@drawable/bg_menu_icon">
+                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_details"
+                                android:tint="@color/white" android:contentDescription="@null" />
+                        </FrameLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_about_us"
+                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/label_about_sub"
+                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ── BOTTOM NAVIGATION ── -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="AccountActivity — TODO"
-        android:textColor="@color/purple_primary"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        app:itemIconTint="@color/nav_icon_color"
+        app:itemTextColor="@color/nav_icon_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:elevation="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

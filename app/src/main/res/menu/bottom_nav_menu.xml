@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/menu/bottom_nav_menu.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_nav_home"
+        android:title="@string/nav_home" />
+
+    <item
+        android:id="@+id/nav_budgets"
+        android:icon="@drawable/ic_nav_budgets"
+        android:title="@string/nav_budgets" />
+
+    <item
+        android:id="@+id/nav_statistic"
+        android:icon="@drawable/ic_nav_statistic"
+        android:title="@string/nav_statistic" />
+
+    <item
+        android:id="@+id/nav_account"
+        android:icon="@drawable/ic_nav_account"
+        android:title="@string/nav_account" />
+
+</menu>

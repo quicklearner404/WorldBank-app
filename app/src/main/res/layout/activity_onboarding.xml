@@ -1,24 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PLACEHOLDER LAYOUT: activity_onboarding.xml
-     Screen: OnboardingActivity
-     TODO: Build full UI based on mockup and project documentation. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/gray_bg"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding">
+    android:paddingLeft="@dimen/section_spacing"
+    android:paddingRight="@dimen/section_spacing"
+    android:paddingBottom="40dp">
+
+    <ImageView
+        android:id="@+id/iv_onboarding"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/img_onboarding_1"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="OnboardingActivity — TODO"
-        android:textColor="@color/purple_primary"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="@string/onboarding_title"
+        android:textSize="@dimen/text_heading_medium"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_marginTop="@dimen/section_spacing" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/onboarding_subtitle"
+        android:textSize="@dimen/text_body"
+        android:textColor="@color/gray_hint"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginTop="@dimen/item_spacing"
+        android:layout_marginBottom="@dimen/section_spacing" />
+
+    <Button
+        android:id="@+id/btn_get_started"
+        style="@style/Widget.WorldBank.Button.Primary"
+        android:text="@string/btn_get_started" />
+
+</LinearLayout>
