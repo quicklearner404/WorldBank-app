@@ -1,24 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PLACEHOLDER LAYOUT: activity_verify_otp.xml
-     Screen: VerifyOtpActivity
-     TODO: Build full UI based on mockup and project documentation. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/gray_bg"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding">
+    android:paddingLeft="@dimen/section_spacing"
+    android:paddingRight="@dimen/section_spacing"
+    android:id="@+id/main"
+    android:paddingBottom="40dp">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_back"
+        app:title="@string/otp_verify"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/otp_desc"
+        android:textColor="@color/gray_hint"
+        android:textSize="@dimen/text_body"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginTop="@dimen/section_spacing" />
+
+    <LinearLayout
+        android:id="@+id/ll_otp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/section_spacing">
+
+        <EditText
+            android:id="@+id/et_otp_1"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box"
+            android:layout_marginEnd="@dimen/small_spacing" />
+
+        <EditText
+            android:id="@+id/et_otp_2"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box"
+            android:layout_marginEnd="@dimen/small_spacing" />
+
+        <EditText
+            android:id="@+id/et_otp_3"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box"
+            android:layout_marginEnd="@dimen/small_spacing" />
+
+        <EditText
+            android:id="@+id/et_otp_4"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box"
+            android:layout_marginEnd="@dimen/small_spacing" />
+
+        <EditText
+            android:id="@+id/et_otp_5"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box"
+            android:layout_marginEnd="@dimen/small_spacing" />
+
+        <EditText
+            android:id="@+id/et_otp_6"
+            android:layout_width="@dimen/otp_box_width"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="1"
+            android:gravity="center"
+            android:textSize="@dimen/otp_text_size"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_otp_box" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_code_sent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="VerifyOtpActivity — TODO"
-        android:textColor="@color/purple_primary"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="@string/otp_sent_note"
+        android:textColor="@color/gray_hint"
+        android:textSize="@dimen/text_body"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/item_spacing" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/tv_resend_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/otp_resend_prefix"
+        android:textColor="@color/purple_primary"
+        android:textSize="@dimen/text_body"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/xs_spacing" />
+
+    <Button
+        android:id="@+id/btn_confirm"
+        style="@style/Widget.WorldBank.Button.Primary"
+        android:text="@string/btn_confirm"
+        android:layout_marginTop="@dimen/section_spacing" />
+
+</LinearLayout>

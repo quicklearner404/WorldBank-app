@@ -20,7 +20,7 @@ public class SessionManager {
     // ─── DEV BYPASS FLAG ────────────────────────────────────────────────
     // Dev 2: set this to true to skip login screens during development
     // Dev 1: keep this false when working on auth flow
-    public static final boolean DEV_BYPASS = true;
+    public static final boolean DEV_BYPASS = false;
     // ────────────────────────────────────────────────────────────────────
 
     private static final String PREF_NAME = "worldbank_session";

@@ -53,6 +53,7 @@ dependencies {
 
     // Glide — image loading (profile photos)
     implementation libs.glide
+    implementation libs.activity
     annotationProcessor libs.glide.compiler
 
     // MPAndroidChart — spending chart on CardStatisticActivity

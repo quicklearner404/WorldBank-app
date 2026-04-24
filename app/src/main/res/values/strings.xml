@@ -5,7 +5,17 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title">Explore now\nto experience the benefits</string>
-    <string name="onboarding_body">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</string>
+    <string name="onboarding_subtitle"> Experience seamless and secure banking. Our platform uses end-to-end encryption for all atomic transactions, ensuring your accounts and active cards stay protected.</string>
+
+    <!-- Welcome Screen -->
+    <string name="or">Or"</string>
+
+    <!-- Login and SignUp Screen Header -->
+    <string name="login_header">Login</string>
+    <string name="signUp_header">Sign Up</string>
+
+    <!-- Forgot Password Screen Header -->
+    <string name="forgot_password_header">Forgot Password</string>
 
     <!-- Buttons -->
     <string name="btn_get_started">Get Started</string>
@@ -41,6 +51,7 @@
     <string name="otp_desc">Enter your OTP which has been sent to your email and completely verify your account.</string>
     <string name="otp_sent_note">A code has been sent to your phone</string>
     <string name="otp_resend_prefix">Resend in </string>
+    <string name="otp_verify">Verify OTP</string>
 
     <!-- Home -->
     <string name="label_total_balance">Total Balance</string>
