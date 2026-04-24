@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    dialog_recipient_picker.xml
+    Used in SendMoneyActivity to pick a recipient.
+    Place in res/layout/
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="32dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Recipient"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Saved contacts row (horizontal scroll) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recent Contacts"
+        android:textColor="@color/gray_text"
+        android:textSize="13sp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvContacts"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_divider"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Manual entry -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Account / IBAN / Mobile"
+        android:textColor="@color/gray_text"
+        android:textSize="13sp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etRecipientAccount"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_input_field"
+        android:hint="e.g. PK36HBL0000001234567802 or 03001234567"
+        android:textColorHint="@color/gray_hint"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        android:paddingHorizontal="14dp"
+        android:inputType="text"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/etRecipientName"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_input_field"
+        android:hint="Recipient name"
+        android:textColorHint="@color/gray_hint"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:paddingHorizontal="14dp"
+        android:inputType="textPersonName"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Bank selector -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Bank"
+        android:textColor="@color/gray_text"
+        android:textSize="13sp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Row 1: HBL, Meezan, UBL -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvBankHBL"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="HBL"
+            android:textSize="13sp"
+            android:textColor="@color/purple_primary"
+            android:background="@drawable/bg_white_button"
+            android:layout_marginEnd="6dp"
+            android:clickable="true" android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvBankMeezan"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Meezan"
+            android:textSize="13sp"
+            android:textColor="@color/purple_primary"
+            android:background="@drawable/bg_white_button"
+            android:layout_marginEnd="6dp"
+            android:clickable="true" android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvBankUBL"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="UBL"
+            android:textSize="13sp"
+            android:textColor="@color/purple_primary"
+            android:background="@drawable/bg_white_button"
+            android:clickable="true" android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Row 2: MCB, World Bank, JazzCash -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/tvBankMCB"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="MCB"
+            android:textSize="13sp"
+            android:textColor="@color/purple_primary"
+            android:background="@drawable/bg_white_button"
+            android:layout_marginEnd="6dp"
+            android:clickable="true" android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvBankWorldBank"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="World Bank"
+            android:textSize="12sp"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_purple_button"
+            android:layout_marginEnd="6dp"
+            android:clickable="true" android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvBankJazz"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="JazzCash"
+            android:textSize="12sp"
+            android:textColor="@color/purple_primary"
+            android:background="@drawable/bg_white_button"
+            android:clickable="true" android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Confirm button -->
+    <Button
+        android:id="@+id/btnConfirmRecipient"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:text="Confirm Recipient"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_button"
+        android:textStyle="bold"
+        android:background="@drawable/bg_purple_button"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>

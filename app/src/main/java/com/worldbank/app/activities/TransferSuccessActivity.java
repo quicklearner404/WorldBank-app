@@ -5,14 +5,19 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.worldbank.app.R;
 
+/**
+ * TransferSuccessActivity
+ * ────────────────────────
+ * Screen shown after a successful transfer or top-up.
+ * Displays total amount, breakdown, and confirmation.
+ */
 public class TransferSuccessActivity extends AppCompatActivity {
 
     private TextView tvTotalAmount, tvTotalTransferAmount, tvAdminFeeAmount, tvTotalAmountGreen;
-    private Button btnDone, btnShare;
+    private Button btnShare, btnDone;
     private ImageButton ibBack;
 
     @Override
@@ -21,47 +26,63 @@ public class TransferSuccessActivity extends AppCompatActivity {
         setContentView(R.layout.activity_transfer_success);
 
         bindViews();
-        populateData();
+        loadDataFromIntent();
         setupClickListeners();
     }
 
     private void bindViews() {
-        ibBack                = findViewById(R.id.ibBack);
         tvTotalAmount         = findViewById(R.id.tvTotalAmount);
         tvTotalTransferAmount = findViewById(R.id.tvTotalTransferAmount);
         tvAdminFeeAmount      = findViewById(R.id.tvAdminFeeAmount);
         tvTotalAmountGreen    = findViewById(R.id.tvTotalAmountGreen);
-        btnDone               = findViewById(R.id.btnDone);
         btnShare              = findViewById(R.id.btnShare);
+        btnDone               = findViewById(R.id.btnDone);
+        ibBack                = findViewById(R.id.ibBack);
     }
 
-    private void populateData() {
-        double amount   = getIntent().getDoubleExtra("amount",   900.00);
-        double adminFee = getIntent().getDoubleExtra("adminFee", 1.00);
-        double total    = getIntent().getDoubleExtra("total",    901.00);
+    private void loadDataFromIntent() {
+        Intent intent = getIntent();
+        if (intent == null) return;
 
-        tvTotalAmount.setText(String.format("$%.2f", total));
-        tvTotalTransferAmount.setText(String.format("$%.2f", amount));
-        tvAdminFeeAmount.setText(String.format("$%.2f", adminFee));
-        tvTotalAmountGreen.setText(String.format("$%.2f", total));
+        double amount   = intent.getDoubleExtra("amount", 0.0);
+        double adminFee = intent.getDoubleExtra("adminFee", 0.0);
+        double total    = amount + adminFee;
+
+        String formattedTotal    = String.format("$%,.2f", total);
+        String formattedAmount   = String.format("$%,.2f", amount);
+        String formattedAdminFee = String.format("$%,.2f", adminFee);
+
+        tvTotalAmount.setText(formattedTotal);
+        tvTotalAmountGreen.setText(formattedTotal);
+        tvTotalTransferAmount.setText(formattedAmount);
+        tvAdminFeeAmount.setText(formattedAdminFee);
     }
 
     private void setupClickListeners() {
-        ibBack.setOnClickListener(v -> finish());
+        if (ibBack != null) {
+            ibBack.setOnClickListener(v -> goToHome());
+        }
+
+        btnDone.setOnClickListener(v -> goToHome());
 
         btnShare.setOnClickListener(v -> {
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT,
-                    "I just sent " + tvTotalTransferAmount.getText() + " via World Bank!");
-            startActivity(Intent.createChooser(share, "Share receipt via"));
+            // Placeholder share logic
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Transfer successful: " + tvTotalAmount.getText());
+            startActivity(Intent.createChooser(shareIntent, "Share Receipt"));
         });
+    }
 
-        btnDone.setOnClickListener(v -> {
-            // Go all the way back to Home, clear the back stack
-            Intent intent = new Intent(this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-        });
+    private void goToHome() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        goToHome();
     }
 }
