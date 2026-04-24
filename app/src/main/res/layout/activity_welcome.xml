@@ -7,6 +7,7 @@
     android:background="@color/gray_bg"
     android:paddingLeft="@dimen/section_spacing"
     android:paddingRight="@dimen/section_spacing"
+    android:id="@+id/main"
     android:paddingBottom="48dp">
 
     <ImageView

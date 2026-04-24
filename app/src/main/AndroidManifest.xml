@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.worldbank.app">
-
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,118 +12,106 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WorldBank">
-
-        <!-- ════════════════════════════════════════════
+        <activity
+            android:name=".activities.lo"
+            android:exported="false" />
+        <!--
+         ════════════════════════════════════════════
              AUTH FLOW  — Dev 1 owns these activities
-             ════════════════════════════════════════════ -->
-
+             ════════════════════════════════════════════
+        -->
         <!-- LAUNCHER -->
         <activity
             android:name=".activities.SplashActivity"
+            android:exported="true"
             android:noHistory="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.WorldBank.Splash"
-            android:exported="true">
+            android:theme="@style/Theme.WorldBank.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.OnboardingActivity"
+            android:exported="false"
             android:noHistory="true"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.WelcomeActivity"
+            android:exported="false"
             android:noHistory="true"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.LoginActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.SignUpActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.ForgotPasswordActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.VerifyOtpActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
-        <!-- ════════════════════════════════════════════
+            android:windowSoftInputMode="adjustResize" />
+        <!--
+ ════════════════════════════════════════════
              MAIN APP FLOW — Dev 2 owns these activities
-             ════════════════════════════════════════════ -->
-
+             ════════════════════════════════════════════
+        -->
         <activity
             android:name=".activities.HomeActivity"
-            android:screenOrientation="portrait"
+            android:exported="false"
             android:launchMode="singleTask"
-            android:exported="false" />
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.CardDetailActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.CardStatisticActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.BudgetsActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.SendMoneyActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.TransferSuccessActivity"
+            android:exported="false"
             android:noHistory="true"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TransactionHistoryActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.AccountActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TopUpActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.PaymentsActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-
+            android:exported="false"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

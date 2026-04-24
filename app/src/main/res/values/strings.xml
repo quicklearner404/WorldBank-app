@@ -14,7 +14,9 @@
     <string name="login_header">Login</string>
     <string name="signUp_header">Sign Up</string>
 
+    <!-- Forgot Password Screen Header -->
     <string name="forgot_password_header">Forgot Password</string>
+
     <!-- Buttons -->
     <string name="btn_get_started">Get Started</string>
     <string name="btn_log_in">Log In</string>
