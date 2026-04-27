@@ -2,12 +2,15 @@ package com.worldbank.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -15,39 +18,40 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.worldbank.app.R;
+import com.worldbank.app.adapters.CardAdapter;
 import com.worldbank.app.adapters.TransactionAdapter;
 import com.worldbank.app.models.Account;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.models.Transaction;
-import com.worldbank.app.utils.FirestoreSeeder;
 import com.worldbank.app.utils.SessionManager;
 import com.worldbank.app.utils.TransactionRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * HomeActivity — UPGRADED
- * ────────────────────────
- * Now uses real-time Firestore snapshot listeners.
- */
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
-    private TextView tvTotalBalance, tvBalanceAmount, tvCardNumber, tvCardHolder, tvCardExpiry, tvSeeMore;
-    private RecyclerView rvTransactions;
+    private static final String TAG = "HomeActivity";
+
+    private TextView tvBalanceAmount, tvSeeMore;
+    private RecyclerView rvTransactions, rvCards;
     private BottomNavigationView bottomNavView;
-    private View btnTransfer, btnPayments, btnTopUp, btnDetails;
+    private View btnTransfer, btnPayments, btnTopUp, btnAddCard;
 
     private TransactionAdapter transactionAdapter;
+    private CardAdapter cardAdapter;
+    
     private final List<Transaction> transactionList = new ArrayList<>();
+    private final List<Card> cardList = new ArrayList<>();
+    
     private TransactionRepository repo;
     private FirebaseAuth auth;
     private SessionManager sessionManager;
 
     private ListenerRegistration accountListener;
+    private ListenerRegistration cardListener;
     private ListenerRegistration transactionListener;
 
-    private String currentCardId    = "";
     private String currentAccountId = "";
 
     @Override
@@ -60,15 +64,22 @@ public class HomeActivity extends AppCompatActivity {
         repo           = new TransactionRepository();
 
         bindViews();
-        setupRecyclerView();
+        setupRecyclers();
         setupQuickActions();
         setupBottomNav();
+        setupSnapHelper();
+    }
 
-        // ── FORCE SEED TRIGGER ──
-        // Click the "Total Balance" label to manually seed the DB if it's empty
-        tvTotalBalance.setOnClickListener(v -> {
-            FirestoreSeeder.seedDevData(this);
-        });
+    private void setupSnapHelper() {
+        PagerSnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(rvCards);
+    }
+
+    @Override
+    public void onCardClick(Card card, int position) {
+        Intent intent = new Intent(this, CardDetailActivity.class);
+        intent.putExtra("cardId", card.getCardId());
+        startActivity(intent);
     }
 
     @Override
@@ -81,6 +92,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (accountListener != null) accountListener.remove();
+        if (cardListener != null) cardListener.remove();
         if (transactionListener != null) transactionListener.remove();
     }
 
@@ -88,101 +100,78 @@ public class HomeActivity extends AppCompatActivity {
         String uid = getCurrentUserId();
         if (uid == null || uid.isEmpty()) return;
 
-        accountListener = repo.getAccountQuery(uid)
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null || snapshots == null) return;
+        // 1. Global Account Listener
+        accountListener = repo.getAccountQuery(uid).addSnapshotListener((snapshots, e) -> {
+            if (e != null || snapshots == null || snapshots.isEmpty()) return;
+            QueryDocumentSnapshot doc = (QueryDocumentSnapshot) snapshots.getDocuments().get(0);
+            Account account = doc.toObject(Account.class);
+            currentAccountId = doc.getId();
+            tvBalanceAmount.setText(account.getFormattedBalance());
+        });
 
-                    if (snapshots.isEmpty()) {
-                        // DB is empty for this user — auto seed once
-                        if (SessionManager.DEV_BYPASS) FirestoreSeeder.seedDevData(this);
-                        return;
-                    }
-
-                    QueryDocumentSnapshot doc = (QueryDocumentSnapshot) snapshots.getDocuments().get(0);
-                    Account account = doc.toObject(Account.class);
-                    account.setAccountId(doc.getId());
-                    currentAccountId = doc.getId();
-                    tvBalanceAmount.setText(account.getFormattedBalance());
-                    loadCardForAccount(uid);
-                });
-
-        transactionListener = repo.getTransactionsQuery(uid, 10)
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null || snapshots == null) return;
-                    transactionList.clear();
-                    for (QueryDocumentSnapshot doc : snapshots) {
-                        Transaction txn = doc.toObject(Transaction.class);
-                        txn.setTxnId(doc.getId());
-                        transactionList.add(txn);
-                    }
-                    transactionAdapter.notifyDataSetChanged();
-                });
-    }
-
-    private void loadCardForAccount(String uid) {
-        repo.getCardsQuery(uid).limit(1).get().addOnSuccessListener(snapshots -> {
-            if (!snapshots.isEmpty()) {
-                QueryDocumentSnapshot doc = (QueryDocumentSnapshot) snapshots.getDocuments().get(0);
+        // 2. Real-time Cards Listener
+        cardListener = repo.getCardsQuery(uid).addSnapshotListener((snapshots, e) -> {
+            if (e != null || snapshots == null) return;
+            cardList.clear();
+            for (QueryDocumentSnapshot doc : snapshots) {
                 Card card = doc.toObject(Card.class);
                 card.setCardId(doc.getId());
-                currentCardId = doc.getId();
-                displayCard(card);
+                cardList.add(card);
             }
+            cardAdapter.notifyDataSetChanged();
+        });
+
+        // 3. Transactions Listener
+        transactionListener = repo.getTransactionsQuery(uid, 10).addSnapshotListener((snapshots, e) -> {
+            if (e != null || snapshots == null) return;
+            transactionList.clear();
+            for (QueryDocumentSnapshot doc : snapshots) {
+                Transaction txn = doc.toObject(Transaction.class);
+                txn.setTxnId(doc.getId());
+                transactionList.add(txn);
+            }
+            transactionAdapter.notifyDataSetChanged();
         });
     }
 
-    private void displayCard(Card card) {
-        tvCardNumber.setText(card.getMaskedNumber());
-        tvCardHolder.setText(card.getHolderName());
-        tvCardExpiry.setText("Exp " + card.getExpiry());
-    }
-
     private void bindViews() {
-        tvTotalBalance  = findViewById(R.id.tvTotalBalance);
         tvBalanceAmount = findViewById(R.id.tvBalanceAmount);
-        tvCardNumber    = findViewById(R.id.tvCardNumber);
-        tvCardHolder    = findViewById(R.id.tvCardHolder);
-        tvCardExpiry    = findViewById(R.id.tvCardExpiry);
         tvSeeMore       = findViewById(R.id.tvSeeMore);
         rvTransactions  = findViewById(R.id.rvTransactions);
+        rvCards         = findViewById(R.id.rvCards);
         bottomNavView   = findViewById(R.id.bottomNavView);
         btnTransfer     = findViewById(R.id.btnTransfer);
         btnPayments     = findViewById(R.id.btnPayments);
         btnTopUp        = findViewById(R.id.btnTopUp);
-        btnDetails      = findViewById(R.id.btnDetails);
+        btnAddCard      = findViewById(R.id.btnAddCard);
     }
 
-    private void setupRecyclerView() {
+    private void setupRecyclers() {
         transactionAdapter = new TransactionAdapter(this, transactionList);
         rvTransactions.setLayoutManager(new LinearLayoutManager(this));
         rvTransactions.setAdapter(transactionAdapter);
         rvTransactions.setNestedScrollingEnabled(false);
+
+        cardAdapter = new CardAdapter(this, cardList, this);
+        rvCards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvCards.setAdapter(cardAdapter);
     }
 
     private void setupQuickActions() {
         btnTransfer.setOnClickListener(v -> {
             Intent intent = new Intent(this, SendMoneyActivity.class);
-            intent.putExtra("cardId", currentCardId);
             intent.putExtra("accountId", currentAccountId);
             startActivity(intent);
         });
+        
         btnPayments.setOnClickListener(v -> {
             Intent intent = new Intent(this, PaymentsActivity.class);
-            intent.putExtra("cardId", currentCardId);
-            intent.putExtra("accountId", currentAccountId);
             startActivity(intent);
         });
-        btnTopUp.setOnClickListener(v -> {
-            Intent intent = new Intent(this, TopUpActivity.class);
-            intent.putExtra("cardId", currentCardId);
-            intent.putExtra("accountId", currentAccountId);
-            startActivity(intent);
-        });
-        btnDetails.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CardDetailActivity.class);
-            intent.putExtra("cardId", currentCardId);
-            startActivity(intent);
-        });
+
+        btnTopUp.setOnClickListener(v -> startActivity(new Intent(this, TopUpActivity.class)));
+        btnAddCard.setOnClickListener(v -> startActivity(new Intent(this, AddCardActivity.class)));
+
         tvSeeMore.setOnClickListener(v -> startActivity(new Intent(this, TransactionHistoryActivity.class)));
     }
 
@@ -208,7 +197,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private String getCurrentUserId() {
-        if (SessionManager.DEV_BYPASS) return sessionManager.getUserId();
+        if (SessionManager.DEV_BYPASS) return "dev_user_001";
         if (auth.getCurrentUser() != null) return auth.getCurrentUser().getUid();
         return "";
     }

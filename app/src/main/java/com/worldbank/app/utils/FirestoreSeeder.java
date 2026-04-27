@@ -12,17 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * FirestoreSeeder.java
- * ────────────────────
- * Utility class to quickly seed the database with initial Pakistani banking data
- * for the developer user (dev_user_001).
- *
- * This class now handles seeding for:
- * 1. Users
- * 2. Accounts
- * 3. Cards
- * 4. Transactions
- * 5. Contacts
+ * FirestoreSeeder.java — FINAL FIX
  */
 public class FirestoreSeeder {
 
@@ -32,83 +22,55 @@ public class FirestoreSeeder {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String devUid = "dev_user_001";
 
-        // ── 1. Create dev_user_001 Profile ────────────────────────
-        Map<String, Object> user = new HashMap<>();
-        user.put("uid", devUid);
-        user.put("displayName", "Ali Hassan");
-        user.put("email", "dev@worldbank.com");
-        user.put("phone", "+92 300 1234567");
-        user.put("city", "Lahore");
-        user.put("cnic", "35202-XXXXXXX-X");
-        user.put("createdAt", Timestamp.now());
+        // 1. Clear existing dev documents to avoid duplicates or conflicts
+        db.collection("accounts").document("dev_account_001").delete();
+        db.collection("cards").document("dev_card_001").delete();
+        db.collection("cards").document("dev_card_002").delete();
 
-        db.collection("users").document(devUid).set(user);
-
-        // ── 2. Create dev_user_001 Account ────────────────────────
+        // ── Create Account ────────────────────────
         Map<String, Object> account = new HashMap<>();
         account.put("uid", devUid);
         account.put("accountNumber", "PK36SCBL0000001123456702");
-        account.put("accountTitle", "Ali Hassan");
+        account.put("accountTitle", "Emmie Watson");
         account.put("bankName", "World Bank");
         account.put("accountType", "SAVINGS");
         account.put("balance", 125000.0);
         account.put("currency", "PKR");
         account.put("isActive", true);
 
-        db.collection("accounts").document("dev_account_001")
-                .set(account)
-                .addOnSuccessListener(aVoid -> {
-                    // ── 3. Create dev_user_001 Card ───────────────────────
-                    Map<String, Object> card = new HashMap<>();
-                    card.put("uid", devUid);
-                    card.put("accountId", "dev_account_001");
-                    card.put("maskedNumber", "4532 **** **** 3090");
-                    card.put("holderName", "Ali Hassan");
-                    card.put("expiry", "09/26");
-                    card.put("cardType", "VISA");
-                    card.put("isActive", true);
-                    card.put("monthlyLimit", 200000.0);
-                    card.put("monthlyUsed", 45000.0);
+        db.collection("accounts").document("dev_account_001").set(account);
 
-                    db.collection("cards").document("dev_card_001").set(card);
+        // ── Create MULTIPLE Cards ──────────────────────────
+        
+        // Card 1
+        Map<String, Object> card1 = new HashMap<>();
+        card1.put("uid", devUid);
+        card1.put("accountId", "dev_account_001");
+        card1.put("maskedNumber", "**** **** **** 3090");
+        card1.put("holderName", "Emmie Watson");
+        card1.put("expiry", "09/26");
+        card1.put("cardType", "VISA");
+        card1.put("isActive", true);
+        card1.put("balance", 125000.0);
+        card1.put("monthlyLimit", 200000.0);
+        card1.put("monthlyUsed", 45000.0);
+        db.collection("cards").document("dev_card_001").set(card1);
 
-                    // ── 4. Add Some Test Transactions ──────────────────────
-                    addTestTransaction(db, devUid, "Fatima Khan", 15000, Transaction.TYPE_DEBIT, Transaction.CAT_TRANSFER, "PK36HBLN0000001234567802", "HBL");
-                    addTestTransaction(db, devUid, "Lesco Bill", 4500, Transaction.TYPE_DEBIT, Transaction.CAT_BILL, "LESCO-123", "LESCO");
-                    addTestTransaction(db, devUid, "Salary", 125000, Transaction.TYPE_CREDIT, Transaction.CAT_SALARY, "PK36SCBL0000001123456702", "World Bank");
-
-                    // ── 5. Add Some Contacts ──────────────────────────────
-                    addContact(db, devUid, "Fatima Khan", "PK36HBLN0000001234567802", "HBL");
-                    addContact(db, devUid, "Ali Hassan", "PK36MEZN0000009876543210", "Meezan");
-
-                    Toast.makeText(context, "Full Banking Data Seeded!", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Error seeding data", e));
-    }
-
-    private static void addTestTransaction(FirebaseFirestore db, String uid, String name, double amt, String type, String cat, String acc, String bank) {
-        Map<String, Object> txn = new HashMap<>();
-        txn.put("uid", uid);
-        txn.put("senderUid", uid);
-        txn.put("recipientName", name);
-        txn.put("recipientAccount", acc);
-        txn.put("recipientBank", bank);
-        txn.put("amount", amt);
-        txn.put("type", type);
-        txn.put("category", cat);
-        txn.put("status", "SUCCESS");
-        txn.put("timestamp", Timestamp.now());
-        txn.put("referenceNumber", Transaction.generateReference());
-        db.collection("transactions").add(txn);
-    }
-
-    private static void addContact(FirebaseFirestore db, String ownerUid, String name, String acc, String bank) {
-        Map<String, Object> contact = new HashMap<>();
-        contact.put("ownerUid", ownerUid);
-        contact.put("name", name);
-        contact.put("accountNumber", acc);
-        contact.put("bankName", bank);
-        contact.put("lastUsed", Timestamp.now());
-        db.collection("contacts").add(contact);
+        // Card 2
+        Map<String, Object> card2 = new HashMap<>();
+        card2.put("uid", devUid);
+        card2.put("accountId", "dev_account_001");
+        card2.put("maskedNumber", "**** **** **** 8844");
+        card2.put("holderName", "Emmie Watson");
+        card2.put("expiry", "12/25");
+        card2.put("cardType", "MASTERCARD");
+        card2.put("isActive", true);
+        card2.put("balance", 0.0);
+        card2.put("monthlyLimit", 100000.0);
+        card2.put("monthlyUsed", 0.0);
+        db.collection("cards").document("dev_card_002").set(card2)
+            .addOnSuccessListener(v -> {
+                Toast.makeText(context, "Cards Seeded! Scroll to see them.", Toast.LENGTH_SHORT).show();
+            });
     }
 }

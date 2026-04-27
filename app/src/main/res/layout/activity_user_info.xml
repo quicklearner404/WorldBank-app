@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- ── TOP BAR ── -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingHorizontal="@dimen/screen_horizontal_padding">
+
+            <ImageButton
+                android:id="@+id/ibBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_chevron_left"
+                android:tint="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your Account"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding"
+                android:paddingTop="24dp">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Full Name" android:textColor="@color/gray_text" android:textSize="12sp" />
+                        <TextView android:id="@+id/tvInfoName" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/black" android:textSize="16sp" android:textStyle="bold" android:layout_marginTop="4dp"
+                            tools:text="Emmie Watson" />
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_divider" android:layout_marginVertical="16dp" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Email Address" android:textColor="@color/gray_text" android:textSize="12sp" />
+                        <TextView android:id="@+id/tvInfoEmail" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/black" android:textSize="16sp" android:textStyle="bold" android:layout_marginTop="4dp"
+                            tools:text="emmie.watson@gmail.com" />
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_divider" android:layout_marginVertical="16dp" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Phone Number" android:textColor="@color/gray_text" android:textSize="12sp" />
+                        <TextView android:id="@+id/tvInfoPhone" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/black" android:textSize="16sp" android:textStyle="bold" android:layout_marginTop="4dp"
+                            tools:text="+92 300 1234567" />
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_divider" android:layout_marginVertical="16dp" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Location" android:textColor="@color/gray_text" android:textSize="12sp" />
+                        <TextView android:id="@+id/tvInfoLocation" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/black" android:textSize="16sp" android:textStyle="bold" android:layout_marginTop="4dp"
+                            tools:text="Lahore, Pakistan" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <Button
+                    android:id="@+id/btnEditProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/bg_purple_button"
+                    android:text="Edit Profile"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

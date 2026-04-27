@@ -29,7 +29,7 @@
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_chevron_left"
-                    android:contentDescription="@string/cd_back_button"
+                    android:tint="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
@@ -48,7 +48,7 @@
                     app:layout_constraintBottom_toBottomOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- ── CARD CAROUSEL ── -->
+            <!-- ── LIVE CARD CAROUSEL (Premium 180dp Height) ── -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCards"
                 android:layout_width="match_parent"
@@ -56,29 +56,16 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="@dimen/screen_horizontal_padding"
                 android:clipToPadding="false"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_card_small" />
 
-            <!-- ── DOT INDICATORS ── -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical">
-                <View android:layout_width="24dp" android:layout_height="8dp" android:background="@drawable/shape_dot_active" />
-                <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
-                <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
-            </LinearLayout>
-
-            <!-- ── SELECT AMOUNT ── -->
+            <!-- ── SELECT AMOUNT (PKR Adjusted) ── -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Amount"
+                android:text="Select Amount (Rs.)"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -88,14 +75,12 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="4"
+                android:columnCount="3"
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
                 android:layout_marginTop="12dp">
-                <!-- Preset Amounts -->
-                <Button style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="$10" android:layout_marginEnd="4dp" />
-                <Button style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="$25" android:layout_marginEnd="4dp" />
-                <Button style="?attr/materialButtonStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="$50" android:layout_marginEnd="4dp" />
-                <Button style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="$100" />
+                <Button android:id="@+id/btn500" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 500" android:layout_marginEnd="4dp" />
+                <Button android:id="@+id/btn1000" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 1000" android:layout_marginEnd="4dp" />
+                <Button android:id="@+id/btn2000" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 2000" />
             </GridLayout>
 
             <FrameLayout
@@ -110,7 +95,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
-                    android:hint="Other"
+                    android:hint="Other Amount (PKR)"
                     android:paddingHorizontal="16dp"
                     android:textColor="@color/black"
                     android:textColorHint="@color/gray_hint"
@@ -129,51 +114,29 @@
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
                 android:layout_marginTop="24dp" />
 
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
-                android:layout_marginTop="12dp">
-
-                <androidx.cardview.widget.CardView
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white">
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F3E5F5">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="64dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_bank" />
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Linked Bank Account" android:textColor="@color/black" android:textStyle="bold" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(XXXX 1234)" android:textColor="@color/gray_text" android:textSize="12sp" />
-                        </LinearLayout>
+                    android:layout_height="64dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
+                    <View android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/bg_menu_icon" />
+                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_marginStart="-32dp" android:src="@drawable/ic_bank" android:tint="@color/purple_primary" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="24dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Linked Bank Account" android:textColor="@color/black" android:textStyle="bold" android:textSize="14sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(XXXX 1234)" android:textColor="@color/gray_text" android:textSize="12sp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/white">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="64dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_payments" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="New Card" android:textColor="@color/black" android:textStyle="bold" android:layout_marginStart="12dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_chevron_right" android:tint="@color/gray_divider" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <Button
                 android:id="@+id/btnTopUpNow"
@@ -185,7 +148,8 @@
                 android:text="Top Up Now"
                 android:background="@drawable/bg_purple_button"
                 android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAllCaps="false" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
