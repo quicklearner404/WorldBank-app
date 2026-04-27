@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -27,7 +28,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     FirebaseAuth auth;
     FirebaseFirestore db;
-    TextInputEditText etEmail, etPassword, etConfirmPassword;
+    TextInputEditText etName, etCnic, etPhone, etEmail, etPassword, etConfirmPassword;
     Button btnSignup;
     Toolbar toolbar;
 
@@ -48,13 +49,30 @@ public class SignUpActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
         btnSignup.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            String cnic = etCnic.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String pass = etPassword.getText().toString().trim();
             String cpass = etConfirmPassword.getText().toString().trim();
 
-            if (email.isEmpty() || pass.isEmpty() || cpass.isEmpty()) {
-                Toast.makeText(SignUpActivity.this, "Some fields are empty", Toast.LENGTH_SHORT).show();
+            if (name.isEmpty() || cnic.isEmpty() || phone.isEmpty() || email.isEmpty() || pass.isEmpty() || cpass.isEmpty()) {
+                Toast.makeText(SignUpActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (cnic.length() != 13) {
+                Toast.makeText(SignUpActivity.this, "CNIC must be 13 digits", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -74,8 +92,7 @@ public class SignUpActivity extends AppCompatActivity {
                         public void onSuccess(AuthResult authResult) {
                             authResult.getUser().sendEmailVerification();
                             String uid = authResult.getUser().getUid();
-                            String name = email.split("@")[0];
-                            createNewUserData(uid, name, email);
+                            createNewUserData(uid, name, cnic, phone, email);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -87,13 +104,14 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    void createNewUserData(String uid, String name, String email) {
-        // create the user profile document first then chain account and card creation
+    void createNewUserData(String uid, String name, String cnic, String phone, String email) {
+        // create the user profile document with all personal details
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
         user.put("displayName", name);
+        user.put("cnic", cnic);
+        user.put("phone", phone);
         user.put("email", email);
-        user.put("phone", "");
         user.put("city", "");
         user.put("createdAt", FieldValue.serverTimestamp());
 
@@ -128,8 +146,7 @@ public class SignUpActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<com.google.firebase.firestore.DocumentReference>() {
                     @Override
                     public void onSuccess(com.google.firebase.firestore.DocumentReference ref) {
-                        String accountId = ref.getId();
-                        createCardData(uid, accountId, name);
+                        createCardData(uid, ref.getId(), name);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -178,6 +195,9 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void init() {
+        etName = findViewById(R.id.et_name);
+        etCnic = findViewById(R.id.et_cnic);
+        etPhone = findViewById(R.id.et_phone);
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
@@ -186,14 +206,5 @@ public class SignUpActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(android.view.MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

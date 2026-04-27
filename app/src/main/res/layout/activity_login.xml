@@ -20,9 +20,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_back"
-            app:title="@string/login_header"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Title" />
+            app:navigationIcon="@drawable/ic_back" />
 
         <TextView
             android:id="@+id/tv_email_label"

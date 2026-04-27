@@ -8,14 +8,26 @@
     <string name="onboarding_subtitle"> Experience seamless and secure banking. Our platform uses end-to-end encryption for all atomic transactions, ensuring your accounts and active cards stay protected.</string>
 
     <!-- Welcome Screen -->
-    <string name="or">Or"</string>
+    <string name="or">Or</string>
 
-    <!-- Login and SignUp Screen Header -->
-    <string name="login_header">Login</string>
-    <string name="signUp_header">Sign Up</string>
+    <!-- Sign Up Form Labels and Hints -->
+    <string name="label_full_name">Full Name</string>
+    <string name="label_cnic">CNIC</string>
+    <string name="label_phone">Phone Number</string>
+    <string name="hint_full_name">Enter your full name</string>
+    <string name="hint_cnic">35201-1234567-1</string>
+    <string name="hint_phone">+92 300 1234567</string>
 
-    <!-- Forgot Password Screen Header -->
-    <string name="forgot_password_header">Forgot Password</string>
+    <!-- Sign Up Validation Errors -->
+    <string name="error_fields_empty">All fields are required</string>
+    <string name="error_cnic_invalid">CNIC must be 13 digits</string>
+    <string name="error_password_short">Password must be at least 6 characters</string>
+
+    <!-- Sign Up Success -->
+    <string name="success_account_created">Account Created!</string>
+    <string name="error_user_save_failed">Failed to save user</string>
+    <string name="error_account_create_failed">Failed to create account</string>
+    <string name="error_card_create_failed">Failed to create card</string>
 
     <!-- Buttons -->
     <string name="btn_get_started">Get Started</string>
