@@ -78,7 +78,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/input_height"
                     android:inputType="number"
-                    android:maxLength="13"
+                    android:maxLength="15"
                     android:paddingStart="@dimen/input_padding_horizontal"
                     android:paddingEnd="@dimen/input_padding_horizontal" />
 
@@ -106,6 +106,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/input_height"
                     android:inputType="phone"
+                    android:maxLength="14"
                     android:paddingStart="@dimen/input_padding_horizontal"
                     android:paddingEnd="@dimen/input_padding_horizontal" />
 

@@ -32,7 +32,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 2. Sir's style: Always includes this EdgeToEdge block at the top of onCreate
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -41,13 +40,10 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 3. Sir's style: Call init() immediately
         init();
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // 4. Sir's style: Button clicks using (v)->{ ... }
         btnLogin.setOnClickListener((v)->{
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
