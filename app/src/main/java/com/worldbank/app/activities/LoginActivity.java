@@ -25,10 +25,19 @@ import com.worldbank.app.utils.SessionManager;
 
 public class LoginActivity extends AppCompatActivity {
 
+    // firebase auth instance used for sign in
     FirebaseAuth auth;
+
+    // input fields for email and password
     TextInputEditText etEmail, etPassword;
+
+    // main login button
     Button btnLogin;
+
+    // navigation links at the bottom
     TextView tvForgotPassword, tvRegister;
+
+    // toolbar with back navigation
     Toolbar toolbar;
 
     @Override
@@ -45,9 +54,13 @@ public class LoginActivity extends AppCompatActivity {
 
         init();
 
+        // set the register link text here since xml left it blank
+        tvRegister.setText("Don't have an account? Register");
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // handle back press using modern dispatcher
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -55,14 +68,16 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // toolbar back arrow triggers the dispatcher
         toolbar.setNavigationOnClickListener(v ->
                 getOnBackPressedDispatcher().onBackPressed()
         );
 
         btnLogin.setOnClickListener((v) -> {
-            String email = etEmail.getText().toString().trim();
+            String email    = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
+            // validate both fields before calling firebase
             if (email.isEmpty()) {
                 etEmail.setError("Email is required");
                 return;
@@ -76,10 +91,10 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
-                            // save session so splash skips login on next app open
-                            String uid = authResult.getUser().getUid();
+                            // save session so splash skips login on next open
+                            String uid       = authResult.getUser().getUid();
                             String userEmail = authResult.getUser().getEmail();
-                            String userName = authResult.getUser().getDisplayName() != null
+                            String userName  = authResult.getUser().getDisplayName() != null
                                     ? authResult.getUser().getDisplayName()
                                     : "";
 
@@ -99,22 +114,25 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
+        // navigate to forgot password screen
         tvForgotPassword.setOnClickListener((v) -> {
             startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
 
+        // navigate to sign up screen
         tvRegister.setOnClickListener((v) -> {
             startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
         });
     }
 
+    // finds all views and initialises firebase
     void init() {
-        etEmail = findViewById(R.id.et_email);
-        etPassword = findViewById(R.id.et_password);
-        btnLogin = findViewById(R.id.btn_login);
+        etEmail          = findViewById(R.id.et_email);
+        etPassword       = findViewById(R.id.et_password);
+        btnLogin         = findViewById(R.id.btn_login);
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
-        tvRegister = findViewById(R.id.tv_register);
-        toolbar = findViewById(R.id.toolbar);
-        auth = FirebaseAuth.getInstance();
+        tvRegister       = findViewById(R.id.tv_register);
+        toolbar          = findViewById(R.id.toolbar);
+        auth             = FirebaseAuth.getInstance();
     }
 }

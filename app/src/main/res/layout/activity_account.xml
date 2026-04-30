@@ -15,7 +15,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="88dp"
+        android:paddingBottom="72dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -36,6 +36,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_chevron_left"
                     android:contentDescription="@string/cd_back_button"
+                    android:tint="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
@@ -67,25 +68,40 @@
                     android:layout_width="@dimen/avatar_size"
                     android:layout_height="@dimen/avatar_size">
 
-                    <ImageView
-                        android:id="@+id/ivProfilePhoto"
+                    <FrameLayout
                         android:layout_width="@dimen/avatar_size"
                         android:layout_height="@dimen/avatar_size"
-                        android:background="@drawable/shape_avatar_circle"
-                        android:contentDescription="@string/cd_profile_photo"
-                        android:scaleType="centerCrop" />
+                        android:background="@drawable/shape_avatar_circle">
+                        <TextView
+                            android:id="@+id/tvUserInitials"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textColor="@color/purple_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="AH" />
+                    </FrameLayout>
 
-                    <!-- Pink edit button bottom-right -->
-                    <ImageButton
-                        android:id="@+id/ibEditPhoto"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
+                    <!-- Modern edit button bottom-right -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cvEditPhoto"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:layout_gravity="bottom|end"
-                        android:background="@drawable/shape_edit_photo_btn"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:tint="@color/white"
-                        android:padding="4dp"
-                        android:contentDescription="@string/cd_edit_photo" />
+                        app:cardBackgroundColor="@color/pink_edit_btn"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="2dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_transfer_alt"
+                            android:rotation="-45"
+                            android:tint="@color/white"
+                            android:contentDescription="@string/cd_edit_photo" />
+                    </androidx.cardview.widget.CardView>
 
                 </FrameLayout>
 
@@ -98,7 +114,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginTop="12dp"
-                    tools:text="Emmie Watson" />
+                    tools:text="Ali Hassan" />
 
                 <!-- Location -->
                 <TextView
@@ -108,7 +124,7 @@
                     android:textColor="@color/gray_text"
                     android:textSize="13sp"
                     android:layout_marginTop="4dp"
-                    tools:text="Malang, Indonesia" />
+                    tools:text="Lahore, Pakistan" />
 
             </LinearLayout>
 
@@ -119,51 +135,52 @@
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
                 android:layout_marginTop="24dp"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="12dp">
 
                     <!-- Your Account -->
                     <LinearLayout
                         android:id="@+id/llYourAccount"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/menu_item_height"
+                        android:layout_height="72dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <FrameLayout
-                            android:layout_width="@dimen/menu_item_icon_size"
-                            android:layout_height="@dimen/menu_item_icon_size"
-                            android:background="@drawable/bg_menu_icon">
-                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_nav_account"
-                                android:tint="@color/white" android:contentDescription="@null" />
-                        </FrameLayout>
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="-32dp"
+                            android:src="@drawable/ic_nav_account"
+                            android:tint="@color/purple_primary" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="24dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_your_account"
-                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                                android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_account_sub"
-                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                                android:textColor="@color/gray_text" android:textSize="12sp" />
                         </LinearLayout>
 
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                            android:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -173,7 +190,7 @@
                     <LinearLayout
                         android:id="@+id/llPayment"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/menu_item_height"
+                        android:layout_height="72dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="16dp"
@@ -181,29 +198,30 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
-                            android:layout_height="@dimen/menu_item_icon_size"
-                            android:background="@drawable/bg_menu_icon">
-                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_payments"
-                                android:tint="@color/white" android:contentDescription="@null" />
-                        </FrameLayout>
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon" />
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                            android:layout_marginStart="-33dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_payments"
+                            android:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="24dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_payment"
-                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                                android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_payment_sub"
-                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                                android:textColor="@color/gray_text" android:textSize="12sp" />
                         </LinearLayout>
 
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                            android:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -213,7 +231,7 @@
                     <LinearLayout
                         android:id="@+id/llHistoryActivities"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/menu_item_height"
+                        android:layout_height="72dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="16dp"
@@ -221,29 +239,30 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
-                            android:layout_height="@dimen/menu_item_icon_size"
-                            android:background="@drawable/bg_menu_icon">
-                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_nav_budgets"
-                                android:tint="@color/white" android:contentDescription="@null" />
-                        </FrameLayout>
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon" />
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                            android:layout_marginStart="-33dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_nav_budgets"
+                            android:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="24dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_history_activities"
-                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                                android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_history_sub"
-                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                                android:textColor="@color/gray_text" android:textSize="12sp" />
                         </LinearLayout>
 
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                            android:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -253,7 +272,7 @@
                     <LinearLayout
                         android:id="@+id/llPrivacySecurity"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/menu_item_height"
+                        android:layout_height="72dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="16dp"
@@ -261,29 +280,30 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
-                            android:layout_height="@dimen/menu_item_icon_size"
-                            android:background="@drawable/bg_menu_icon">
-                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_lock"
-                                android:tint="@color/white" android:contentDescription="@null" />
-                        </FrameLayout>
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon" />
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                            android:layout_marginStart="-33dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_lock"
+                            android:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="24dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_privacy_security"
-                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                                android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_privacy_sub"
-                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                                android:textColor="@color/gray_text" android:textSize="12sp" />
                         </LinearLayout>
 
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                            android:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -293,7 +313,7 @@
                     <LinearLayout
                         android:id="@+id/llAboutUs"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/menu_item_height"
+                        android:layout_height="72dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="16dp"
@@ -301,29 +321,68 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <FrameLayout android:layout_width="@dimen/menu_item_icon_size"
-                            android:layout_height="@dimen/menu_item_icon_size"
-                            android:background="@drawable/bg_menu_icon">
-                            <ImageView android:layout_width="22dp" android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_details"
-                                android:tint="@color/white" android:contentDescription="@null" />
-                        </FrameLayout>
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon" />
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                            android:layout_marginStart="-33dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_details"
+                            android:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="24dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_about_us"
-                                android:textColor="@color/black" android:textSize="14sp" android:textStyle="bold" />
+                                android:textColor="@color/black" android:textSize="15sp" android:textStyle="bold" />
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/label_about_sub"
-                                android:textColor="@color/gray_text" android:textSize="12sp" android:layout_marginTop="2dp" />
+                                android:textColor="@color/gray_text" android:textSize="12sp" />
                         </LinearLayout>
 
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text" android:contentDescription="@null" />
+                            android:tint="@color/gray_divider" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp" android:background="@color/gray_divider" />
+
+                    <!-- Logout -->
+                    <LinearLayout
+                        android:id="@+id/llLogout"
+                        android:layout_width="match_parent"
+                        android:layout_height="72dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="20dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_menu_icon"
+                            android:backgroundTint="#FFEBEE" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="-32dp"
+                            android:src="@android:drawable/ic_lock_power_off"
+                            android:tint="@color/red_debit" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="24dp"
+                            android:text="Logout" android:textColor="@color/red_debit"
+                            android:textSize="15sp" android:textStyle="bold" />
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:tint="@color/gray_divider" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -336,7 +395,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="72dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
         app:itemIconTint="@color/nav_icon_color"

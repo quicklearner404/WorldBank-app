@@ -146,4 +146,5 @@
     <string name="cd_edit_photo">Edit profile photo</string>
     <string name="cd_nfc_icon">Contactless payment</string>
     <string name="cd_visa_logo">Visa card</string>
+    <string name="label_reference">Reference Number</string>
 </resources>

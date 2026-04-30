@@ -143,6 +143,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
      * Using Android built-ins for now — replace with custom ic_ drawables later.
      */
     private int getCategoryIcon(String category) {
+        if (category == null) return android.R.drawable.ic_menu_agenda;
+
         switch (category) {
             case Transaction.CAT_SHOPPING:
                 return android.R.drawable.ic_menu_agenda;
