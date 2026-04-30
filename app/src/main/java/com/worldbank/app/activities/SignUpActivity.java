@@ -21,9 +21,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.worldbank.app.R;
+import com.worldbank.app.models.Card;
+import com.worldbank.app.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class SignUpActivity extends AppCompatActivity {
                 getOnBackPressedDispatcher().onBackPressed()
         );
 
-        // auto format cnic as user types so it looks like 35201-1234567-1 ( it should show - on screen also while typing :) )
+        // auto format cnic as user types so it looks like 35201-1234567-1
         etCnic.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -84,15 +85,12 @@ public class SignUpActivity extends AppCompatActivity {
                 if (isFormattingCnic) return;
                 isFormattingCnic = true;
 
-                // strip everything except digits first
                 String digits = s.toString().replaceAll("[^0-9]", "");
 
-                // cap at 13 digits which is the full cnic length
                 if (digits.length() > 13) {
                     digits = digits.substring(0, 13);
                 }
 
-                // insert dashes at position 5 and 13 to match cnic format
                 String formatted = digits;
                 if (digits.length() > 5) {
                     formatted = digits.substring(0, 5) + "-" + digits.substring(5);
@@ -122,17 +120,13 @@ public class SignUpActivity extends AppCompatActivity {
 
                 String current = s.toString();
 
-                // always make sure the prefix is there no matter what
                 if (!current.startsWith("+92 ")) {
-                    // pull out only the digits the user typed after the prefix
                     String userDigits = current.replaceAll("[^0-9]", "");
 
-                    // drop the 92 from the start if it got included in the strip
                     if (userDigits.startsWith("92")) {
                         userDigits = userDigits.substring(2);
                     }
 
-                    // cap at 10 digits which is the local number length in pakistan
                     if (userDigits.length() > 10) {
                         userDigits = userDigits.substring(0, 10);
                     }
@@ -141,7 +135,6 @@ public class SignUpActivity extends AppCompatActivity {
                     etPhone.setText(formatted);
                     etPhone.setSelection(formatted.length());
                 } else {
-                    // prefix is fine, just make sure the number part isnt too long
                     String afterPrefix = current.substring(4);
                     String digitsOnly = afterPrefix.replaceAll("[^0-9]", "");
 
@@ -178,27 +171,23 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            // name should be at least two words like first and last name
             if (!name.contains(" ") || name.split(" ").length < 2) {
                 Toast.makeText(SignUpActivity.this, "Please enter your full name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // cnic digits only should be 13 after stripping the dashes
             String cnicDigits = cnic.replaceAll("[^0-9]", "");
             if (cnicDigits.length() != 13) {
                 Toast.makeText(SignUpActivity.this, getString(R.string.error_cnic_invalid), Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // phone after the +92 prefix should have exactly 10 digits
             String phoneDigits = phone.replaceAll("[^0-9]", "");
             if (phoneDigits.length() != 12) {
                 Toast.makeText(SignUpActivity.this, "Enter a valid Pakistani phone number", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // basic email format check before hitting firebase
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(SignUpActivity.this, getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show();
                 return;
@@ -233,15 +222,8 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     void createNewUserData(String uid, String name, String cnic, String phone, String email) {
-        // save all personal info to users collection under the firebase uid
-        Map<String, Object> user = new HashMap<>();
-        user.put("uid", uid);
-        user.put("displayName", name);
-        user.put("cnic", cnic);
-        user.put("phone", phone);
-        user.put("email", email);
-        user.put("city", "");
-        user.put("createdAt", FieldValue.serverTimestamp());
+        // build a User object so firestore can deserialize it back into the model later
+        User user = new User(uid, email, name, cnic, phone);
 
         db.collection("users").document(uid).set(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -259,7 +241,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     void createAccountData(String uid, String name) {
-        // create a savings account and link it to the user we just created
+        // account still uses a map because there is no Account model yet
         Map<String, Object> account = new HashMap<>();
         account.put("uid", uid);
         account.put("accountNumber", generateIBAN());
@@ -286,17 +268,8 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     void createCardData(String uid, String accountId, String name) {
-        // card is always VISA with a fixed masked number for now, dev 2 handles real card logic
-        Map<String, Object> card = new HashMap<>();
-        card.put("uid", uid);
-        card.put("accountId", accountId);
-        card.put("maskedNumber", "4532 **** **** 3090");
-        card.put("holderName", name);
-        card.put("expiry", "12/28");
-        card.put("cardType", "VISA");
-        card.put("isActive", true);
-        card.put("monthlyLimit", 200000);
-        card.put("monthlyUsed", 0);
+        // build a Card object so firestore can deserialize it back into the model later
+        Card card = new Card(uid, accountId, "4532 **** **** 3090", name, "12/28", "VISA", 200000);
 
         db.collection("cards").add(card)
                 .addOnSuccessListener(new OnSuccessListener<com.google.firebase.firestore.DocumentReference>() {
@@ -322,7 +295,7 @@ public class SignUpActivity extends AppCompatActivity {
         return "PK36WBNK" + number;
     }
 
-    private void init() {
+    void init() {
         etName = findViewById(R.id.et_name);
         etCnic = findViewById(R.id.et_cnic);
         etPhone = findViewById(R.id.et_phone);

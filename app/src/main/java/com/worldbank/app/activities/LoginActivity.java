@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -20,8 +21,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.worldbank.app.R;
+import com.worldbank.app.utils.SessionManager;
 
 public class LoginActivity extends AppCompatActivity {
+
     FirebaseAuth auth;
     TextInputEditText etEmail, etPassword;
     Button btnLogin;
@@ -41,10 +44,22 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         init();
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        btnLogin.setOnClickListener((v)->{
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(v ->
+                getOnBackPressedDispatcher().onBackPressed()
+        );
+
+        btnLogin.setOnClickListener((v) -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
@@ -57,11 +72,20 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // 5. Sir's style: Explicit OnSuccessListener instead of short lambdas
             auth.signInWithEmailAndPassword(email, password)
                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
+                            // save session so splash skips login on next app open
+                            String uid = authResult.getUser().getUid();
+                            String userEmail = authResult.getUser().getEmail();
+                            String userName = authResult.getUser().getDisplayName() != null
+                                    ? authResult.getUser().getDisplayName()
+                                    : "";
+
+                            SessionManager session = new SessionManager(LoginActivity.this);
+                            session.saveSession(uid, userEmail, userName, true);
+
                             Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                             finish();
@@ -75,16 +99,16 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
-        tvForgotPassword.setOnClickListener((v)->{
+        tvForgotPassword.setOnClickListener((v) -> {
             startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
 
-        tvRegister.setOnClickListener((v)->{
+        tvRegister.setOnClickListener((v) -> {
             startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
         });
     }
 
-    private void init() {
+    void init() {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
@@ -92,14 +116,5 @@ public class LoginActivity extends AppCompatActivity {
         tvRegister = findViewById(R.id.tv_register);
         toolbar = findViewById(R.id.toolbar);
         auth = FirebaseAuth.getInstance();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(android.view.MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }
