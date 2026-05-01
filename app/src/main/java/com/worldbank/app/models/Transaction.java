@@ -7,9 +7,6 @@ import java.util.UUID;
  * Transaction.java — UPDATED for Pakistani banking
  * ──────────────────────────────────────────────────
  * Represents a money movement in PKR.
- * Every send/receive creates a document in Firestore transactions collection.
- *
- * Firestore collection: transactions/{txnId}
  */
 public class Transaction {
 
@@ -41,29 +38,28 @@ public class Transaction {
 
     // ── Fields ───────────────────────────────────────────────────
     private String txnId;
-    private String senderUid;           // Firebase UID of sender
-    private String recipientUid;        // Firebase UID of recipient (null if external bank)
-    private String senderAccount;       // IBAN of sender
-    private String recipientAccount;    // IBAN or mobile number of recipient
-    private String recipientName;       // "Fatima Khan"
-    private String recipientBank;       // "HBL", "Meezan", "World Bank"
-    private double amount;              // PKR amount
-    private double adminFee;            // PKR fee (e.g. 25)
-    private double totalDeducted;       // amount + adminFee
-    private String type;                // TYPE_CREDIT / TYPE_DEBIT
-    private String category;            // CAT_* constants
-    private String transferType;        // TRANSFER_* constants
-    private String referenceNumber;     // "WB202404221234"
-    private String status;              // STATUS_* constants
-    private String description;         // optional note
+    private String senderUid;
+    private String recipientUid;
+    private String recipientAccountId; // NEW: To link account doc for internal transfers
+    private String senderAccount;
+    private String recipientAccount;
+    private String recipientName;
+    private String recipientBank;
+    private double amount;
+    private double adminFee;
+    private double totalDeducted;
+    private String type;
+    private String category;
+    private String transferType;
+    private String referenceNumber;
+    private String status;
+    private String description;
     private Timestamp timestamp;
 
-    // Legacy field — keep for backwards compat with existing docs
-    private String uid;                 // same as senderUid, kept for old queries
+    private String uid; // legacy compat
 
     public Transaction() {} // Required for Firestore
 
-    // ── Factory method: create a new outgoing transfer ────────────
     public static Transaction createTransfer(
             String senderUid, String senderAccount,
             String recipientUid, String recipientAccount,
@@ -73,7 +69,7 @@ public class Transaction {
 
         Transaction t = new Transaction();
         t.senderUid       = senderUid;
-        t.uid             = senderUid; // legacy compat
+        t.uid             = senderUid;
         t.senderAccount   = senderAccount;
         t.recipientUid    = recipientUid;
         t.recipientAccount = recipientAccount;
@@ -92,12 +88,9 @@ public class Transaction {
         return t;
     }
 
-    // ── Helpers ──────────────────────────────────────────────────
-
-    /** Generates a reference number like "WB202404221234" */
     public static String generateReference() {
         long epoch = System.currentTimeMillis();
-        String tail = String.valueOf(epoch).substring(String.valueOf(epoch).length() - 6);
+        String tail = String.valueOf(epoch).substring(Math.max(0, String.valueOf(epoch).length() - 6));
         java.util.Calendar cal = java.util.Calendar.getInstance();
         return String.format("WB%04d%02d%02d%s",
                 cal.get(java.util.Calendar.YEAR),
@@ -106,15 +99,10 @@ public class Transaction {
                 tail);
     }
 
-    /** Returns true if this is an incoming (credit) transaction */
     public boolean isCredit() {
         return TYPE_CREDIT.equals(type);
     }
 
-    /**
-     * Returns formatted amount string in PKR.
-     * e.g. "+Rs. 15,000" or "-Rs. 15,000"
-     */
     public String getFormattedAmount() {
         String prefix = isCredit() ? "+Rs. " : "-Rs. ";
         return String.format("%s%,.0f", prefix, amount);
@@ -125,6 +113,7 @@ public class Transaction {
     public String getSenderUid()        { return senderUid; }
     public String getUid()              { return uid != null ? uid : senderUid; }
     public String getRecipientUid()     { return recipientUid; }
+    public String getRecipientAccountId() { return recipientAccountId; }
     public String getSenderAccount()    { return senderAccount; }
     public String getRecipientAccount() { return recipientAccount; }
     public String getRecipientName()    { return recipientName; }
@@ -145,6 +134,7 @@ public class Transaction {
     public void setSenderUid(String uid)                { this.senderUid = uid; this.uid = uid; }
     public void setUid(String uid)                      { this.uid = uid; this.senderUid = uid; }
     public void setRecipientUid(String uid)             { this.recipientUid = uid; }
+    public void setRecipientAccountId(String id)        { this.recipientAccountId = id; }
     public void setSenderAccount(String a)              { this.senderAccount = a; }
     public void setRecipientAccount(String a)           { this.recipientAccount = a; }
     public void setRecipientName(String name)           { this.recipientName = name; }
@@ -159,30 +149,4 @@ public class Transaction {
     public void setStatus(String status)                { this.status = status; }
     public void setDescription(String desc)             { this.description = desc; }
     public void setTimestamp(Timestamp timestamp)       { this.timestamp = timestamp; }
-    public static Transaction createCredit(
-            String recipientUid, String recipientAccount,
-            String senderUid, String senderAccount,
-            String senderName, String senderBank,
-            double amount, String transferType, String description) {
-
-        Transaction t = new Transaction();
-        t.senderUid        = senderUid;
-        t.uid              = recipientUid;
-        t.senderAccount    = senderAccount;
-        t.recipientUid     = recipientUid;
-        t.recipientAccount = recipientAccount;
-        t.recipientName    = senderName;
-        t.recipientBank    = senderBank;
-        t.amount           = amount;
-        t.adminFee         = 0.0;
-        t.totalDeducted    = 0.0;
-        t.type             = TYPE_CREDIT;
-        t.category         = CAT_TRANSFER;
-        t.transferType     = transferType;
-        t.referenceNumber  = generateReference();
-        t.status           = STATUS_PENDING;
-        t.description      = description;
-        t.timestamp        = Timestamp.now();
-        return t;
-    }
 }

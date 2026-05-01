@@ -4,8 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -29,33 +30,27 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
-    TextView tvBalanceAmount;
-    TextView tvSeeMore;
-    RecyclerView rvTransactions;
-    RecyclerView rvCards;
-    BottomNavigationView bottomNavView;
-    View btnTransfer;
-    View btnPayments;
-    View btnTopUp;
-    View btnAddCard;
+    private TextView tvBalanceAmount, tvSeeMore;
+    private RecyclerView rvTransactions, rvCards;
+    private BottomNavigationView bottomNavView;
+    private View btnTransfer, btnPayments, btnTopUp, btnAddCard;
 
-    TransactionAdapter transactionAdapter;
-    CardAdapter cardAdapter;
+    private TransactionAdapter transactionAdapter;
+    private CardAdapter cardAdapter;
+    
+    private final List<Transaction> transactionList = new ArrayList<>();
+    private final List<Card> cardList = new ArrayList<>();
+    
+    private TransactionRepository repo;
+    private FirebaseAuth auth;
+    private SessionManager sessionManager;
 
-    final List<Transaction> transactionList = new ArrayList<>();
-    final List<Card> cardList = new ArrayList<>();
+    private ListenerRegistration accountListener;
+    private ListenerRegistration cardListener;
+    private ListenerRegistration transactionListener;
 
-    TransactionRepository repo;
-    FirebaseAuth auth;
-    SessionManager sessionManager;
-
-    ListenerRegistration accountListener;
-    ListenerRegistration cardListener;
-    ListenerRegistration transactionListener;
-
-    // Account and card IDs are stored so they can be passed to SendMoneyActivity
-    String currentAccountId = "";
-    String currentCardId    = "";
+    private String currentAccountId = "";
+    private String currentCardId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,34 +61,37 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
         sessionManager = new SessionManager(this);
         repo           = new TransactionRepository();
 
-        init();
+        bindViews();
         setupRecyclers();
         setupQuickActions();
         setupBottomNav();
         setupSnapHelper();
-        setupBackPress();
     }
 
     private void setupSnapHelper() {
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rvCards);
-    }
 
-    private void setupBackPress() {
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+        rvCards.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void handleOnBackPressed() {
-                // Move to background instead of destroying the activity
-                moveTaskToBack(true);
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    View centerView = snapHelper.findSnapView(rvCards.getLayoutManager());
+                    if (centerView != null) {
+                        int pos = rvCards.getLayoutManager().getPosition(centerView);
+                        if (pos < cardList.size()) {
+                            currentCardId = cardList.get(pos).getCardId();
+                        }
+                    }
+                }
             }
         });
     }
 
     @Override
     public void onCardClick(Card card, int position) {
-        // Store the tapped card so the transfer screen always has the right cardId
-        currentCardId = card.getCardId() != null ? card.getCardId() : "";
-
+        currentCardId = card.getCardId();
         Intent intent = new Intent(this, CardDetailActivity.class);
         intent.putExtra("cardId", card.getCardId());
         startActivity(intent);
@@ -108,8 +106,8 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     protected void onStop() {
         super.onStop();
-        if (accountListener    != null) accountListener.remove();
-        if (cardListener       != null) cardListener.remove();
+        if (accountListener != null) accountListener.remove();
+        if (cardListener != null) cardListener.remove();
         if (transactionListener != null) transactionListener.remove();
     }
 
@@ -117,7 +115,6 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
         String uid = getCurrentUserId();
         if (uid == null || uid.isEmpty()) return;
 
-        // Listen for balance changes and store the account ID
         accountListener = repo.getAccountQuery(uid).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null || snapshots.isEmpty()) return;
             QueryDocumentSnapshot doc = (QueryDocumentSnapshot) snapshots.getDocuments().get(0);
@@ -126,7 +123,6 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
             tvBalanceAmount.setText(account.getFormattedBalance());
         });
 
-        // Listen for card updates and keep the first card ID ready for transfers
         cardListener = repo.getCardsQuery(uid).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null) return;
             cardList.clear();
@@ -135,14 +131,12 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
                 card.setCardId(doc.getId());
                 cardList.add(card);
             }
-            // Keep the first card as the default for the transfer screen
             if (!cardList.isEmpty() && currentCardId.isEmpty()) {
                 currentCardId = cardList.get(0).getCardId();
             }
             cardAdapter.notifyDataSetChanged();
         });
 
-        // Listen for the ten most recent transactions
         transactionListener = repo.getTransactionsQuery(uid, 10).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null) return;
             transactionList.clear();
@@ -155,11 +149,7 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
         });
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  INIT
-    // ══════════════════════════════════════════════════════════════
-
-    private void init() {
+    private void bindViews() {
         tvBalanceAmount = findViewById(R.id.tvBalanceAmount);
         tvSeeMore       = findViewById(R.id.tvSeeMore);
         rvTransactions  = findViewById(R.id.rvTransactions);
@@ -178,31 +168,34 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
         rvTransactions.setNestedScrollingEnabled(false);
 
         cardAdapter = new CardAdapter(this, cardList, this);
-        rvCards.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvCards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvCards.setAdapter(cardAdapter);
     }
 
     private void setupQuickActions() {
         btnTransfer.setOnClickListener(v -> {
-            // Pass both accountId and cardId so SendMoneyActivity can load the card and deduct balance
             Intent intent = new Intent(this, SendMoneyActivity.class);
             intent.putExtra("accountId", currentAccountId);
-            intent.putExtra("cardId",    currentCardId);
+            intent.putExtra("cardId", currentCardId);
+            startActivity(intent);
+        });
+        
+        btnPayments.setOnClickListener(v -> {
+            Intent intent = new Intent(this, PaymentsActivity.class);
+            intent.putExtra("accountId", currentAccountId);
+            intent.putExtra("cardId", currentCardId);
             startActivity(intent);
         });
 
-        btnPayments.setOnClickListener(v ->
-                startActivity(new Intent(this, PaymentsActivity.class)));
+        btnTopUp.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TopUpActivity.class);
+            intent.putExtra("accountId", currentAccountId);
+            startActivity(intent);
+        });
 
-        btnTopUp.setOnClickListener(v ->
-                startActivity(new Intent(this, TopUpActivity.class)));
-
-        btnAddCard.setOnClickListener(v ->
-                startActivity(new Intent(this, AddCardActivity.class)));
-
-        tvSeeMore.setOnClickListener(v ->
-                startActivity(new Intent(this, TransactionHistoryActivity.class)));
+        btnAddCard.setOnClickListener(v -> startActivity(new Intent(this, AddCardActivity.class)));
+        
+        tvSeeMore.setOnClickListener(v -> startActivity(new Intent(this, TransactionHistoryActivity.class)));
     }
 
     private void setupBottomNav() {
@@ -226,13 +219,14 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
         });
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  HELPERS
-    // ══════════════════════════════════════════════════════════════
-
     private String getCurrentUserId() {
         if (SessionManager.DEV_BYPASS) return "dev_user_001";
         if (auth.getCurrentUser() != null) return auth.getCurrentUser().getUid();
         return "";
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

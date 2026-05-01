@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.worldbank.app.models.Account;
 import com.worldbank.app.models.Contact;
 import com.worldbank.app.models.Transaction;
@@ -13,6 +14,11 @@ import com.worldbank.app.models.Transaction;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * TransactionRepository.java
+ * ───────────────────────────
+ * Central class for ALL Firestore banking operations.
+ */
 public class TransactionRepository {
 
     private static final String COL_USERS        = "users";
@@ -21,10 +27,6 @@ public class TransactionRepository {
     private static final String COL_TRANSACTIONS = "transactions";
     private static final String COL_CONTACTS     = "contacts";
 
-    public static final double ADMIN_FEE_INTERNAL = 0;
-    public static final double ADMIN_FEE_IBFT     = 25;
-    public static final double ADMIN_FEE_WALLET   = 0;
-
     private final FirebaseFirestore db;
 
     public TransactionRepository() {
@@ -32,14 +34,16 @@ public class TransactionRepository {
     }
 
     public Query getAccountQuery(String uid) {
-        return db.collection(COL_ACCOUNTS)
-                .whereEqualTo("uid", uid)
-                .limit(1);
+        return db.collection(COL_ACCOUNTS).whereEqualTo("uid", uid).limit(1);
+    }
+
+    /** Load account by ID for balance checks */
+    public Task<DocumentSnapshot> getAccount(String accountId) {
+        return db.collection(COL_ACCOUNTS).document(accountId).get();
     }
 
     public Query getCardsQuery(String uid) {
-        return db.collection(COL_CARDS)
-                .whereEqualTo("uid", uid);
+        return db.collection(COL_CARDS).whereEqualTo("uid", uid);
     }
 
     public Task<DocumentSnapshot> getCard(String cardId) {
@@ -48,6 +52,108 @@ public class TransactionRepository {
 
     public Task<Void> addCard(Map<String, Object> cardMap) {
         return db.collection(COL_CARDS).document().set(cardMap);
+    }
+
+    /** Find a World Bank account by IBAN for Auto-Lookup */
+    public Task<QuerySnapshot> findAccountByIban(String iban) {
+        return db.collection(COL_ACCOUNTS)
+                .whereEqualTo("accountNumber", iban)
+                .limit(1)
+                .get();
+    }
+
+    /**
+     * TOP-UP: Safe Credit Transaction
+     */
+    public Task<String> topUp(String uid, String accountId, double amount) {
+        String referenceNumber = Transaction.generateReference();
+        DocumentReference accountRef = db.collection(COL_ACCOUNTS).document(accountId);
+        DocumentReference txnRef = db.collection(COL_TRANSACTIONS).document();
+
+        return db.runTransaction(transaction -> {
+            DocumentSnapshot accountSnap = transaction.get(accountRef);
+            double currentBalance = accountSnap.getDouble("balance") != null ? accountSnap.getDouble("balance") : 0;
+            transaction.update(accountRef, "balance", currentBalance + amount);
+
+            Transaction t = new Transaction();
+            t.setUid(uid);
+            t.setSenderUid(uid);
+            t.setAmount(amount);
+            t.setType(Transaction.TYPE_CREDIT);
+            t.setCategory(Transaction.CAT_TOPUP);
+            t.setReferenceNumber(referenceNumber);
+            t.setTimestamp(Timestamp.now());
+            t.setRecipientName("Self Top-Up");
+            t.setStatus(Transaction.STATUS_SUCCESS);
+
+            transaction.set(txnRef, t);
+            return referenceNumber;
+        });
+    }
+
+    /**
+     * SEND MONEY: Atomic Transfer using a Transaction object.
+     * Deducts from sender and credits recipient if internal.
+     */
+    public Task<String> sendMoney(Transaction txn, String senderAccountId) {
+        DocumentReference senderAccountRef = db.collection(COL_ACCOUNTS).document(senderAccountId);
+        DocumentReference senderTxnRef     = db.collection(COL_TRANSACTIONS).document();
+
+        boolean isInternal = txn.getRecipientUid() != null && !txn.getRecipientUid().isEmpty();
+        
+        // Recipient refs (only used if internal)
+        DocumentReference recipientAccountRef = isInternal
+                ? db.collection(COL_ACCOUNTS).document(txn.getRecipientAccountId())
+                : null;
+        DocumentReference recipientTxnRef = isInternal
+                ? db.collection(COL_TRANSACTIONS).document()
+                : null;
+
+        return db.runTransaction(transaction -> {
+            // 1. Check Sender Balance
+            DocumentSnapshot senderAccountSnap = transaction.get(senderAccountRef);
+            double senderBalance = senderAccountSnap.getDouble("balance") != null ? senderAccountSnap.getDouble("balance") : 0;
+
+            if (senderBalance < txn.getTotalDeducted()) {
+                throw new RuntimeException("Insufficient balance");
+            }
+
+            // 2. Deduct from Sender
+            transaction.update(senderAccountRef, "balance", senderBalance - txn.getTotalDeducted());
+
+            // 3. Save Record
+            String referenceNumber = Transaction.generateReference();
+            txn.setTxnId(senderTxnRef.getId());
+            txn.setTimestamp(Timestamp.now());
+            txn.setStatus(Transaction.STATUS_SUCCESS);
+            txn.setReferenceNumber(referenceNumber);
+            transaction.set(senderTxnRef, txn);
+
+            // 4. If Internal — Credit Recipient
+            if (isInternal && recipientAccountRef != null) {
+                DocumentSnapshot recipientSnap = transaction.get(recipientAccountRef);
+                double recipientBalance = recipientSnap.getDouble("balance") != null ? recipientSnap.getDouble("balance") : 0;
+                transaction.update(recipientAccountRef, "balance", recipientBalance + txn.getAmount());
+
+                Transaction credit = new Transaction();
+                credit.setUid(txn.getRecipientUid());
+                credit.setSenderUid(txn.getSenderUid());
+                credit.setRecipientUid(txn.getRecipientUid());
+                credit.setRecipientAccount(txn.getRecipientAccount());
+                credit.setRecipientName(senderAccountSnap.getString("accountTitle"));
+                credit.setRecipientBank("World Bank");
+                credit.setAmount(txn.getAmount());
+                credit.setType(Transaction.TYPE_CREDIT);
+                credit.setCategory(Transaction.CAT_TRANSFER);
+                credit.setTransferType(Transaction.TRANSFER_INTERNAL);
+                credit.setReferenceNumber(referenceNumber);
+                credit.setStatus(Transaction.STATUS_SUCCESS);
+                credit.setTimestamp(txn.getTimestamp());
+                transaction.set(recipientTxnRef, credit);
+            }
+
+            return referenceNumber;
+        });
     }
 
     public Query getTransactionsQuery(String uid, int limit) {
@@ -64,195 +170,18 @@ public class TransactionRepository {
                 .limit(20);
     }
 
-    // tops up the sender account balance from an external source
-    public Task<String> topUp(String uid, String accountId, double amount) {
-        String referenceNumber = Transaction.generateReference();
-        DocumentReference accountRef = db.collection(COL_ACCOUNTS).document(accountId);
-        DocumentReference txnRef = db.collection(COL_TRANSACTIONS).document();
-
-        return db.runTransaction(firestoreTransaction -> {
-            // all reads first
-            DocumentSnapshot accountSnap = firestoreTransaction.get(accountRef);
-
-            double currentBalance = accountSnap.getDouble("balance") != null
-                    ? accountSnap.getDouble("balance") : 0;
-
-            // writes after all reads
-            firestoreTransaction.update(accountRef, "balance", currentBalance + amount);
-
-            Transaction txn = Transaction.createCredit(
-                    uid,
-                    accountSnap.getString("accountNumber"),
-                    uid,
-                    accountSnap.getString("accountNumber"),
-                    "Self Top-Up",
-                    "External Source",
-                    amount,
-                    Transaction.TRANSFER_INTERNAL,
-                    "Top-Up"
-            );
-            txn.setTxnId(txnRef.getId());
-            txn.setStatus(Transaction.STATUS_SUCCESS);
-            txn.setReferenceNumber(referenceNumber);
-            firestoreTransaction.set(txnRef, txn);
-
-            return referenceNumber;
-        });
-    }
-
-    public Task<String> sendMoney(
-            String senderUid, String senderAccountId, String senderCardId,
-            String recipientUid, String recipientAccountId, String recipientAccount,
-            String recipientName, String recipientBank, double amount,
-            String transferType, String description, String contactId) {
-
-        double adminFee      = getAdminFee(transferType);
-        double totalDeducted = amount + adminFee;
-        String referenceNumber = Transaction.generateReference();
-        boolean isInternal = recipientUid != null && !recipientUid.isEmpty();
-
-        DocumentReference senderAccountRef = db.collection(COL_ACCOUNTS).document(senderAccountId);
-        DocumentReference senderCardRef    = db.collection(COL_CARDS).document(senderCardId);
-        DocumentReference newTxnRef        = db.collection(COL_TRANSACTIONS).document();
-
-        DocumentReference recipientAccountRef = isInternal && recipientAccountId != null
-                ? db.collection(COL_ACCOUNTS).document(recipientAccountId)
-                : null;
-        DocumentReference recipientTxnRef = isInternal
-                ? db.collection(COL_TRANSACTIONS).document()
-                : null;
-
-        return db.runTransaction(firestoreTransaction -> {
-            // all reads first before any writes
-            DocumentSnapshot senderAccountSnap = firestoreTransaction.get(senderAccountRef);
-            DocumentSnapshot cardSnap          = firestoreTransaction.get(senderCardRef);
-
-            DocumentSnapshot recipientAccountSnap = null;
-            if (isInternal && recipientAccountRef != null) {
-                recipientAccountSnap = firestoreTransaction.get(recipientAccountRef);
-            }
-
-            // validate balance before touching anything
-            double currentBalance = senderAccountSnap.getDouble("balance") != null
-                    ? senderAccountSnap.getDouble("balance") : 0;
-
-            if (currentBalance < totalDeducted) {
-                throw new RuntimeException("Insufficient balance");
-            }
-
-            double currentMonthlyUsed = cardSnap.getDouble("monthlyUsed") != null
-                    ? cardSnap.getDouble("monthlyUsed") : 0;
-
-            // all writes after all reads
-            firestoreTransaction.update(senderAccountRef, "balance", currentBalance - totalDeducted);
-            firestoreTransaction.update(senderCardRef, "monthlyUsed", currentMonthlyUsed + amount);
-
-            Transaction senderTxn = Transaction.createTransfer(
-                    senderUid,
-                    senderAccountSnap.getString("accountNumber"),
-                    recipientUid != null ? recipientUid : "",
-                    recipientAccount,
-                    recipientName,
-                    recipientBank,
-                    amount,
-                    adminFee,
-                    transferType,
-                    description != null ? description : ""
-            );
-            senderTxn.setTxnId(newTxnRef.getId());
-            senderTxn.setStatus(Transaction.STATUS_SUCCESS);
-            senderTxn.setReferenceNumber(referenceNumber);
-            firestoreTransaction.set(newTxnRef, senderTxn);
-
-            // credit the recipient account for internal world bank transfers
-            if (isInternal && recipientAccountRef != null && recipientAccountSnap != null) {
-                double recipientBalance = recipientAccountSnap.getDouble("balance") != null
-                        ? recipientAccountSnap.getDouble("balance") : 0;
-
-                firestoreTransaction.update(recipientAccountRef, "balance", recipientBalance + amount);
-
-                Transaction recipientTxn = Transaction.createCredit(
-                        recipientUid,
-                        recipientAccount,
-                        senderUid,
-                        senderAccountSnap.getString("accountNumber"),
-                        senderAccountSnap.getString("accountTitle"),
-                        "World Bank",
-                        amount,
-                        Transaction.TRANSFER_INTERNAL,
-                        "Received from " + senderAccountSnap.getString("accountTitle")
-                );
-                recipientTxn.setTxnId(recipientTxnRef.getId());
-                recipientTxn.setStatus(Transaction.STATUS_SUCCESS);
-                recipientTxn.setReferenceNumber(referenceNumber);
-                firestoreTransaction.set(recipientTxnRef, recipientTxn);
-            }
-
-            // update the last used timestamp on the contact if one was selected
-            if (contactId != null && !contactId.isEmpty()) {
-                DocumentReference contactRef = db.collection(COL_CONTACTS).document(contactId);
-                firestoreTransaction.update(contactRef, "lastUsed", Timestamp.now());
-            }
-
-            return referenceNumber;
-        });
+    public Task<DocumentReference> saveContact(Contact contact) {
+        contact.setLastUsed(Timestamp.now());
+        return db.collection(COL_CONTACTS).add(contact);
     }
 
     public static double getAdminFee(String transferType) {
-        if (transferType == null) return ADMIN_FEE_IBFT;
+        if (transferType == null) return 25.0;
         switch (transferType) {
-            case Transaction.TRANSFER_INTERNAL: return ADMIN_FEE_INTERNAL;
+            case Transaction.TRANSFER_INTERNAL: return 0.0;
             case Transaction.TRANSFER_JAZZCASH:
-            case Transaction.TRANSFER_EASYPAISA: return ADMIN_FEE_WALLET;
-            default: return ADMIN_FEE_IBFT;
+            case Transaction.TRANSFER_EASYPAISA: return 0.0;
+            default: return 25.0;
         }
-    }
-
-    public Task<Void> createNewUserData(String uid, String name, String email, String phone) {
-        String iban = "PK36WBNK" + String.format("%016d", Math.abs(uid.hashCode() % 9999999999999999L));
-
-        Map<String, Object> userMap = new HashMap<>();
-        userMap.put("uid", uid);
-        userMap.put("displayName", name);
-        userMap.put("email", email);
-        userMap.put("phone", phone);
-        userMap.put("city", "Pakistan");
-        userMap.put("createdAt", Timestamp.now());
-
-        // account and card use maps here because they are batch writes to new documents
-        // and the Account and Card models do not have a toMap method
-        Map<String, Object> accountMap = new HashMap<>();
-        accountMap.put("uid", uid);
-        accountMap.put("accountNumber", iban);
-        accountMap.put("accountTitle", name);
-        accountMap.put("bankName", "World Bank");
-        accountMap.put("accountType", Account.TYPE_SAVINGS);
-        accountMap.put("balance", 0.0);
-        accountMap.put("currency", Account.CURRENCY_PKR);
-        accountMap.put("isActive", true);
-
-        DocumentReference userRef    = db.collection(COL_USERS).document(uid);
-        DocumentReference accountRef = db.collection(COL_ACCOUNTS).document();
-
-        return db.runBatch(batch -> {
-            batch.set(userRef, userMap);
-            batch.set(accountRef, accountMap);
-
-            String maskedCard = "**** **** **** " + String.format("%04d", Math.abs(uid.hashCode() % 10000));
-
-            Map<String, Object> cardMap = new HashMap<>();
-            cardMap.put("uid", uid);
-            cardMap.put("accountId", accountRef.getId());
-            cardMap.put("maskedNumber", maskedCard);
-            cardMap.put("holderName", name);
-            cardMap.put("expiry", "12/28");
-            cardMap.put("cardType", "VISA");
-            cardMap.put("isActive", true);
-            cardMap.put("monthlyLimit", 200000.0);
-            cardMap.put("monthlyUsed", 0.0);
-
-            DocumentReference cardRef = db.collection(COL_CARDS).document();
-            batch.set(cardRef, cardMap);
-        });
     }
 }
