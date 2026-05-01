@@ -29,7 +29,7 @@ public class AccountActivity extends AppCompatActivity {
 
     private TextView tvUserName, tvUserLocation, tvUserInitials;
     private ImageButton ibBack;
-    private View cvEditPhoto; // Changed from ImageButton to View to match modern CardView ID
+    private View cvEditPhoto;
     private LinearLayout llYourAccount, llPayment, llHistoryActivities, llPrivacySecurity, llAboutUs, llLogout;
     private BottomNavigationView bottomNavView;
 
@@ -56,7 +56,7 @@ public class AccountActivity extends AppCompatActivity {
         tvUserName          = findViewById(R.id.tvUserName);
         tvUserLocation      = findViewById(R.id.tvUserLocation);
         tvUserInitials      = findViewById(R.id.tvUserInitials);
-        cvEditPhoto         = findViewById(R.id.cvEditPhoto); // Corrected ID
+        cvEditPhoto         = findViewById(R.id.cvEditPhoto);
         ibBack              = findViewById(R.id.ibBack);
         llYourAccount       = findViewById(R.id.llYourAccount);
         llPayment           = findViewById(R.id.llPayment);
@@ -95,7 +95,7 @@ public class AccountActivity extends AppCompatActivity {
         if (name == null || name.isEmpty()) return "??";
         String[] parts = name.trim().split("\\s+");
         if (parts.length >= 2) {
-            return (parts[0].charAt(0) + "" + parts[1].charAt(0)).toUpperCase();
+            return (String.valueOf(parts[0].charAt(0)) + parts[1].charAt(0)).toUpperCase();
         }
         return String.valueOf(parts[0].charAt(0)).toUpperCase();
     }
@@ -105,15 +105,27 @@ public class AccountActivity extends AppCompatActivity {
             ibBack.setOnClickListener(v -> finish());
         }
 
+        // 1. Your Account (Profile Info)
         llYourAccount.setOnClickListener(v -> 
             startActivity(new Intent(this, UserInfoActivity.class)));
 
-        llAboutUs.setOnClickListener(v -> 
-            startActivity(new Intent(this, AboutUsActivity.class)));
+        // 2. Payment Settings (Cards & Methods)
+        llPayment.setOnClickListener(v -> 
+            startActivity(new Intent(this, PaymentSettingsActivity.class)));
 
+        // 3. Transaction History (Renamed from History Activities)
         llHistoryActivities.setOnClickListener(v ->
                 startActivity(new Intent(this, TransactionHistoryActivity.class)));
 
+        // 4. Privacy & Security
+        llPrivacySecurity.setOnClickListener(v -> 
+            startActivity(new Intent(this, PrivacySecurityActivity.class)));
+
+        // 5. About Us
+        llAboutUs.setOnClickListener(v -> 
+            startActivity(new Intent(this, AboutUsActivity.class)));
+
+        // 6. Logout
         llLogout.setOnClickListener(v -> showLogoutDialog());
         
         if (cvEditPhoto != null) {

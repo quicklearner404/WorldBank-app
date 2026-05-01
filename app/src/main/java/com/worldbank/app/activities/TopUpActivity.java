@@ -76,6 +76,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
     }
 
     private void setupRecyclerView() {
+        // Initializing with 'this' listener to handle card selection
         cardAdapter = new CardAdapter(this, cardList, this);
         rvCards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvCards.setAdapter(cardAdapter);
@@ -90,6 +91,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
     private void setupAmountButtons() {
         View.OnClickListener amountListener = v -> {
             Button b = (Button) v;
+            // Get value from "Rs. 500" -> "500"
             String val = b.getText().toString().replaceAll("[^0-9]", "");
             etOtherAmount.setText(val);
         };
@@ -119,6 +121,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
             }
             cardAdapter.notifyDataSetChanged();
             
+            // Default selection to first card if exists
             if (!cardList.isEmpty() && selectedFundingCard == null) {
                 selectedFundingCard = cardList.get(0);
             }
@@ -151,7 +154,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
         }
 
         btnTopUpNow.setEnabled(false);
-        btnTopUpNow.setText("Processing PKR...");
+        btnTopUpNow.setText("Adding PKR...");
 
         String uid = getCurrentUserId();
         repo.topUp(uid, currentAccountId, amount)

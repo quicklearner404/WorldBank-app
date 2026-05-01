@@ -115,14 +115,14 @@
     <string name="label_account">Account</string>
     <string name="label_your_account">Your Account</string>
     <string name="label_account_sub">Name, Email, Handphone</string>
-    <string name="label_payment">Payment</string>
-    <string name="label_payment_sub">Card, Method, Wishlist</string>
-    <string name="label_history_activities">History Activities</string>
-    <string name="label_history_sub">Tracking, Alert, Notifications</string>
+    <string name="label_payment">Payment Settings</string>
+    <string name="label_payment_sub">Cards, Methods, Limits</string>
+    <string name="label_history_activities">Transaction History</string>
+    <string name="label_history_sub">View and search your activities</string>
     <string name="label_privacy_security">Privacy &amp; Security</string>
-    <string name="label_privacy_sub">Password, Privilige, Locations</string>
+    <string name="label_privacy_sub">Password, Biometric, Security</string>
     <string name="label_about_us">About Us</string>
-    <string name="label_about_sub">Explanation of our history</string>
+    <string name="label_about_sub">Learn more about our mission</string>
 
     <!-- Bottom Nav -->
     <string name="nav_home">Home</string>

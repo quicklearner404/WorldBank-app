@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/drawable/shape_circular_progress.xml
-     Used by pbMonthlyLimit in CardDetailActivity
-     Shows a purple arc on a grey ring -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!-- Background ring (grey track) -->
+    <!-- Background Track (Grey Ring) -->
     <item android:id="@android:id/background">
-        <shape android:shape="ring"
-            android:innerRadiusRatio="2.8"
-            android:thicknessRatio="8"
+        <shape
+            android:innerRadius="56dp"
+            android:shape="ring"
+            android:thickness="8dp"
             android:useLevel="false">
-            <solid android:color="@color/gray_divider" />
+            <solid android:color="#E0E0E0" />
         </shape>
     </item>
 
-    <!-- Progress arc (purple fill) -->
+    <!-- Progress Filler (Purple Arc) -->
     <item android:id="@android:id/progress">
-        <clip>
-            <shape android:shape="ring"
-                android:innerRadiusRatio="2.8"
-                android:thicknessRatio="8"
+        <rotate
+            android:fromDegrees="270"
+            android:pivotX="50%"
+            android:pivotY="50%"
+            android:toDegrees="270">
+            <shape
+                android:innerRadius="56dp"
+                android:shape="ring"
+                android:thickness="8dp"
                 android:useLevel="true">
                 <solid android:color="@color/purple_primary" />
             </shape>
-        </clip>
+        </rotate>
     </item>
-
 </layer-list>
