@@ -25,19 +25,10 @@ import com.worldbank.app.utils.SessionManager;
 
 public class LoginActivity extends AppCompatActivity {
 
-    // firebase auth instance used for sign in
     FirebaseAuth auth;
-
-    // input fields for email and password
     TextInputEditText etEmail, etPassword;
-
-    // main login button
     Button btnLogin;
-
-    // navigation links at the bottom
     TextView tvForgotPassword, tvRegister;
-
-    // toolbar with back navigation
     Toolbar toolbar;
 
     @Override
@@ -54,30 +45,28 @@ public class LoginActivity extends AppCompatActivity {
 
         init();
 
-        // set the register link text here since xml left it blank
         tvRegister.setText("Don't have an account? Register");
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Login");
+        }
 
-        // handle back press using modern dispatcher
+        // back goes to welcome screen not out of the app
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                finish();
+                goToWelcome();
             }
         });
 
-        // toolbar back arrow triggers the dispatcher
-        toolbar.setNavigationOnClickListener(v ->
-                getOnBackPressedDispatcher().onBackPressed()
-        );
+        toolbar.setNavigationOnClickListener(v -> goToWelcome());
 
-        btnLogin.setOnClickListener((v) -> {
+        btnLogin.setOnClickListener(v -> {
             String email    = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            // validate both fields before calling firebase
             if (email.isEmpty()) {
                 etEmail.setError("Email is required");
                 return;
@@ -91,17 +80,16 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
-                            // save session so splash skips login on next open
                             String uid       = authResult.getUser().getUid();
                             String userEmail = authResult.getUser().getEmail();
                             String userName  = authResult.getUser().getDisplayName() != null
-                                    ? authResult.getUser().getDisplayName()
-                                    : "";
+                                    ? authResult.getUser().getDisplayName() : "";
 
                             SessionManager session = new SessionManager(LoginActivity.this);
                             session.saveSession(uid, userEmail, userName, true);
 
-                            Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Login successful",
+                                    Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                             finish();
                         }
@@ -109,23 +97,24 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(LoginActivity.this, e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     });
         });
 
-        // navigate to forgot password screen
-        tvForgotPassword.setOnClickListener((v) -> {
-            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
-        });
+        tvForgotPassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ForgotPasswordActivity.class)));
 
-        // navigate to sign up screen
-        tvRegister.setOnClickListener((v) -> {
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        tvRegister.setOnClickListener(v ->
+                startActivity(new Intent(this, SignUpActivity.class)));
     }
 
-    // finds all views and initialises firebase
+    private void goToWelcome() {
+        startActivity(new Intent(this, WelcomeActivity.class));
+        finish();
+    }
+
     void init() {
         etEmail          = findViewById(R.id.et_email);
         etPassword       = findViewById(R.id.et_password);

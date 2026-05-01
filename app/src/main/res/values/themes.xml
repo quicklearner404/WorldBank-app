@@ -13,6 +13,7 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowBackground">@color/gray_bg</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
     <!-- Splash screen theme — no status bar content visible -->
@@ -54,6 +55,8 @@
         <item name="boxCornerRadiusBottomEnd">@dimen/input_corner_radius</item>
         <item name="boxStrokeColor">@color/gray_divider</item>
         <item name="hintTextColor">@color/gray_hint</item>
+        <item name="editTextColor">@color/black</item>
+        <item name="android:textColorHint">@color/gray_hint</item>
     </style>
 
 </resources>
