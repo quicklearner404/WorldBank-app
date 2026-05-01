@@ -1,6 +1,8 @@
 package com.worldbank.app.utils;
 
+import android.util.Log;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -17,19 +19,17 @@ import java.util.Map;
 /**
  * TransactionRepository.java
  * ───────────────────────────
- * Central class for ALL Firestore banking operations.
+ * Robust Firestore banking operations.
+ * Reverted to stable multi-argument logic to prevent Channel Shutdowns.
  */
 public class TransactionRepository {
 
+    private static final String TAG = "TransactionRepo";
     private static final String COL_USERS        = "users";
     private static final String COL_ACCOUNTS     = "accounts";
     private static final String COL_CARDS        = "cards";
     private static final String COL_TRANSACTIONS = "transactions";
     private static final String COL_CONTACTS     = "contacts";
-
-    public static final double ADMIN_FEE_INTERNAL = 0;
-    public static final double ADMIN_FEE_IBFT     = 25;
-    public static final double ADMIN_FEE_WALLET   = 0;
 
     private final FirebaseFirestore db;
 
@@ -41,8 +41,10 @@ public class TransactionRepository {
         return db.collection(COL_ACCOUNTS).whereEqualTo("uid", uid).limit(1);
     }
 
-    /** Load account by ID for balance checks */
     public Task<DocumentSnapshot> getAccount(String accountId) {
+        if (accountId == null || accountId.isEmpty()) {
+            return Tasks.forException(new Exception("Invalid Account ID"));
+        }
         return db.collection(COL_ACCOUNTS).document(accountId).get();
     }
 
@@ -51,6 +53,9 @@ public class TransactionRepository {
     }
 
     public Task<DocumentSnapshot> getCard(String cardId) {
+        if (cardId == null || cardId.isEmpty()) {
+            return Tasks.forException(new Exception("Invalid Card ID"));
+        }
         return db.collection(COL_CARDS).document(cardId).get();
     }
 
@@ -58,17 +63,10 @@ public class TransactionRepository {
         return db.collection(COL_CARDS).document().set(cardMap);
     }
 
-    /** Find a World Bank account by IBAN for Auto-Lookup */
     public Task<QuerySnapshot> findAccountByIban(String iban) {
-        return db.collection(COL_ACCOUNTS)
-                .whereEqualTo("accountNumber", iban)
-                .limit(1)
-                .get();
+        return db.collection(COL_ACCOUNTS).whereEqualTo("accountNumber", iban).limit(1).get();
     }
 
-    /**
-     * TOP-UP: Safe Credit Transaction
-     */
     public Task<String> topUp(String uid, String accountId, double amount) {
         String referenceNumber = Transaction.generateReference();
         DocumentReference accountRef = db.collection(COL_ACCOUNTS).document(accountId);
@@ -79,9 +77,10 @@ public class TransactionRepository {
             double currentBalance = accountSnap.getDouble("balance") != null ? accountSnap.getDouble("balance") : 0;
             transaction.update(accountRef, "balance", currentBalance + amount);
 
+            // FIX: Use your Transaction Model Class instead of a HashMap!
             Transaction t = new Transaction();
             t.setUid(uid);
-            t.setSenderUid(uid);
+            t.setSenderUid(uid); // uid and senderUid are the same for top-up
             t.setAmount(amount);
             t.setType(Transaction.TYPE_CREDIT);
             t.setCategory(Transaction.CAT_TOPUP);
@@ -90,70 +89,112 @@ public class TransactionRepository {
             t.setRecipientName("Self Top-Up");
             t.setStatus(Transaction.STATUS_SUCCESS);
 
+            // Firebase will automatically save the Transaction object!
             transaction.set(txnRef, t);
             return referenceNumber;
         });
     }
 
     /**
-     * SEND MONEY: Atomic Transfer using a Transaction object.
-     * Deducts from sender and credits recipient if internal.
+     * SEND MONEY: Reliable multi-argument atomic transfer.
      */
-    public Task<String> sendMoney(Transaction txn, String senderAccountId) {
+
+    public Task<String> sendMoney(
+            String senderUid, String senderAccountId, String senderCardId,
+            String recipientUid, String recipientAccountId, String recipientAccount,
+            String recipientName, String recipientBank, double amount,
+            String transferType, String description, String contactId) {
+
+        Log.d(TAG, "sendMoney() invoked. SenderAcc: " + senderAccountId + ", Recipient: " + recipientName);
+
+        if (senderAccountId == null || senderAccountId.isEmpty()) {
+            return Tasks.forException(new Exception("Sender account ID missing"));
+        }
+
+        double adminFee = getAdminFee(transferType);
+        double totalDeducted = amount + adminFee;
+        String referenceNumber = Transaction.generateReference();
+
+        boolean isInternal = recipientUid != null && !recipientUid.isEmpty() &&
+                recipientAccountId != null && !recipientAccountId.isEmpty();
+
         DocumentReference senderAccountRef = db.collection(COL_ACCOUNTS).document(senderAccountId);
         DocumentReference senderTxnRef     = db.collection(COL_TRANSACTIONS).document();
 
-        boolean isInternal = txn.getRecipientUid() != null && !txn.getRecipientUid().isEmpty();
-        
-        // Recipient refs (only used if internal)
-        DocumentReference recipientAccountRef = isInternal
-                ? db.collection(COL_ACCOUNTS).document(txn.getRecipientAccountId())
-                : null;
-        DocumentReference recipientTxnRef = isInternal
-                ? db.collection(COL_TRANSACTIONS).document()
-                : null;
+        // Note: Using 'dbTransaction' instead of 'transaction' to avoid confusing
+        // Java with your 'Transaction' model class!
+        return db.runTransaction(dbTransaction -> {
 
-        return db.runTransaction(transaction -> {
-            // 1. Check Sender Balance
-            DocumentSnapshot senderAccountSnap = transaction.get(senderAccountRef);
+            // ==========================================
+            // 1. DO ALL READS FIRST (Firestore Rule)
+            // ==========================================
+            DocumentSnapshot senderAccountSnap = dbTransaction.get(senderAccountRef);
+            if (!senderAccountSnap.exists()) {
+                throw new RuntimeException("Sender account record not found");
+            }
+
+            DocumentSnapshot recAccSnap = null;
+            DocumentReference recAccRef = null;
+
+            // Read the recipient's account BEFORE making any writes
+            if (isInternal) {
+                recAccRef = db.collection(COL_ACCOUNTS).document(recipientAccountId);
+                recAccSnap = dbTransaction.get(recAccRef);
+            }
+
+            // ==========================================
+            // 2. VALIDATE CALCULATIONS
+            // ==========================================
             double senderBalance = senderAccountSnap.getDouble("balance") != null ? senderAccountSnap.getDouble("balance") : 0;
 
-            if (senderBalance < txn.getTotalDeducted()) {
+            if (senderBalance < totalDeducted) {
                 throw new RuntimeException("Insufficient balance");
             }
 
-            // 2. Deduct from Sender
-            transaction.update(senderAccountRef, "balance", senderBalance - txn.getTotalDeducted());
+            // ==========================================
+            // 3. DO ALL WRITES NOW
+            // ==========================================
 
-            // 3. Save Record
-            String referenceNumber = Transaction.generateReference();
-            txn.setTxnId(senderTxnRef.getId());
-            txn.setTimestamp(Timestamp.now());
-            txn.setStatus(Transaction.STATUS_SUCCESS);
-            txn.setReferenceNumber(referenceNumber);
-            transaction.set(senderTxnRef, txn);
+            // A. Deduct balance from Sender
+            dbTransaction.update(senderAccountRef, "balance", senderBalance - totalDeducted);
 
-            // 4. If Internal — Credit Recipient
-            if (isInternal && recipientAccountRef != null) {
-                DocumentSnapshot recipientSnap = transaction.get(recipientAccountRef);
-                double recipientBalance = recipientSnap.getDouble("balance") != null ? recipientSnap.getDouble("balance") : 0;
-                transaction.update(recipientAccountRef, "balance", recipientBalance + txn.getAmount());
+            // B. Record Sender Debit (Using the clean Model Class!)
+            Transaction debit = new Transaction();
+            debit.setUid(senderUid);
+            debit.setSenderUid(senderUid);
+            debit.setRecipientName(recipientName);
+            debit.setRecipientAccount(recipientAccount);
+            debit.setAmount(amount);
+            debit.setAdminFee(adminFee);
+            debit.setTotalDeducted(totalDeducted);
+            debit.setType(Transaction.TYPE_DEBIT);
+            debit.setCategory(Transaction.CAT_TRANSFER);
+            debit.setStatus(Transaction.STATUS_SUCCESS);
+            debit.setReferenceNumber(referenceNumber);
+            debit.setTimestamp(Timestamp.now());
 
+            dbTransaction.set(senderTxnRef, debit);
+
+            // C. If internal transfer, credit the recipient
+            if (isInternal && recAccSnap != null && recAccSnap.exists()) {
+                double recBalance = recAccSnap.getDouble("balance") != null ? recAccSnap.getDouble("balance") : 0;
+
+                // Add balance to recipient
+                dbTransaction.update(recAccRef, "balance", recBalance + amount);
+
+                DocumentReference recTxnRef = db.collection(COL_TRANSACTIONS).document();
+
+                // Record Recipient Credit (Using the clean Model Class!)
                 Transaction credit = new Transaction();
-                credit.setUid(txn.getRecipientUid());
-                credit.setSenderUid(txn.getSenderUid());
-                credit.setRecipientUid(txn.getRecipientUid());
-                credit.setRecipientAccount(txn.getRecipientAccount());
-                credit.setRecipientName(senderAccountSnap.getString("accountTitle"));
-                credit.setRecipientBank("World Bank");
-                credit.setAmount(txn.getAmount());
+                credit.setUid(recipientUid);
+                credit.setSenderUid(senderUid);
                 credit.setType(Transaction.TYPE_CREDIT);
+                credit.setAmount(amount);
                 credit.setCategory(Transaction.CAT_TRANSFER);
-                credit.setTransferType(Transaction.TRANSFER_INTERNAL);
-                credit.setReferenceNumber(referenceNumber);
-                credit.setStatus(Transaction.STATUS_SUCCESS);
-                credit.setTimestamp(txn.getTimestamp());
-                transaction.set(recipientTxnRef, credit);
+                credit.setTimestamp(Timestamp.now());
+                credit.setRecipientName(senderAccountSnap.getString("accountTitle"));
+
+                dbTransaction.set(recTxnRef, credit);
             }
 
             return referenceNumber;
@@ -187,49 +228,5 @@ public class TransactionRepository {
             case Transaction.TRANSFER_EASYPAISA: return 0.0;
             default: return 25.0;
         }
-    }
-
-    public Task<Void> createNewUserData(String uid, String name, String email, String phone) {
-        String iban = "PK36WBNK" + String.format("%016d", Math.abs(uid.hashCode() % 9999999999999999L));
-        Map<String, Object> userMap = new HashMap<>();
-        userMap.put("uid", uid);
-        userMap.put("displayName", name);
-        userMap.put("email", email);
-        userMap.put("phone", phone);
-        userMap.put("city", "Pakistan");
-        userMap.put("createdAt", Timestamp.now());
-
-        Map<String, Object> accountMap = new HashMap<>();
-        accountMap.put("uid", uid);
-        accountMap.put("accountNumber", iban);
-        accountMap.put("accountTitle", name);
-        accountMap.put("bankName", "World Bank");
-        accountMap.put("accountType", Account.TYPE_SAVINGS);
-        accountMap.put("balance", 0.0);
-        accountMap.put("currency", Account.CURRENCY_PKR);
-        accountMap.put("isActive", true);
-
-        DocumentReference userRef    = db.collection(COL_USERS).document(uid);
-        DocumentReference accountRef = db.collection(COL_ACCOUNTS).document();
-
-        return db.runBatch(batch -> {
-            batch.set(userRef, userMap);
-            batch.set(accountRef, accountMap);
-
-            String maskedCard = "**** **** **** " + String.format("%04d", Math.abs(uid.hashCode() % 10000));
-            Map<String, Object> cardMap = new HashMap<>();
-            cardMap.put("uid", uid);
-            cardMap.put("accountId", accountRef.getId());
-            cardMap.put("maskedNumber", maskedCard);
-            cardMap.put("holderName", name);
-            cardMap.put("expiry", "12/28");
-            cardMap.put("cardType", "VISA");
-            cardMap.put("isActive", true);
-            cardMap.put("monthlyLimit", 200000.0);
-            cardMap.put("monthlyUsed", 0.0);
-
-            DocumentReference cardRef = db.collection(COL_CARDS).document();
-            batch.set(cardRef, cardMap);
-        });
     }
 }

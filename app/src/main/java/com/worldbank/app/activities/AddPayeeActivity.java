@@ -154,7 +154,8 @@ public class AddPayeeActivity extends AppCompatActivity {
         btnSavePayee.setText("Saving...");
 
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
-        Contact contact = new Contact(uid, name, account, bank);
+        // FIXED: Added empty string for recipientUid to match 5-argument constructor in Contact.java
+        Contact contact = new Contact(uid, "", name, account, bank);
 
         repo.saveContact(contact).addOnSuccessListener(documentReference -> {
             Toast.makeText(this, "Payee saved successfully!", Toast.LENGTH_SHORT).show();

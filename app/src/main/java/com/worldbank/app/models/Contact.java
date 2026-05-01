@@ -29,11 +29,13 @@ public class Contact {
     private String bankName;        // BANK_* constants above
     private boolean isFavorite;
     private Timestamp lastUsed;
+    private String recipientUid;
 
     public Contact() {} // Required for Firestore
 
-    public Contact(String ownerUid, String name, String accountNumber, String bankName) {
+    public Contact(String ownerUid, String recipientUid, String name, String accountNumber, String bankName) {
         this.ownerUid      = ownerUid;
+        this.recipientUid  = recipientUid; // Set it here
         this.name          = name;
         this.accountNumber = accountNumber;
         this.bankName      = bankName;
@@ -48,7 +50,8 @@ public class Contact {
     public String getBankName()      { return bankName; }
     public boolean isFavorite()      { return isFavorite; }
     public Timestamp getLastUsed()   { return lastUsed; }
-
+    public String getRecipientUid() { return recipientUid; }
+    public void setRecipientUid(String uid) { this.recipientUid = uid; }
     // ── Setters ──────────────────────────────────────────────────
     public void setContactId(String id)        { this.contactId = id; }
     public void setOwnerUid(String uid)        { this.ownerUid = uid; }

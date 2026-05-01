@@ -92,7 +92,6 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         setupClickListeners();
         setupAmountWatcher();
 
-        // ── FIX: Handle data passed from Quick Pay or Payments Activity ──
         if (intent != null && intent.hasExtra("recipientAccount")) {
             setRecipient(
                 intent.getStringExtra("recipientName"),
@@ -161,7 +160,6 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     }
 
     private void promptRecipientIfEmpty() {
-        // Only show picker if we don't have a recipient yet
         if (selectedRecipientAccount == null || selectedRecipientAccount.isEmpty()) {
             showRecipientPicker();
         }
@@ -185,28 +183,15 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         setupDialogBankDropdown(currentDialogBankSpinner);
         loadContactsIntoDialog(rvContacts);
 
-        currentDialogAccEdit.setText(IBAN_PREFIX);
-        currentDialogAccEdit.setSelection(IBAN_PREFIX.length());
-
         currentDialogAccEdit.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int i, int i1, int i2) {}
-            @Override public void onTextChanged(CharSequence s, int i, int i1, int i2) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                String iban = s.toString().trim();
-                if (iban.length() == 24 && iban.startsWith(IBAN_PREFIX)) {
-                    currentDialogNameEdit.setHint("Searching database...");
-                    repo.findAccountByIban(iban).addOnSuccessListener(snapshots -> {
-                        if (!snapshots.isEmpty()) {
-                            String name = snapshots.getDocuments().get(0).getString("accountTitle");
-                            selectedRecipientUid = snapshots.getDocuments().get(0).getString("uid");
-                            selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
-                            currentDialogNameEdit.setText(name);
-                            currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
-                        } else {
-                            currentDialogNameEdit.setHint("Recipient Name");
-                        }
-                    });
+                String input = s.toString().trim();
+                // Real-time lookup for World Bank accounts (via IBAN or Phone)
+                if (input.length() >= 11) {
+                    performRecipientLookup(input);
                 }
             }
         });
@@ -220,7 +205,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
             String bank = currentDialogBankSpinner.getText().toString().trim();
             
             if (name.isEmpty() || acc.isEmpty()) {
-                Toast.makeText(this, "Please enter recipient details", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Recipient details missing", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -231,12 +216,44 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         dialog.show();
     }
 
+    private void performRecipientLookup(String input) {
+        // Search by IBAN
+        if (input.startsWith(IBAN_PREFIX) && input.length() == 24) {
+            repo.findAccountByIban(input).addOnSuccessListener(snapshots -> {
+                if (!snapshots.isEmpty()) {
+                    populateLookupResults(snapshots.getDocuments().get(0));
+                }
+            });
+        } 
+        // Search by Phone Number (if it's a potential internal user)
+        else if (input.length() == 11 && input.startsWith("03")) {
+            FirebaseFirestore.getInstance().collection("users")
+                .whereEqualTo("phone", input)
+                .limit(1).get().addOnSuccessListener(userSnaps -> {
+                    if (!userSnaps.isEmpty()) {
+                        String uid = userSnaps.getDocuments().get(0).getId();
+                        repo.getAccountQuery(uid).get().addOnSuccessListener(accSnaps -> {
+                            if (!accSnaps.isEmpty()) {
+                                populateLookupResults(accSnaps.getDocuments().get(0));
+                            }
+                        });
+                    }
+                });
+        }
+    }
+
+    private void populateLookupResults(com.google.firebase.firestore.DocumentSnapshot doc) {
+        selectedRecipientUid = doc.getString("uid");
+        selectedRecipientAccountId = doc.getId();
+        currentDialogNameEdit.setText(doc.getString("accountTitle"));
+        currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+    }
+
     private void setupDialogBankDropdown(AutoCompleteTextView spinner) {
         String[] banks = {
                 Contact.BANK_WORLDBANK, Contact.BANK_HBL, Contact.BANK_MEEZAN, 
                 Contact.BANK_UBL, Contact.BANK_MCB, Contact.BANK_JAZZCASH, Contact.BANK_EASYPAISA
         };
-        // FIXED: Using high-contrast dropdown layout for black text
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_dropdown_black, banks);
         spinner.setAdapter(adapter);
     }
@@ -256,37 +273,19 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                pickContact();
-            } else {
-                Toast.makeText(this, "Permission denied to read contacts", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_CONTACT_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri contactUri = data.getData();
             String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
-
             try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                    int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                    String number = cursor.getString(numberIndex);
-                    String name = cursor.getString(nameIndex);
-
-                    String cleanNumber = number.replaceAll("[^0-9]", "");
-                    if (cleanNumber.startsWith("92")) cleanNumber = "0" + cleanNumber.substring(2);
-
-                    if (currentDialogAccEdit != null) currentDialogAccEdit.setText(cleanNumber);
+                    String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String clean = number.replaceAll("[^0-9]", "");
+                    if (clean.startsWith("92")) clean = "0" + clean.substring(2);
+                    if (currentDialogAccEdit != null) currentDialogAccEdit.setText(clean);
                     if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
-                    if (currentDialogBankSpinner != null) currentDialogBankSpinner.setText(Contact.BANK_JAZZCASH, false);
                 }
             } catch (Exception e) { e.printStackTrace(); }
         }
@@ -295,13 +294,10 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private void loadContactsIntoDialog(RecyclerView rv) {
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
         if (uid == null || uid.isEmpty() || rv == null) return;
-
         List<Contact> contacts = new ArrayList<>();
         QuickPayAdapter adapter = new QuickPayAdapter(contacts, this);
         rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rv.setAdapter(adapter);
-
-        // Fetch real saved contacts for the user
         repo.getContactsQuery(uid).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null) return;
             contacts.clear();
@@ -316,7 +312,10 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     @Override
     public void onContactClick(Contact contact) {
-        // Tapping a contact circle fills the dialog fields
+        // Reset old IDs first to prevent crashes if lookup fails
+        selectedRecipientUid = "";
+        selectedRecipientAccountId = "";
+
         if (currentDialogAccEdit != null) {
             currentDialogAccEdit.setText(contact.getAccountNumber());
             currentDialogAccEdit.setSelection(currentDialogAccEdit.getText().length());
@@ -327,17 +326,18 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         if (currentDialogBankSpinner != null) {
             currentDialogBankSpinner.setText(contact.getBankName(), false);
         }
-        
-        selectedRecipientUid = contact.getOwnerUid(); // Simplification: in real app use recipientUid field
+        selectedRecipientUid = contact.getRecipientUid();
         selectedRecipientBank = contact.getBankName();
+        // Force a lookup if it's potentially a World Bank user
+        performRecipientLookup(contact.getAccountNumber());
     }
 
     public void setRecipient(String name, String account, String bank, String uid, String accId, String contactId) {
         selectedRecipientName = name;
         selectedRecipientAccount = account;
         selectedRecipientBank = bank;
-        selectedRecipientUid = uid;
-        selectedRecipientAccountId = accId;
+        selectedRecipientUid = uid != null ? uid : "";
+        selectedRecipientAccountId = accId != null ? accId : "";
         
         tvRecipientName.setText(name);
         tvRecipientAccount.setText(account);
@@ -351,9 +351,17 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private void goToReview() {
         String amtStr = etAmount.getText().toString().trim();
         if (amtStr.isEmpty() || selectedRecipientAccount.isEmpty()) {
-            Toast.makeText(this, "Please enter amount and recipient", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Details missing", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // VALIDATION: If internal, we MUST have a recipient UID or it will crash later
+        if (selectedTransferType.equals(Transaction.TRANSFER_INTERNAL) && selectedRecipientAccountId.isEmpty()) {
+            Toast.makeText(this, "Verifying recipient account...", Toast.LENGTH_SHORT).show();
+            performRecipientLookup(selectedRecipientAccount);
+            return;
+        }
+
         double amount = Double.parseDouble(amtStr.replaceAll("[^0-9.]", ""));
         double fee = TransactionRepository.getAdminFee(selectedTransferType);
 

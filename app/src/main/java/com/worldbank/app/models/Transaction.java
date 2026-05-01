@@ -1,8 +1,8 @@
 package com.worldbank.app.models;
-
+import com.google.firebase.firestore.Exclude;
 import com.google.firebase.Timestamp;
 import java.util.UUID;
-
+import com.google.firebase.firestore.Exclude;
 /**
  * Transaction.java — UPDATED for Pakistani banking
  * ──────────────────────────────────────────────────
@@ -99,10 +99,11 @@ public class Transaction {
                 tail);
     }
 
+    @Exclude
     public boolean isCredit() {
         return TYPE_CREDIT.equals(type);
     }
-
+    @Exclude
     public String getFormattedAmount() {
         String prefix = isCredit() ? "+Rs. " : "-Rs. ";
         return String.format("%s%,.0f", prefix, amount);

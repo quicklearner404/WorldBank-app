@@ -196,6 +196,7 @@ public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapt
         intent.putExtra("recipientName", contact.getName());
         intent.putExtra("recipientAccount", contact.getAccountNumber());
         intent.putExtra("recipientBank", contact.getBankName());
+        intent.putExtra("recipientUid", contact.getRecipientUid());
         intent.putExtra("accountId", accountId);
         intent.putExtra("cardId", cardId);
         startActivity(intent);

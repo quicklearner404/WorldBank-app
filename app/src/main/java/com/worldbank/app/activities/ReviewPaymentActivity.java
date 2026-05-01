@@ -9,14 +9,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.worldbank.app.R;
-import com.worldbank.app.models.Transaction;
 import com.worldbank.app.utils.SessionManager;
 import com.worldbank.app.utils.TransactionRepository;
 
 /**
- * ReviewPaymentActivity — UPGRADED
- * ────────────────────────────────
- * Final confirmation screen with PKR balance validation.
+ * ReviewPaymentActivity — STABLE VERSION
+ * ──────────────────────────────────────
+ * Final confirmation screen for outgoing transfers.
+ * Uses explicit arguments for repository calls to ensure stability.
  */
 public class ReviewPaymentActivity extends AppCompatActivity {
 
@@ -107,30 +107,28 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             btnSendPaymentFinal.setEnabled(true);
             btnSendPaymentFinal.setText("Send Payment");
-            Toast.makeText(this, "Connection Error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Network Error. Please try again.", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void executeRealTransfer() {
         btnSendPaymentFinal.setText("Sending PKR...");
 
-        Transaction txn = new Transaction();
-        txn.setUid(sessionManager.getUserId());
-        txn.setSenderUid(sessionManager.getUserId());
-        txn.setRecipientUid(recipientUid);
-        txn.setRecipientAccountId(recipientAccountId);
-        txn.setRecipientAccount(recipientAccount);
-        txn.setRecipientName(recipientName);
-        txn.setRecipientBank(recipientBank);
-        txn.setAmount(amount);
-        txn.setAdminFee(fee);
-        txn.setTotalDeducted(amount + fee);
-        txn.setType(Transaction.TYPE_DEBIT);
-        txn.setCategory(transferType != null && transferType.contains("Bill") ? Transaction.CAT_BILL : Transaction.CAT_TRANSFER);
-        txn.setTransferType(transferType);
-        txn.setDescription(etReviewNote.getText().toString().trim());
-
-        repo.sendMoney(txn, accountId).addOnSuccessListener(ref -> {
+        // Reverted to stable multi-argument call
+        repo.sendMoney(
+                sessionManager.getUserId(),
+                accountId,
+                cardId,
+                recipientUid != null ? recipientUid : "",
+                recipientAccountId != null ? recipientAccountId : "",
+                recipientAccount,
+                recipientName,
+                recipientBank,
+                amount,
+                transferType,
+                etReviewNote.getText().toString().trim(),
+                "" // contactId
+        ).addOnSuccessListener(ref -> {
             Intent intent = new Intent(this, TransferSuccessActivity.class);
             intent.putExtra("amount", amount);
             intent.putExtra("adminFee", fee);
@@ -141,7 +139,7 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             btnSendPaymentFinal.setEnabled(true);
             btnSendPaymentFinal.setText("Send Payment");
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Transfer Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
     }
 
