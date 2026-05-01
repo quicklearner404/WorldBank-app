@@ -70,20 +70,17 @@ public class AddPayeeActivity extends AppCompatActivity {
                 Contact.BANK_ASKARI, Contact.BANK_JAZZCASH, Contact.BANK_EASYPAISA
         };
 
-        // Use standard simple_dropdown_item_1line with dark text color
+        // FIXED: Using custom item_dropdown_black for high contrast visibility
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
-                android.R.layout.simple_dropdown_item_1line, banks);
+                R.layout.item_dropdown_black, banks);
         autoCompleteBanks.setAdapter(adapter);
         
-        // Set default value
         autoCompleteBanks.setText(Contact.BANK_WORLDBANK, false);
     }
 
     private void setupClickListeners() {
         if (ibBack != null) ibBack.setOnClickListener(v -> finish());
-
         ibPickContact.setOnClickListener(v -> checkContactsPermission());
-
         btnSavePayee.setOnClickListener(v -> savePayee());
     }
 
@@ -110,7 +107,7 @@ public class AddPayeeActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 pickContact();
             } else {
-                Toast.makeText(this, "Permission denied to read contacts", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permission denied. Please enable in settings.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -129,20 +126,16 @@ public class AddPayeeActivity extends AppCompatActivity {
                     String number = cursor.getString(numberIndex);
                     String name = cursor.getString(nameIndex);
 
-                    // Clean phone number: remove spaces, dashes, country code +92
                     String cleanNumber = number.replaceAll("[^0-9]", "");
-                    if (cleanNumber.startsWith("92")) {
-                        cleanNumber = "0" + cleanNumber.substring(2);
-                    }
+                    if (cleanNumber.startsWith("92")) cleanNumber = "0" + cleanNumber.substring(2);
+                    else if (!cleanNumber.startsWith("0")) cleanNumber = "0" + cleanNumber;
 
                     etPayeeAccount.setText(cleanNumber);
                     etPayeeName.setText(name);
-                    
-                    // Most mobile contacts are for JazzCash/EasyPaisa
                     autoCompleteBanks.setText(Contact.BANK_JAZZCASH, false);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Toast.makeText(this, "Failed to load contact", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -153,7 +146,7 @@ public class AddPayeeActivity extends AppCompatActivity {
         String bank = autoCompleteBanks.getText().toString().trim();
 
         if (name.isEmpty() || account.isEmpty()) {
-            Toast.makeText(this, "Please fill name and account details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 

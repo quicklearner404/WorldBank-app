@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    activity_top_up.xml — PKR ADJUSTED
+    Owner : Dev 2 | Mockup : Page 9
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,7 +26,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:paddingHorizontal="@dimen/screen_horizontal_padding">
-
                 <ImageButton
                     android:id="@+id/ibBack"
                     android:layout_width="40dp"
@@ -33,7 +36,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
-
                 <TextView
                     android:id="@+id/tvScreenTitle"
                     android:layout_width="wrap_content"
@@ -78,8 +80,8 @@
                 android:columnCount="3"
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
                 android:layout_marginTop="12dp">
+                <Button android:id="@+id/btn100" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 100" android:layout_marginEnd="4dp" />
                 <Button android:id="@+id/btn500" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 500" android:layout_marginEnd="4dp" />
-                <Button android:id="@+id/btn1000" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 1000" android:layout_marginEnd="4dp" />
                 <Button android:id="@+id/btn2000" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_gravity="fill_horizontal" android:layout_columnWeight="1" android:text="Rs. 2000" />
             </GridLayout>
 
@@ -132,9 +134,8 @@
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_marginStart="-32dp" android:src="@drawable/ic_bank" android:tint="@color/purple_primary" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="24dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Linked Bank Account" android:textColor="@color/black" android:textStyle="bold" android:textSize="14sp" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(XXXX 1234)" android:textColor="@color/gray_text" android:textSize="12sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(Simulated connection)" android:textColor="@color/gray_text" android:textSize="12sp" />
                     </LinearLayout>
-                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_chevron_right" android:tint="@color/gray_divider" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

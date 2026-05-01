@@ -7,16 +7,19 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.worldbank.app.R;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * TransferSuccessActivity — RECEIPT SCREEN
  * ─────────────────────────────────────────
- * Modern, light-themed receipt showing transfer details.
+ * Displays a sleek, light-themed receipt for the transaction.
+ * Fixed symbols to match the updated XML layout.
  */
 public class TransferSuccessActivity extends AppCompatActivity {
 
-    private TextView tvTotalAmount, tvTotalTransferAmount, tvAdminFeeAmount, tvTotalAmountGreen;
-    private TextView tvReferenceNumber, tvRecipientName;
+    private TextView tvTotalAmount, tvRecipientName, tvTransactionDate, tvReferenceNumber, tvAdminFeeAmount;
     private Button btnShare, btnDone;
     private ImageButton ibBack;
 
@@ -31,15 +34,15 @@ public class TransferSuccessActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        tvTotalAmount         = findViewById(R.id.tvTotalAmount);
-        tvTotalTransferAmount = findViewById(R.id.tvTotalTransferAmount);
-        tvAdminFeeAmount      = findViewById(R.id.tvAdminFeeAmount);
-        tvTotalAmountGreen    = findViewById(R.id.tvTotalAmountGreen);
-        tvReferenceNumber     = findViewById(R.id.tvReferenceNumber);
-        tvRecipientName       = findViewById(R.id.tvRecipientName);
-        btnShare              = findViewById(R.id.btnShare);
-        btnDone               = findViewById(R.id.btnDone);
-        ibBack                = findViewById(R.id.ibBack);
+        // Matches the IDs in activity_transfer_success.xml
+        tvTotalAmount      = findViewById(R.id.tvTotalAmount);
+        tvRecipientName    = findViewById(R.id.tvRecipientName);
+        tvTransactionDate  = findViewById(R.id.tvTransactionDate);
+        tvReferenceNumber  = findViewById(R.id.tvReferenceNumber);
+        tvAdminFeeAmount   = findViewById(R.id.tvAdminFeeAmount);
+        btnShare           = findViewById(R.id.btnShare);
+        btnDone            = findViewById(R.id.btnDone);
+        ibBack             = findViewById(R.id.ibBack);
     }
 
     private void loadDataFromIntent() {
@@ -51,25 +54,30 @@ public class TransferSuccessActivity extends AppCompatActivity {
         String ref      = intent.getStringExtra("referenceNumber");
         String name     = intent.getStringExtra("recipientName");
 
-        double total    = amount + adminFee;
+        double total = amount + adminFee;
 
-        tvTotalAmount.setText(String.format("Rs. %,.0f", total));
-        tvTotalAmountGreen.setText(String.format("Rs. %,.0f", total));
-        tvTotalTransferAmount.setText(String.format("Rs. %,.0f", amount));
-        tvAdminFeeAmount.setText(String.format("Rs. %,.0f", adminFee));
-        
-        tvReferenceNumber.setText(ref != null ? ref : "N/A");
+        // Display total in PKR format
+        tvTotalAmount.setText(String.format(Locale.getDefault(), "Rs. %,.0f", total));
         tvRecipientName.setText(name != null ? name : "Self Top-Up");
+        tvReferenceNumber.setText(ref != null ? ref : "N/A");
+        tvAdminFeeAmount.setText(String.format(Locale.getDefault(), "Rs. %,.2f", adminFee));
+
+        // Display current transaction date
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        tvTransactionDate.setText(sdf.format(new Date()));
     }
 
     private void setupClickListeners() {
         if (ibBack != null) ibBack.setOnClickListener(v -> goToHome());
         btnDone.setOnClickListener(v -> goToHome());
-        
+
         btnShare.setOnClickListener(v -> {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "Payment Receipt: " + tvTotalAmount.getText() + " Ref: " + tvReferenceNumber.getText());
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "World Bank Transaction Receipt\n" +
+                    "Recipient: " + tvRecipientName.getText() + "\n" +
+                    "Total Amount: " + tvTotalAmount.getText() + "\n" +
+                    "Reference: " + tvReferenceNumber.getText());
             startActivity(Intent.createChooser(shareIntent, "Share Receipt"));
         });
     }

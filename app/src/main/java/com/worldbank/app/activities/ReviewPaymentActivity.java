@@ -16,7 +16,7 @@ import com.worldbank.app.utils.TransactionRepository;
 /**
  * ReviewPaymentActivity — UPGRADED
  * ────────────────────────────────
- * Handles final confirmation with robust balance checking.
+ * Final confirmation screen with PKR balance validation.
  */
 public class ReviewPaymentActivity extends AppCompatActivity {
 
@@ -76,7 +76,7 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         tvReviewName.setText(recipientName);
         tvReviewInitials.setText(getInitials(recipientName));
         tvReviewAmount.setText(String.format("Rs. %,.0f", amount));
-        
+
         tvBreakdownAmount.setText(String.format("Rs. %,.2f", amount));
         tvBreakdownFee.setText(String.format("Rs. %,.2f", fee));
         tvBreakdownTotal.setText(String.format("Rs. %,.2f", amount + fee));
@@ -91,7 +91,6 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         btnSendPaymentFinal.setEnabled(false);
         btnSendPaymentFinal.setText("Checking Balance...");
 
-        // ── 1. Fetch Latest Balance for Pre-check ─────────────────
         repo.getAccount(accountId).addOnSuccessListener(doc -> {
             Double currentBalance = doc.getDouble("balance");
             double totalNeeded = amount + fee;
@@ -108,7 +107,7 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             btnSendPaymentFinal.setEnabled(true);
             btnSendPaymentFinal.setText("Send Payment");
-            Toast.makeText(this, "Network Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Connection Error", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -127,14 +126,10 @@ public class ReviewPaymentActivity extends AppCompatActivity {
         txn.setAdminFee(fee);
         txn.setTotalDeducted(amount + fee);
         txn.setType(Transaction.TYPE_DEBIT);
-        txn.setCategory(Transaction.CAT_TRANSFER);
-        if (Transaction.CAT_BILL.equals(transferType)) {
-            txn.setCategory(Transaction.CAT_BILL);
-        }
+        txn.setCategory(transferType != null && transferType.contains("Bill") ? Transaction.CAT_BILL : Transaction.CAT_TRANSFER);
         txn.setTransferType(transferType);
         txn.setDescription(etReviewNote.getText().toString().trim());
 
-        // FIX: Changed executeTransfer to sendMoney to match TransactionRepository.java
         repo.sendMoney(txn, accountId).addOnSuccessListener(ref -> {
             Intent intent = new Intent(this, TransferSuccessActivity.class);
             intent.putExtra("amount", amount);

@@ -27,6 +27,10 @@ public class TransactionRepository {
     private static final String COL_TRANSACTIONS = "transactions";
     private static final String COL_CONTACTS     = "contacts";
 
+    public static final double ADMIN_FEE_INTERNAL = 0;
+    public static final double ADMIN_FEE_IBFT     = 25;
+    public static final double ADMIN_FEE_WALLET   = 0;
+
     private final FirebaseFirestore db;
 
     public TransactionRepository() {
@@ -183,5 +187,49 @@ public class TransactionRepository {
             case Transaction.TRANSFER_EASYPAISA: return 0.0;
             default: return 25.0;
         }
+    }
+
+    public Task<Void> createNewUserData(String uid, String name, String email, String phone) {
+        String iban = "PK36WBNK" + String.format("%016d", Math.abs(uid.hashCode() % 9999999999999999L));
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("uid", uid);
+        userMap.put("displayName", name);
+        userMap.put("email", email);
+        userMap.put("phone", phone);
+        userMap.put("city", "Pakistan");
+        userMap.put("createdAt", Timestamp.now());
+
+        Map<String, Object> accountMap = new HashMap<>();
+        accountMap.put("uid", uid);
+        accountMap.put("accountNumber", iban);
+        accountMap.put("accountTitle", name);
+        accountMap.put("bankName", "World Bank");
+        accountMap.put("accountType", Account.TYPE_SAVINGS);
+        accountMap.put("balance", 0.0);
+        accountMap.put("currency", Account.CURRENCY_PKR);
+        accountMap.put("isActive", true);
+
+        DocumentReference userRef    = db.collection(COL_USERS).document(uid);
+        DocumentReference accountRef = db.collection(COL_ACCOUNTS).document();
+
+        return db.runBatch(batch -> {
+            batch.set(userRef, userMap);
+            batch.set(accountRef, accountMap);
+
+            String maskedCard = "**** **** **** " + String.format("%04d", Math.abs(uid.hashCode() % 10000));
+            Map<String, Object> cardMap = new HashMap<>();
+            cardMap.put("uid", uid);
+            cardMap.put("accountId", accountRef.getId());
+            cardMap.put("maskedNumber", maskedCard);
+            cardMap.put("holderName", name);
+            cardMap.put("expiry", "12/28");
+            cardMap.put("cardType", "VISA");
+            cardMap.put("isActive", true);
+            cardMap.put("monthlyLimit", 200000.0);
+            cardMap.put("monthlyUsed", 0.0);
+
+            DocumentReference cardRef = db.collection(COL_CARDS).document();
+            batch.set(cardRef, cardMap);
+        });
     }
 }

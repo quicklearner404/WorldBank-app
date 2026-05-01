@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TopUpActivity — UPGRADED & SYNCED
+ * TopUpActivity — PKR UPDATED & FIXED
  * ──────────────────────────
- * Functional PKR top-up from real cards.
+ * Functional PKR top-up with Rs. 100, Rs. 500, Rs. 2000 quick options.
  */
 public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
@@ -35,7 +35,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
     private List<Card> cardList = new ArrayList<>();
     private EditText etOtherAmount;
     private Button btnTopUpNow;
-    private Button btn500, btn1000, btn2000;
+    private Button btn100, btn500, btn2000;
 
     private TransactionRepository repo;
     private FirebaseAuth auth;
@@ -63,8 +63,8 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
         etOtherAmount = findViewById(R.id.etOtherAmount);
         btnTopUpNow = findViewById(R.id.btnTopUpNow);
         
+        btn100 = findViewById(R.id.btn100);
         btn500 = findViewById(R.id.btn500);
-        btn1000 = findViewById(R.id.btn1000);
         btn2000 = findViewById(R.id.btn2000);
 
         ImageButton ibBack = findViewById(R.id.ibBack);
@@ -76,7 +76,6 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
     }
 
     private void setupRecyclerView() {
-        // Initializing with 'this' listener to handle card selection
         cardAdapter = new CardAdapter(this, cardList, this);
         rvCards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvCards.setAdapter(cardAdapter);
@@ -85,7 +84,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
     @Override
     public void onCardClick(Card card, int position) {
         selectedFundingCard = card;
-        Toast.makeText(this, "Selected: " + card.getMaskedNumber(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Source Selected: " + card.getMaskedNumber(), Toast.LENGTH_SHORT).show();
     }
 
     private void setupAmountButtons() {
@@ -95,9 +94,9 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
             etOtherAmount.setText(val);
         };
 
-        btn500.setOnClickListener(amountListener);
-        btn1000.setOnClickListener(amountListener);
-        btn2000.setOnClickListener(amountListener);
+        if (btn100 != null) btn100.setOnClickListener(amountListener);
+        if (btn500 != null) btn500.setOnClickListener(amountListener);
+        if (btn2000 != null) btn2000.setOnClickListener(amountListener);
     }
 
     private void loadInitialData() {
@@ -120,7 +119,6 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
             }
             cardAdapter.notifyDataSetChanged();
             
-            // Default selection to first card if exists
             if (!cardList.isEmpty() && selectedFundingCard == null) {
                 selectedFundingCard = cardList.get(0);
             }
@@ -143,7 +141,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
         }
 
         if (currentAccountId.isEmpty()) {
-            Toast.makeText(this, "Still syncing account...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Account still syncing...", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -153,7 +151,7 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
         }
 
         btnTopUpNow.setEnabled(false);
-        btnTopUpNow.setText("Simulating PKR Transfer...");
+        btnTopUpNow.setText("Processing PKR...");
 
         String uid = getCurrentUserId();
         repo.topUp(uid, currentAccountId, amount)
@@ -162,13 +160,14 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
                     intent.putExtra("amount", amount);
                     intent.putExtra("adminFee", 0.0);
                     intent.putExtra("referenceNumber", ref);
+                    intent.putExtra("recipientName", "Balance Top-Up");
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     btnTopUpNow.setEnabled(true);
                     btnTopUpNow.setText("Top Up Now");
-                    Toast.makeText(this, "Top-up error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 

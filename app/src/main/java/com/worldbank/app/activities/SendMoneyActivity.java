@@ -1,12 +1,19 @@
 package com.worldbank.app.activities;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,7 +21,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.worldbank.app.R;
+import com.worldbank.app.adapters.QuickPayAdapter;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.models.Contact;
 import com.worldbank.app.models.Transaction;
@@ -31,7 +43,10 @@ import com.worldbank.app.utils.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SendMoneyActivity extends AppCompatActivity {
+public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdapter.OnContactClickListener {
+
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private static final int PICK_CONTACT_REQUEST = 101;
 
     private ImageButton ibBack;
     private TextView tvCardNumber, tvCardHolder, tvCardExpiry;
@@ -55,15 +70,18 @@ public class SendMoneyActivity extends AppCompatActivity {
     private String selectedTransferType = Transaction.TRANSFER_IBFT;
 
     static final String IBAN_PREFIX = "PK36WBNK";
-    private boolean isFormatting = false;
+    
+    private EditText currentDialogAccEdit, currentDialogNameEdit;
+    private AutoCompleteTextView currentDialogBankSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_money);
 
-        cardId = getIntent().getStringExtra("cardId");
-        accountId = getIntent().getStringExtra("accountId");
+        Intent intent = getIntent();
+        cardId = intent.getStringExtra("cardId");
+        accountId = intent.getStringExtra("accountId");
 
         repo = new TransactionRepository();
         auth = FirebaseAuth.getInstance();
@@ -73,6 +91,19 @@ public class SendMoneyActivity extends AppCompatActivity {
         loadCardData();
         setupClickListeners();
         setupAmountWatcher();
+
+        // Handle pre-filled recipient from Quick Pay
+        if (intent.hasExtra("recipientAccount")) {
+            setRecipient(
+                intent.getStringExtra("recipientName"),
+                intent.getStringExtra("recipientAccount"),
+                intent.getStringExtra("recipientBank"),
+                intent.getStringExtra("recipientUid"),
+                intent.getStringExtra("recipientAccountId"),
+                ""
+            );
+        }
+
         promptRecipientIfEmpty();
     }
 
@@ -139,53 +170,171 @@ public class SendMoneyActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_recipient_picker);
         dialog.getWindow().setLayout(android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
 
-        EditText etAcc = dialog.findViewById(R.id.etRecipientAccount);
-        EditText etName = dialog.findViewById(R.id.etRecipientName);
+        currentDialogAccEdit = dialog.findViewById(R.id.etRecipientAccount);
+        currentDialogNameEdit = dialog.findViewById(R.id.etRecipientName);
+        currentDialogBankSpinner = dialog.findViewById(R.id.autoCompleteBanks);
+        
         Button btnConfirm = dialog.findViewById(R.id.btnConfirmRecipient);
         ImageButton btnClose = dialog.findViewById(R.id.btnCloseDialog);
+        ImageButton ibPickContact = dialog.findViewById(R.id.ibPickContact);
+        RecyclerView rvContacts = dialog.findViewById(R.id.rvContacts);
 
-        etAcc.setText(IBAN_PREFIX);
-        etAcc.setSelection(IBAN_PREFIX.length());
+        setupDialogBankDropdown(currentDialogBankSpinner);
+        loadContactsIntoDialog(rvContacts);
 
-        // ── AUTO-LOOKUP LOGIC ──
-        etAcc.addTextChangedListener(new TextWatcher() {
+        currentDialogAccEdit.setText(IBAN_PREFIX);
+        currentDialogAccEdit.setSelection(IBAN_PREFIX.length());
+
+        currentDialogAccEdit.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int i1, int i2) {}
             @Override public void onTextChanged(CharSequence s, int i, int i1, int i2) {}
             @Override
             public void afterTextChanged(Editable s) {
                 String iban = s.toString().trim();
                 if (iban.length() == 24 && iban.startsWith(IBAN_PREFIX)) {
-                    etName.setHint("Searching database...");
+                    currentDialogNameEdit.setHint("Searching...");
                     repo.findAccountByIban(iban).addOnSuccessListener(snapshots -> {
                         if (!snapshots.isEmpty()) {
                             String name = snapshots.getDocuments().get(0).getString("accountTitle");
                             selectedRecipientUid = snapshots.getDocuments().get(0).getString("uid");
                             selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
-                            etName.setText(name);
-                            Toast.makeText(SendMoneyActivity.this, "World Bank User Found!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            etName.setHint("Recipient Name (Not found)");
+                            currentDialogNameEdit.setText(name);
+                            currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
                         }
                     });
                 }
             }
         });
 
+        ibPickContact.setOnClickListener(v -> checkContactsPermission());
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
         btnConfirm.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            String acc = etAcc.getText().toString().trim();
-            if (name.isEmpty() || acc.isEmpty()) return;
+            String name = currentDialogNameEdit.getText().toString().trim();
+            String acc = currentDialogAccEdit.getText().toString().trim();
+            String bank = currentDialogBankSpinner.getText().toString().trim();
             
-            selectedRecipientName = name;
-            selectedRecipientAccount = acc;
-            tvRecipientName.setText(name);
-            tvRecipientAccount.setText(acc);
+            if (name.isEmpty() || acc.isEmpty()) {
+                Toast.makeText(this, "Please enter recipient details", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            setRecipient(name, acc, bank, selectedRecipientUid, selectedRecipientAccountId, "");
             dialog.dismiss();
         });
 
         dialog.show();
+    }
+
+    private void setupDialogBankDropdown(AutoCompleteTextView spinner) {
+        String[] banks = {
+                Contact.BANK_WORLDBANK, Contact.BANK_HBL, Contact.BANK_MEEZAN, 
+                Contact.BANK_UBL, Contact.BANK_MCB, Contact.BANK_JAZZCASH, Contact.BANK_EASYPAISA
+        };
+        // FIXED: Using custom high-contrast dropdown layout
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_dropdown_black, banks);
+        spinner.setAdapter(adapter);
+    }
+
+    private void checkContactsPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+        } else {
+            pickContact();
+        }
+    }
+
+    private void pickContact() {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        startActivityForResult(intent, PICK_CONTACT_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                pickContact();
+            } else {
+                Toast.makeText(this, "Permission denied to access contacts", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_CONTACT_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri contactUri = data.getData();
+            String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+
+            try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                    String number = cursor.getString(numberIndex);
+                    String name = cursor.getString(nameIndex);
+
+                    String cleanNumber = number.replaceAll("[^0-9]", "");
+                    if (cleanNumber.startsWith("92")) cleanNumber = "0" + cleanNumber.substring(2);
+                    else if (!cleanNumber.startsWith("0")) cleanNumber = "0" + cleanNumber;
+
+                    if (currentDialogAccEdit != null) currentDialogAccEdit.setText(cleanNumber);
+                    if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
+                    if (currentDialogBankSpinner != null) currentDialogBankSpinner.setText(Contact.BANK_JAZZCASH, false);
+                }
+            } catch (Exception e) { e.printStackTrace(); }
+        }
+    }
+
+    private void loadContactsIntoDialog(RecyclerView rv) {
+        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
+        if (uid == null || uid.isEmpty() || rv == null) return;
+
+        List<Contact> contacts = new ArrayList<>();
+        QuickPayAdapter adapter = new QuickPayAdapter(contacts, this);
+        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rv.setAdapter(adapter);
+
+        repo.getContactsQuery(uid).get().addOnSuccessListener(snapshots -> {
+            for (QueryDocumentSnapshot doc : snapshots) {
+                Contact c = doc.toObject(Contact.class);
+                c.setContactId(doc.getId());
+                contacts.add(c);
+            }
+            adapter.notifyDataSetChanged();
+        });
+    }
+
+    @Override
+    public void onContactClick(Contact contact) {
+        if (currentDialogAccEdit != null) {
+            currentDialogAccEdit.setText(contact.getAccountNumber());
+            currentDialogAccEdit.setSelection(currentDialogAccEdit.getText().length());
+        }
+        if (currentDialogNameEdit != null) {
+            currentDialogNameEdit.setText(contact.getName());
+        }
+        if (currentDialogBankSpinner != null) {
+            currentDialogBankSpinner.setText(contact.getBankName(), false);
+        }
+    }
+
+    public void setRecipient(String name, String account, String bank, String uid, String accId, String contactId) {
+        selectedRecipientName = name;
+        selectedRecipientAccount = account;
+        selectedRecipientBank = bank;
+        selectedRecipientUid = uid;
+        selectedRecipientAccountId = accId;
+        
+        tvRecipientName.setText(name);
+        tvRecipientAccount.setText(account);
+
+        if (Contact.BANK_WORLDBANK.equals(bank)) selectedTransferType = Transaction.TRANSFER_INTERNAL;
+        else if (Contact.BANK_JAZZCASH.equals(bank)) selectedTransferType = Transaction.TRANSFER_JAZZCASH;
+        else if (Contact.BANK_EASYPAISA.equals(bank)) selectedTransferType = Transaction.TRANSFER_EASYPAISA;
+        else selectedTransferType = Transaction.TRANSFER_IBFT;
     }
 
     private void goToReview() {
@@ -194,8 +343,7 @@ public class SendMoneyActivity extends AppCompatActivity {
             Toast.makeText(this, "Enter amount and recipient", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        double amount = Double.parseDouble(amtStr);
+        double amount = Double.parseDouble(amtStr.replaceAll("[^0-9.]", ""));
         double fee = TransactionRepository.getAdminFee(selectedTransferType);
 
         Intent intent = new Intent(this, ReviewPaymentActivity.class);
