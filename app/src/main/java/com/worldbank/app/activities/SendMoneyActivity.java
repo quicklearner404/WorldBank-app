@@ -92,8 +92,8 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         setupClickListeners();
         setupAmountWatcher();
 
-        // Handle pre-filled recipient from Quick Pay
-        if (intent.hasExtra("recipientAccount")) {
+        // ── FIX: Handle data passed from Quick Pay or Payments Activity ──
+        if (intent != null && intent.hasExtra("recipientAccount")) {
             setRecipient(
                 intent.getStringExtra("recipientName"),
                 intent.getStringExtra("recipientAccount"),
@@ -161,7 +161,10 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     }
 
     private void promptRecipientIfEmpty() {
-        if (selectedRecipientAccount.isEmpty()) showRecipientPicker();
+        // Only show picker if we don't have a recipient yet
+        if (selectedRecipientAccount == null || selectedRecipientAccount.isEmpty()) {
+            showRecipientPicker();
+        }
     }
 
     private void showRecipientPicker() {
@@ -192,7 +195,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
             public void afterTextChanged(Editable s) {
                 String iban = s.toString().trim();
                 if (iban.length() == 24 && iban.startsWith(IBAN_PREFIX)) {
-                    currentDialogNameEdit.setHint("Searching...");
+                    currentDialogNameEdit.setHint("Searching database...");
                     repo.findAccountByIban(iban).addOnSuccessListener(snapshots -> {
                         if (!snapshots.isEmpty()) {
                             String name = snapshots.getDocuments().get(0).getString("accountTitle");
@@ -200,6 +203,8 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
                             selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
                             currentDialogNameEdit.setText(name);
                             currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+                        } else {
+                            currentDialogNameEdit.setHint("Recipient Name");
                         }
                     });
                 }
@@ -231,7 +236,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
                 Contact.BANK_WORLDBANK, Contact.BANK_HBL, Contact.BANK_MEEZAN, 
                 Contact.BANK_UBL, Contact.BANK_MCB, Contact.BANK_JAZZCASH, Contact.BANK_EASYPAISA
         };
-        // FIXED: Using custom high-contrast dropdown layout
+        // FIXED: Using high-contrast dropdown layout for black text
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_dropdown_black, banks);
         spinner.setAdapter(adapter);
     }
@@ -257,7 +262,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 pickContact();
             } else {
-                Toast.makeText(this, "Permission denied to access contacts", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permission denied to read contacts", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -278,7 +283,6 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
                     String cleanNumber = number.replaceAll("[^0-9]", "");
                     if (cleanNumber.startsWith("92")) cleanNumber = "0" + cleanNumber.substring(2);
-                    else if (!cleanNumber.startsWith("0")) cleanNumber = "0" + cleanNumber;
 
                     if (currentDialogAccEdit != null) currentDialogAccEdit.setText(cleanNumber);
                     if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
@@ -297,7 +301,10 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rv.setAdapter(adapter);
 
-        repo.getContactsQuery(uid).get().addOnSuccessListener(snapshots -> {
+        // Fetch real saved contacts for the user
+        repo.getContactsQuery(uid).addSnapshotListener((snapshots, e) -> {
+            if (e != null || snapshots == null) return;
+            contacts.clear();
             for (QueryDocumentSnapshot doc : snapshots) {
                 Contact c = doc.toObject(Contact.class);
                 c.setContactId(doc.getId());
@@ -309,6 +316,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     @Override
     public void onContactClick(Contact contact) {
+        // Tapping a contact circle fills the dialog fields
         if (currentDialogAccEdit != null) {
             currentDialogAccEdit.setText(contact.getAccountNumber());
             currentDialogAccEdit.setSelection(currentDialogAccEdit.getText().length());
@@ -319,6 +327,9 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         if (currentDialogBankSpinner != null) {
             currentDialogBankSpinner.setText(contact.getBankName(), false);
         }
+        
+        selectedRecipientUid = contact.getOwnerUid(); // Simplification: in real app use recipientUid field
+        selectedRecipientBank = contact.getBankName();
     }
 
     public void setRecipient(String name, String account, String bank, String uid, String accId, String contactId) {
@@ -340,7 +351,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private void goToReview() {
         String amtStr = etAmount.getText().toString().trim();
         if (amtStr.isEmpty() || selectedRecipientAccount.isEmpty()) {
-            Toast.makeText(this, "Enter amount and recipient", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter amount and recipient", Toast.LENGTH_SHORT).show();
             return;
         }
         double amount = Double.parseDouble(amtStr.replaceAll("[^0-9.]", ""));

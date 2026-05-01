@@ -20,23 +20,20 @@ import com.worldbank.app.R;
 import com.worldbank.app.models.Transaction;
 import com.worldbank.app.utils.SessionManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BudgetsActivity
  * ───────────────
- * Calculates real spending vs budget limits by category.
+ * Real-time budget tracker. Classifies transactions into Groceries, Utilities, and Dining.
  */
 public class BudgetsActivity extends AppCompatActivity {
 
     private static final String TAG = "BudgetsActivity";
 
-    // Overall stats
     private ProgressBar pbTotalBudget;
     private TextView tvTotalBudgetStats;
-
-    // Category progress bars and stats
     private View itemGroceries, itemUtilities, itemDining;
     private BottomNavigationView bottomNavView;
 
@@ -44,11 +41,11 @@ public class BudgetsActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private SessionManager sessionManager;
 
-    // Hardcoded Budget Limits (In real apps, these are stored in a 'budgets' collection)
-    private final double LIMIT_GROCERIES = 15000.0;
-    private final double LIMIT_UTILITIES = 10000.0;
-    private final double LIMIT_DINING    = 8000.0;
-    private final double LIMIT_TOTAL     = 50000.0;
+    // Realistic PKR Monthly Limits
+    private final double LIMIT_GROCERIES = 30000.0;
+    private final double LIMIT_UTILITIES = 15000.0;
+    private final double LIMIT_DINING    = 10000.0;
+    private final double LIMIT_TOTAL     = 70000.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,85 +77,74 @@ public class BudgetsActivity extends AppCompatActivity {
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
         if (uid == null || uid.isEmpty()) return;
 
-        // Fetch all transactions for this user to calculate category spending
+        // Snapshot listener for real-time budget updates
         db.collection("transactions")
                 .whereEqualTo("uid", uid)
-                .get()
-                .addOnSuccessListener(snapshots -> {
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null) {
+                        Log.e(TAG, "Budget listener failed", e);
+                        return;
+                    }
+
                     double spentGroceries = 0, spentUtilities = 0, spentDining = 0, totalSpent = 0;
 
                     for (QueryDocumentSnapshot doc : snapshots) {
-                        String type = doc.getString("type");
-                        String category = doc.getString("category");
-                        Double amount = doc.getDouble("amount");
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t.getAmount() <= 0 || !Transaction.TYPE_DEBIT.equals(t.getType())) continue;
 
-                        if (amount == null || type == null || category == null) continue;
+                        totalSpent += t.getAmount();
 
-                        // Only count Debits (Spending)
-                        if (Transaction.TYPE_DEBIT.equals(type)) {
-                            totalSpent += amount;
-                            if (category.toLowerCase().contains("grocer")) spentGroceries += amount;
-                            else if (category.toLowerCase().contains("util")) spentUtilities += amount;
-                            else if (category.toLowerCase().contains("dining") || category.toLowerCase().contains("food")) spentDining += amount;
+                        String cat = t.getCategory() != null ? t.getCategory().toLowerCase() : "";
+                        String rec = t.getRecipientName() != null ? t.getRecipientName().toLowerCase() : "";
+
+                        // Smart Classification Engine (Keyword matching for Pakistan)
+                        if (cat.contains("grocer") || rec.contains("imtiaz") || rec.contains("alfatah") || 
+                            rec.contains("metro") || rec.contains("mart") || rec.contains("store") || rec.contains("pharmacy")) {
+                            spentGroceries += t.getAmount();
+                        } else if (cat.contains("util") || cat.contains("bill") || 
+                                   rec.contains("lesco") || rec.contains("ke") || rec.contains("electric") || 
+                                   rec.contains("sngpl") || rec.contains("ssgc") || rec.contains("ptcl") || 
+                                   rec.contains("fiber") || rec.contains("nayatel")) {
+                            spentUtilities += t.getAmount();
+                        } else if (cat.contains("dining") || cat.contains("food") || 
+                                   rec.contains("panda") || rec.contains("kfc") || rec.contains("mcdonald") || 
+                                   rec.contains("restaurant") || rec.contains("cafe")) {
+                            spentDining += t.getAmount();
                         }
                     }
 
                     updateUI(spentGroceries, spentUtilities, spentDining, totalSpent);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error calculating budgets", e);
-                    Toast.makeText(this, "Failed to load budget data", Toast.LENGTH_SHORT).show();
                 });
     }
 
     private void updateUI(double groceries, double utilities, double dining, double total) {
-        // 1. Total Spending Overview
+        // Update Circular Overview
         int totalProgress = (int) ((total / LIMIT_TOTAL) * 100);
         pbTotalBudget.setProgress(Math.min(totalProgress, 100));
         tvTotalBudgetStats.setText(String.format("Rs. %,.0f Spent / Rs. %,.0f Budget", total, LIMIT_TOTAL));
 
-        // 2. Groceries
+        // Update Detailed Items
         updateCategoryItem(itemGroceries, "Groceries", R.drawable.ic_groceries, groceries, LIMIT_GROCERIES);
-        
-        // 3. Utilities
         updateCategoryItem(itemUtilities, "Utilities", R.drawable.ic_utilities, utilities, LIMIT_UTILITIES);
-        
-        // 4. Dining
         updateCategoryItem(itemDining, "Dining Out", R.drawable.ic_dining, dining, LIMIT_DINING);
     }
 
     private void updateCategoryItem(View view, String name, int iconRes, double spent, double limit) {
         ((ImageView) view.findViewById(R.id.ivBudgetIcon)).setImageResource(iconRes);
         ((TextView) view.findViewById(R.id.tvBudgetName)).setText(name);
-        
         ProgressBar pb = view.findViewById(R.id.pbBudget);
         int progress = (int) ((spent / limit) * 100);
         pb.setProgress(Math.min(progress, 100));
-        
-        ((TextView) view.findViewById(R.id.tvBudgetStats)).setText(
-                String.format("Rs. %,.0f of Rs. %,.0f", spent, limit));
+        ((TextView) view.findViewById(R.id.tvBudgetStats)).setText(String.format("Rs. %,.0f of Rs. %,.0f", spent, limit));
     }
 
     private void setupBottomNav() {
         bottomNavView.setSelectedItemId(R.id.nav_budgets);
         bottomNavView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                startActivity(new Intent(this, HomeActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
-                return true;
-            } else if (id == R.id.nav_statistic) {
-                startActivity(new Intent(this, CardStatisticActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
-                return true;
-            } else if (id == R.id.nav_account) {
-                startActivity(new Intent(this, AccountActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
-                return true;
-            }
+            if (id == R.id.nav_home) { startActivity(new Intent(this, HomeActivity.class)); finish(); return true; }
+            if (id == R.id.nav_statistic) { startActivity(new Intent(this, CardStatisticActivity.class)); finish(); return true; }
+            if (id == R.id.nav_account) { startActivity(new Intent(this, AccountActivity.class)); finish(); return true; }
             return id == R.id.nav_budgets;
         });
     }
