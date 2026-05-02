@@ -34,6 +34,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.worldbank.app.R;
 import com.worldbank.app.adapters.QuickPayAdapter;
+import com.worldbank.app.models.Account;
+import com.worldbank.app.models.User;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.models.Contact;
 import com.worldbank.app.models.Transaction;
@@ -183,15 +185,18 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         setupDialogBankDropdown(currentDialogBankSpinner);
         loadContactsIntoDialog(rvContacts);
 
+        currentDialogAccEdit.setText(IBAN_PREFIX);
+        currentDialogAccEdit.setSelection(IBAN_PREFIX.length());
+
         currentDialogAccEdit.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
                 String input = s.toString().trim();
-                // Real-time lookup for World Bank accounts (via IBAN or Phone)
-                if (input.length() >= 11) {
-                    performRecipientLookup(input);
+                // FIX: Change 11 to 10 to catch all variations!
+                if (input.length() >= 10) {
+                    performRecipientLookup(input, currentDialogNameEdit);
                 }
             }
         });
@@ -203,12 +208,23 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
             String name = currentDialogNameEdit.getText().toString().trim();
             String acc = currentDialogAccEdit.getText().toString().trim();
             String bank = currentDialogBankSpinner.getText().toString().trim();
-            
+
             if (name.isEmpty() || acc.isEmpty()) {
                 Toast.makeText(this, "Recipient details missing", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
+
+            // DO NOT let them click if it is still loading!
+            if (name.equals("Verifying account...")) {
+                Toast.makeText(this, "Please wait, verifying account...", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (Contact.BANK_WORLDBANK.equals(bank) && selectedRecipientAccountId.isEmpty()) {
+                Toast.makeText(this, "This is not a verified World Bank account", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             setRecipient(name, acc, bank, selectedRecipientUid, selectedRecipientAccountId, "");
             dialog.dismiss();
         });
@@ -216,37 +232,86 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         dialog.show();
     }
 
-    private void performRecipientLookup(String input) {
-        // Search by IBAN
-        if (input.startsWith(IBAN_PREFIX) && input.length() == 24) {
-            repo.findAccountByIban(input).addOnSuccessListener(snapshots -> {
-                if (!snapshots.isEmpty()) {
-                    populateLookupResults(snapshots.getDocuments().get(0));
-                }
-            });
-        } 
-        // Search by Phone Number (if it's a potential internal user)
-        else if (input.length() == 11 && input.startsWith("03")) {
-            FirebaseFirestore.getInstance().collection("users")
-                .whereEqualTo("phone", input)
-                .limit(1).get().addOnSuccessListener(userSnaps -> {
-                    if (!userSnaps.isEmpty()) {
-                        String uid = userSnaps.getDocuments().get(0).getId();
-                        repo.getAccountQuery(uid).get().addOnSuccessListener(accSnaps -> {
-                            if (!accSnaps.isEmpty()) {
-                                populateLookupResults(accSnaps.getDocuments().get(0));
-                            }
-                        });
-                    }
-                });
-        }
-    }
+    private void performRecipientLookup(String input, EditText nameEdit) {
+        // 1. Strip spaces, dashes, and brackets
+        String cleanInput = input.replaceAll("[^0-9+]", "");
 
-    private void populateLookupResults(com.google.firebase.firestore.DocumentSnapshot doc) {
-        selectedRecipientUid = doc.getString("uid");
-        selectedRecipientAccountId = doc.getId();
-        currentDialogNameEdit.setText(doc.getString("accountTitle"));
-        currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+        // 2. If it starts with "03" (e.g., 03001234567), turn it into +923001234567
+        if (cleanInput.startsWith("03") && cleanInput.length() == 11) {
+            cleanInput = "+92" + cleanInput.substring(1);
+        }
+        // 3. If it starts with just "3" (e.g., 3001234567), turn it into +923001234567
+        else if (cleanInput.startsWith("3") && cleanInput.length() == 10) {
+            cleanInput = "+92" + cleanInput;
+        }
+        // 4. If they somehow typed "923001234567" without the plus, add the plus
+        else if (cleanInput.startsWith("92") && cleanInput.length() == 12) {
+            cleanInput = "+" + cleanInput;
+        }
+
+        // 1. Search by IBAN
+        if (cleanInput.startsWith(IBAN_PREFIX) && cleanInput.length() == 24) {
+            repo.findAccountByIban(cleanInput).addOnSuccessListener(snapshots -> {
+                try {
+                    if (!snapshots.isEmpty()) {
+                        Account account = snapshots.getDocuments().get(0).toObject(Account.class);
+                        if (account != null) {
+                            selectedRecipientUid = account.getUid();
+                            selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
+                            nameEdit.setText(account.getAccountTitle());
+                            currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+                        }
+                    } else {
+                        clearVerification(nameEdit, "Error: No World Bank account found");
+                    }
+                } catch (Exception e) {
+                    clearVerification(nameEdit, "Error: Data mismatch");
+                }
+            }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Network issue"));
+        }
+        // 2. Search by Phone Number
+        else if (cleanInput.length() >= 10) {
+
+            // FIX: Don't search the database if they explicitly selected JazzCash or EasyPaisa!
+            if (currentDialogBankSpinner != null &&
+                    !Contact.BANK_WORLDBANK.equals(currentDialogBankSpinner.getText().toString())) {
+                return;
+            }
+
+            repo.findUserByPhone(cleanInput).addOnSuccessListener(userSnaps -> {
+                try {
+                    if (!userSnaps.isEmpty()) {
+                        String docId = userSnaps.getDocuments().get(0).getId();
+                        User fetchedUser = userSnaps.getDocuments().get(0).toObject(User.class);
+
+                        String realUid = (fetchedUser != null && fetchedUser.getUid() != null && !fetchedUser.getUid().isEmpty())
+                                ? fetchedUser.getUid() : docId;
+
+                        repo.getAccountQuery(realUid).get().addOnSuccessListener(accSnaps -> {
+                            try {
+                                if (!accSnaps.isEmpty()) {
+                                    Account account = accSnaps.getDocuments().get(0).toObject(Account.class);
+                                    if (account != null) {
+                                        selectedRecipientUid = realUid;
+                                        selectedRecipientAccountId = accSnaps.getDocuments().get(0).getId();
+                                        nameEdit.setText(account.getAccountTitle());
+                                        currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+                                    }
+                                } else {
+                                    clearVerification(nameEdit, "Error: User has no World Bank account.");
+                                }
+                            } catch (Exception e) {
+                                clearVerification(nameEdit, "Error: Account data mismatch");
+                            }
+                        }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Fetching account failed"));
+                    } else {
+                        clearVerification(nameEdit, "Error: Unregistered phone number");
+                    }
+                } catch (Exception e) {
+                    clearVerification(nameEdit, "Error: Verification failed");
+                }
+            }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Network issue"));
+        }
     }
 
     private void setupDialogBankDropdown(AutoCompleteTextView spinner) {
@@ -275,22 +340,38 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == PICK_CONTACT_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri contactUri = data.getData();
-            String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+            String[] projection = new String[]{
+                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+            };
+
             try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    String clean = number.replaceAll("[^0-9]", "");
-                    if (clean.startsWith("92")) clean = "0" + clean.substring(2);
-                    if (currentDialogAccEdit != null) currentDialogAccEdit.setText(clean);
-                    if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
+
+                    // 1. Get the column indexes safely
+                    int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+
+                    // 2. Check if the indexes are valid (>= 0) before getting the strings
+                    if (numberIndex >= 0 && nameIndex >= 0) {
+                        String number = cursor.getString(numberIndex);
+                        String name = cursor.getString(nameIndex);
+
+                        String clean = number.replaceAll("[^0-9]", "");
+                        if (clean.startsWith("92")) clean = "0" + clean.substring(2);
+
+                        if (currentDialogAccEdit != null) currentDialogAccEdit.setText(clean);
+                        if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
+                    }
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
-
     private void loadContactsIntoDialog(RecyclerView rv) {
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
         if (uid == null || uid.isEmpty() || rv == null) return;
@@ -312,26 +393,38 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     @Override
     public void onContactClick(Contact contact) {
-        // Reset old IDs first to prevent crashes if lookup fails
         selectedRecipientUid = "";
         selectedRecipientAccountId = "";
+
+        if (currentDialogBankSpinner != null) {
+            currentDialogBankSpinner.setText(contact.getBankName(), false);
+        }
 
         if (currentDialogAccEdit != null) {
             currentDialogAccEdit.setText(contact.getAccountNumber());
             currentDialogAccEdit.setSelection(currentDialogAccEdit.getText().length());
         }
-        if (currentDialogNameEdit != null) {
-            currentDialogNameEdit.setText(contact.getName());
-        }
-        if (currentDialogBankSpinner != null) {
-            currentDialogBankSpinner.setText(contact.getBankName(), false);
-        }
-        selectedRecipientUid = contact.getRecipientUid();
-        selectedRecipientBank = contact.getBankName();
-        // Force a lookup if it's potentially a World Bank user
-        performRecipientLookup(contact.getAccountNumber());
-    }
 
+        if (currentDialogNameEdit != null) {
+            // FIX: Only verify if it's World Bank!
+            if (Contact.BANK_WORLDBANK.equals(contact.getBankName())) {
+                currentDialogNameEdit.setText("Verifying account...");
+            } else {
+                // If it's JazzCash/EasyPaisa, just put their name in the box. No internet needed!
+                currentDialogNameEdit.setText(contact.getName());
+            }
+        }
+    }
+    private void clearVerification(EditText nameEdit, String errorMsg) {
+        selectedRecipientUid = "";
+        selectedRecipientAccountId = "";
+        if (nameEdit != null) {
+            nameEdit.setText("");
+            nameEdit.setHint(errorMsg);
+        }
+        // Force a pop-up to show the EXACT error reason!
+        Toast.makeText(this, "SECRET ERROR: " + errorMsg, Toast.LENGTH_LONG).show();
+    }
     public void setRecipient(String name, String account, String bank, String uid, String accId, String contactId) {
         selectedRecipientName = name;
         selectedRecipientAccount = account;
@@ -349,18 +442,16 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     }
 
     private void goToReview() {
-        String amtStr = etAmount.getText().toString().trim();
-        if (amtStr.isEmpty() || selectedRecipientAccount.isEmpty()) {
-            Toast.makeText(this, "Details missing", Toast.LENGTH_SHORT).show();
+        if (selectedRecipientAccount.isEmpty()) { Toast.makeText(this, "Add recipient", Toast.LENGTH_SHORT).show(); return; }
+        
+        // Final Foolproof Check for Internal Transfers
+        if (selectedTransferType.equals(Transaction.TRANSFER_INTERNAL) && selectedRecipientAccountId.isEmpty()) {
+            Toast.makeText(this, "Recipient account not verified. Please check the IBAN/Number.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // VALIDATION: If internal, we MUST have a recipient UID or it will crash later
-        if (selectedTransferType.equals(Transaction.TRANSFER_INTERNAL) && selectedRecipientAccountId.isEmpty()) {
-            Toast.makeText(this, "Verifying recipient account...", Toast.LENGTH_SHORT).show();
-            performRecipientLookup(selectedRecipientAccount);
-            return;
-        }
+        String amtStr = etAmount.getText().toString().trim();
+        if (amtStr.isEmpty()) { etAmount.setError("Enter amount"); return; }
 
         double amount = Double.parseDouble(amtStr.replaceAll("[^0-9.]", ""));
         double fee = TransactionRepository.getAdminFee(selectedTransferType);

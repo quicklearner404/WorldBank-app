@@ -13,14 +13,16 @@ import com.worldbank.app.models.Account;
 import com.worldbank.app.models.Contact;
 import com.worldbank.app.models.Transaction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * TransactionRepository.java
  * ───────────────────────────
  * Robust Firestore banking operations.
- * Reverted to stable multi-argument logic to prevent Channel Shutdowns.
+ * Handles atomic balance changes and robust error tracking.
  */
 public class TransactionRepository {
 
@@ -30,6 +32,10 @@ public class TransactionRepository {
     private static final String COL_CARDS        = "cards";
     private static final String COL_TRANSACTIONS = "transactions";
     private static final String COL_CONTACTS     = "contacts";
+
+    public static final double ADMIN_FEE_INTERNAL = 0;
+    public static final double ADMIN_FEE_IBFT     = 25;
+    public static final double ADMIN_FEE_WALLET   = 0;
 
     private final FirebaseFirestore db;
 
@@ -63,8 +69,38 @@ public class TransactionRepository {
         return db.collection(COL_CARDS).document().set(cardMap);
     }
 
+    /** Find a World Bank account by IBAN for Auto-Lookup */
     public Task<QuerySnapshot> findAccountByIban(String iban) {
         return db.collection(COL_ACCOUNTS).whereEqualTo("accountNumber", iban).limit(1).get();
+    }
+
+    /** 
+     * Find a World Bank user by Phone Number.
+     * Supports both +92 and 03 formats for Pakistan.
+     */
+    public Task<QuerySnapshot> findUserByPhone(String phone) {
+        String cleanPhone = phone.replaceAll("[^0-9+]", "");
+        List<String> variations = new ArrayList<>();
+        variations.add(cleanPhone);
+
+        // If starts with 03..., add +92 version
+        if (cleanPhone.startsWith("03") && cleanPhone.length() == 11) {
+            variations.add("+92" + cleanPhone.substring(1));
+        } 
+        // If starts with +92..., add 03 version
+        else if (cleanPhone.startsWith("+92") && cleanPhone.length() == 13) {
+            variations.add("0" + cleanPhone.substring(3));
+        }
+        // If starts with 92..., add +92 and 03 version
+        else if (cleanPhone.startsWith("92") && cleanPhone.length() == 12) {
+            variations.add("+" + cleanPhone);
+            variations.add("0" + cleanPhone.substring(2));
+        }
+
+        return db.collection(COL_USERS)
+                .whereIn("phone", variations)
+                .limit(1)
+                .get();
     }
 
     public Task<String> topUp(String uid, String accountId, double amount) {
@@ -77,10 +113,9 @@ public class TransactionRepository {
             double currentBalance = accountSnap.getDouble("balance") != null ? accountSnap.getDouble("balance") : 0;
             transaction.update(accountRef, "balance", currentBalance + amount);
 
-            // FIX: Use your Transaction Model Class instead of a HashMap!
             Transaction t = new Transaction();
             t.setUid(uid);
-            t.setSenderUid(uid); // uid and senderUid are the same for top-up
+            t.setSenderUid(uid);
             t.setAmount(amount);
             t.setType(Transaction.TYPE_CREDIT);
             t.setCategory(Transaction.CAT_TOPUP);
@@ -89,7 +124,6 @@ public class TransactionRepository {
             t.setRecipientName("Self Top-Up");
             t.setStatus(Transaction.STATUS_SUCCESS);
 
-            // Firebase will automatically save the Transaction object!
             transaction.set(txnRef, t);
             return referenceNumber;
         });
@@ -98,7 +132,6 @@ public class TransactionRepository {
     /**
      * SEND MONEY: Reliable multi-argument atomic transfer.
      */
-
     public Task<String> sendMoney(
             String senderUid, String senderAccountId, String senderCardId,
             String recipientUid, String recipientAccountId, String recipientAccount,
@@ -114,17 +147,14 @@ public class TransactionRepository {
         double adminFee = getAdminFee(transferType);
         double totalDeducted = amount + adminFee;
         String referenceNumber = Transaction.generateReference();
-
-        boolean isInternal = recipientUid != null && !recipientUid.isEmpty() &&
-                recipientAccountId != null && !recipientAccountId.isEmpty();
+        
+        boolean isInternal = recipientUid != null && !recipientUid.isEmpty() && 
+                             recipientAccountId != null && !recipientAccountId.isEmpty();
 
         DocumentReference senderAccountRef = db.collection(COL_ACCOUNTS).document(senderAccountId);
         DocumentReference senderTxnRef     = db.collection(COL_TRANSACTIONS).document();
 
-        // Note: Using 'dbTransaction' instead of 'transaction' to avoid confusing
-        // Java with your 'Transaction' model class!
         return db.runTransaction(dbTransaction -> {
-
             // ==========================================
             // 1. DO ALL READS FIRST (Firestore Rule)
             // ==========================================
@@ -136,7 +166,6 @@ public class TransactionRepository {
             DocumentSnapshot recAccSnap = null;
             DocumentReference recAccRef = null;
 
-            // Read the recipient's account BEFORE making any writes
             if (isInternal) {
                 recAccRef = db.collection(COL_ACCOUNTS).document(recipientAccountId);
                 recAccSnap = dbTransaction.get(recAccRef);
@@ -154,11 +183,8 @@ public class TransactionRepository {
             // ==========================================
             // 3. DO ALL WRITES NOW
             // ==========================================
-
-            // A. Deduct balance from Sender
             dbTransaction.update(senderAccountRef, "balance", senderBalance - totalDeducted);
 
-            // B. Record Sender Debit (Using the clean Model Class!)
             Transaction debit = new Transaction();
             debit.setUid(senderUid);
             debit.setSenderUid(senderUid);
@@ -172,19 +198,13 @@ public class TransactionRepository {
             debit.setStatus(Transaction.STATUS_SUCCESS);
             debit.setReferenceNumber(referenceNumber);
             debit.setTimestamp(Timestamp.now());
-
             dbTransaction.set(senderTxnRef, debit);
 
-            // C. If internal transfer, credit the recipient
             if (isInternal && recAccSnap != null && recAccSnap.exists()) {
                 double recBalance = recAccSnap.getDouble("balance") != null ? recAccSnap.getDouble("balance") : 0;
-
-                // Add balance to recipient
                 dbTransaction.update(recAccRef, "balance", recBalance + amount);
-
+                
                 DocumentReference recTxnRef = db.collection(COL_TRANSACTIONS).document();
-
-                // Record Recipient Credit (Using the clean Model Class!)
                 Transaction credit = new Transaction();
                 credit.setUid(recipientUid);
                 credit.setSenderUid(senderUid);
@@ -193,7 +213,6 @@ public class TransactionRepository {
                 credit.setCategory(Transaction.CAT_TRANSFER);
                 credit.setTimestamp(Timestamp.now());
                 credit.setRecipientName(senderAccountSnap.getString("accountTitle"));
-
                 dbTransaction.set(recTxnRef, credit);
             }
 

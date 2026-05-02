@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    activity_home.xml — UPGRADED SLEEK DESIGN
+    activity_home.xml — CLEAN SLEEK DESIGN
     Owner : Dev 2 | Mockup : Page 8
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -23,7 +23,7 @@
             android:orientation="vertical"
             android:paddingTop="16dp">
 
-            <!-- ── TOP BAR ── -->
+            <!-- ── TOP BAR (Cleaned: No Search/Bell) ── -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,28 +52,6 @@
                     app:layout_constraintTop_toBottomOf="@id/tvTotalBalanceLabel"
                     tools:text="Rs. 125,000" />
 
-                <ImageButton
-                    android:id="@+id/ibBell"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@color/transparent"
-                    android:src="@drawable/ic_notifications"
-                    android:tint="@color/black"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="@id/tvBalanceAmount" />
-
-                <ImageButton
-                    android:id="@+id/ibSearch"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@color/transparent"
-                    android:src="@drawable/ic_search"
-                    android:tint="@color/black"
-                    android:layout_marginEnd="4dp"
-                    app:layout_constraintEnd_toStartOf="@id/ibBell"
-                    app:layout_constraintTop_toTopOf="@id/ibBell"
-                    app:layout_constraintBottom_toBottomOf="@id/ibBell" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- ── LIVE CARD CAROUSEL ── -->
@@ -102,7 +80,7 @@
                 <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
             </LinearLayout>
 
-            <!-- ── QUICK ACTIONS (Updated with Sleek Tints) ── -->
+            <!-- ── QUICK ACTIONS ── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,7 +90,6 @@
                 android:gravity="center"
                 android:weightSum="4">
 
-                <!-- Transfer -->
                 <LinearLayout android:id="@+id/btnTransfer" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -123,7 +100,6 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Transfer" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
-                <!-- Payments -->
                 <LinearLayout android:id="@+id/btnPayments" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -134,7 +110,6 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payments" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
-                <!-- Top Up -->
                 <LinearLayout android:id="@+id/btnTopUp" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -145,7 +120,6 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Top Up" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
-                <!-- Add Card -->
                 <LinearLayout android:id="@+id/btnAddCard" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
