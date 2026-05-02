@@ -29,7 +29,7 @@
     <string name="error_user_save_failed">Failed to save user</string>
     <string name="error_account_create_failed">Failed to create account</string>
     <string name="error_card_create_failed">Failed to create card</string>
-    35202-7553775-4"
+
     <!-- Buttons -->
     <string name="btn_get_started">Get Started</string>
     <string name="btn_log_in">Log In</string>
@@ -50,8 +50,8 @@
     <string name="label_email">Email</string>
     <string name="label_password">Password</string>
     <string name="label_confirm_password">Confirm password</string>
-    <string name="hint_email">Text your email</string>
-    <string name="hint_password">Text your password</string>
+    <string name="hint_email">Enter your email</string>
+    <string name="hint_password">Enter your password</string>
     <string name="label_remember_me">Remember me</string>
     <string name="link_forgot_password">Forgot password?</string>
     <string name="dont_have_account">Don\'t have an account?</string>

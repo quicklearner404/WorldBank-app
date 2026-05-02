@@ -3,6 +3,7 @@ package com.worldbank.app.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +30,10 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth auth;
     TextInputEditText etEmail, etPassword;
     Button btnLogin;
+    CheckBox cbRememberMe;
     TextView tvForgotPassword, tvRegister;
     Toolbar toolbar;
+    SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,13 @@ public class LoginActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Login");
         }
 
+        // prefill email if user had remember me on during last login
+        String rememberedEmail = session.getRememberedEmail();
+        if (!rememberedEmail.isEmpty()) {
+            etEmail.setText(rememberedEmail);
+            cbRememberMe.setChecked(true);
+        }
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() { goToWelcome(); }
@@ -74,15 +84,13 @@ public class LoginActivity extends AppCompatActivity {
                         public void onSuccess(AuthResult authResult) {
                             FirebaseUser user = authResult.getUser();
 
-                            // block login if email has not been verified yet
+                            // block unverified users from entering the app
                             if (!user.isEmailVerified()) {
                                 auth.signOut();
-                                Toast.makeText(LoginActivity.this,
-                                        "Please verify your email first. Check your inbox.",
-                                        Toast.LENGTH_LONG).show();
-
-                                // offer to resend verification in case email was missed
                                 user.sendEmailVerification();
+                                Toast.makeText(LoginActivity.this,
+                                        "Please verify your email first. A new link has been sent.",
+                                        Toast.LENGTH_LONG).show();
                                 return;
                             }
 
@@ -91,8 +99,15 @@ public class LoginActivity extends AppCompatActivity {
                             String userName  = user.getDisplayName() != null
                                     ? user.getDisplayName() : "";
 
-                            SessionManager session = new SessionManager(LoginActivity.this);
-                            session.saveSession(uid, userEmail, userName, true);
+                            // save or clear remembered email based on checkbox
+                            if (cbRememberMe.isChecked()) {
+                                session.saveRememberedEmail(userEmail);
+                            } else {
+                                session.clearRememberedEmail();
+                            }
+
+                            // always save active session so home screen works
+                            session.saveSession(uid, userEmail, userName, cbRememberMe.isChecked());
 
                             Toast.makeText(LoginActivity.this, "Login successful",
                                     Toast.LENGTH_SHORT).show();
@@ -125,9 +140,11 @@ public class LoginActivity extends AppCompatActivity {
         etEmail          = findViewById(R.id.et_email);
         etPassword       = findViewById(R.id.et_password);
         btnLogin         = findViewById(R.id.btn_login);
+        cbRememberMe     = findViewById(R.id.cb_remember_me);
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
         tvRegister       = findViewById(R.id.tv_register);
         toolbar          = findViewById(R.id.toolbar);
         auth             = FirebaseAuth.getInstance();
+        session          = new SessionManager(this);
     }
 }
