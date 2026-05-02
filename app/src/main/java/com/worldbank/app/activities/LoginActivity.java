@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
 
@@ -53,12 +54,9 @@ public class LoginActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Login");
         }
 
-        // back goes to welcome screen not out of the app
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
-            public void handleOnBackPressed() {
-                goToWelcome();
-            }
+            public void handleOnBackPressed() { goToWelcome(); }
         });
 
         toolbar.setNavigationOnClickListener(v -> goToWelcome());
@@ -67,23 +65,31 @@ public class LoginActivity extends AppCompatActivity {
             String email    = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (email.isEmpty()) {
-                etEmail.setError("Email is required");
-                return;
-            }
-            if (password.isEmpty()) {
-                etPassword.setError("Password is required");
-                return;
-            }
+            if (email.isEmpty()) { etEmail.setError("Email is required"); return; }
+            if (password.isEmpty()) { etPassword.setError("Password is required"); return; }
 
             auth.signInWithEmailAndPassword(email, password)
                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
-                            String uid       = authResult.getUser().getUid();
-                            String userEmail = authResult.getUser().getEmail();
-                            String userName  = authResult.getUser().getDisplayName() != null
-                                    ? authResult.getUser().getDisplayName() : "";
+                            FirebaseUser user = authResult.getUser();
+
+                            // block login if email has not been verified yet
+                            if (!user.isEmailVerified()) {
+                                auth.signOut();
+                                Toast.makeText(LoginActivity.this,
+                                        "Please verify your email first. Check your inbox.",
+                                        Toast.LENGTH_LONG).show();
+
+                                // offer to resend verification in case email was missed
+                                user.sendEmailVerification();
+                                return;
+                            }
+
+                            String uid       = user.getUid();
+                            String userEmail = user.getEmail();
+                            String userName  = user.getDisplayName() != null
+                                    ? user.getDisplayName() : "";
 
                             SessionManager session = new SessionManager(LoginActivity.this);
                             session.saveSession(uid, userEmail, userName, true);

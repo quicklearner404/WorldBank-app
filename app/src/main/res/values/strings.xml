@@ -17,6 +17,7 @@
     <string name="hint_full_name">Enter your full name</string>
     <string name="hint_cnic">35201-1234567-1</string>
     <string name="hint_phone">+92 300 1234567</string>
+    <string name="label_location">Location</string>
 
     <!-- Sign Up Validation Errors -->
     <string name="error_fields_empty">All fields are required</string>
@@ -28,7 +29,7 @@
     <string name="error_user_save_failed">Failed to save user</string>
     <string name="error_account_create_failed">Failed to create account</string>
     <string name="error_card_create_failed">Failed to create card</string>
-
+    35202-7553775-4"
     <!-- Buttons -->
     <string name="btn_get_started">Get Started</string>
     <string name="btn_log_in">Log In</string>

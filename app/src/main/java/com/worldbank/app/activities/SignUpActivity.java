@@ -9,17 +9,14 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.worldbank.app.R;
@@ -58,16 +55,12 @@ public class SignUpActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            // sets the toolbar title to Sign Up instead of app name
             getSupportActionBar().setTitle("Sign Up");
         }
 
-        // back press goes to welcome screen not out of the app
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
-            public void handleOnBackPressed() {
-                goToWelcome();
-            }
+            public void handleOnBackPressed() { goToWelcome(); }
         });
 
         toolbar.setNavigationOnClickListener(v -> goToWelcome());
@@ -85,8 +78,11 @@ public class SignUpActivity extends AppCompatActivity {
                 if (digits.length() > 13) digits = digits.substring(0, 13);
 
                 String formatted = digits;
-                if (digits.length() > 5)  formatted = digits.substring(0, 5) + "-" + digits.substring(5);
-                if (digits.length() > 12) formatted = digits.substring(0, 5) + "-" + digits.substring(5, 12) + "-" + digits.substring(12);
+                if (digits.length() > 5)
+                    formatted = digits.substring(0, 5) + "-" + digits.substring(5);
+                if (digits.length() > 12)
+                    formatted = digits.substring(0, 5) + "-"
+                            + digits.substring(5, 12) + "-" + digits.substring(12);
 
                 etCnic.setText(formatted);
                 etCnic.setSelection(formatted.length());
@@ -104,7 +100,6 @@ public class SignUpActivity extends AppCompatActivity {
                 isFormattingPhone = true;
 
                 String current = s.toString();
-
                 if (!current.startsWith("+92 ")) {
                     String userDigits = current.replaceAll("[^0-9]", "");
                     if (userDigits.startsWith("92")) userDigits = userDigits.substring(2);
@@ -113,16 +108,14 @@ public class SignUpActivity extends AppCompatActivity {
                     etPhone.setText(formatted);
                     etPhone.setSelection(formatted.length());
                 } else {
-                    String afterPrefix = current.substring(4);
-                    String digitsOnly  = afterPrefix.replaceAll("[^0-9]", "");
-                    if (digitsOnly.length() > 10) {
-                        digitsOnly = digitsOnly.substring(0, 10);
-                        String formatted = "+92 " + digitsOnly;
+                    String afterPrefix = current.substring(4).replaceAll("[^0-9]", "");
+                    if (afterPrefix.length() > 10) {
+                        afterPrefix = afterPrefix.substring(0, 10);
+                        String formatted = "+92 " + afterPrefix;
                         etPhone.setText(formatted);
                         etPhone.setSelection(formatted.length());
                     }
                 }
-
                 isFormattingPhone = false;
             }
         });
@@ -144,7 +137,8 @@ public class SignUpActivity extends AppCompatActivity {
 
             if (name.isEmpty() || cnic.isEmpty() || phone.isEmpty()
                     || email.isEmpty() || pass.isEmpty() || cpass.isEmpty()) {
-                Toast.makeText(this, getString(R.string.error_fields_empty), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_fields_empty),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!name.contains(" ") || name.split(" ").length < 2) {
@@ -152,34 +146,76 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
             if (cnic.replaceAll("[^0-9]", "").length() != 13) {
-                Toast.makeText(this, getString(R.string.error_cnic_invalid), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_cnic_invalid),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (phone.replaceAll("[^0-9]", "").length() != 12) {
-                Toast.makeText(this, "Enter a valid Pakistani phone number", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Enter a valid Pakistani phone number",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_invalid_email),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (pass.length() < 6) {
-                Toast.makeText(this, getString(R.string.error_password_short), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_password_short),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!pass.equals(cpass)) {
-                Toast.makeText(this, getString(R.string.error_passwords_dont_match), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_passwords_dont_match),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            auth.createUserWithEmailAndPassword(email, pass)
-                    .addOnSuccessListener(authResult -> {
-                        authResult.getUser().sendEmailVerification();
-                        String uid = authResult.getUser().getUid();
-                        createNewUserData(uid, name, cnic, phone, email);
+            btnSignup.setEnabled(false);
+            btnSignup.setText("Checking...");
+
+            // check cnic uniqueness before creating the firebase account
+            db.collection("users")
+                    .whereEqualTo("cnic", cnic)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        if (!snapshot.isEmpty()) {
+                            btnSignup.setEnabled(true);
+                            btnSignup.setText(getString(R.string.btn_sign_up));
+                            etCnic.setError("An account with this CNIC already exists");
+                            etCnic.requestFocus();
+                            Toast.makeText(this,
+                                    "This CNIC is already registered to another account.",
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        btnSignup.setText("Creating account...");
+
+                        auth.createUserWithEmailAndPassword(email, pass)
+                                .addOnSuccessListener(authResult -> {
+                                    // send verification email so user confirms they own this email
+                                    authResult.getUser().sendEmailVerification()
+                                            .addOnCompleteListener(task -> {
+                                                String uid = authResult.getUser().getUid();
+                                                createNewUserData(uid, name, cnic, phone, email);
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    btnSignup.setEnabled(true);
+                                    btnSignup.setText(getString(R.string.btn_sign_up));
+                                    Toast.makeText(this, e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                });
                     })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(e -> {
+                        btnSignup.setEnabled(true);
+                        btnSignup.setText(getString(R.string.btn_sign_up));
+                        Toast.makeText(this,
+                                "Could not verify CNIC: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
         });
     }
 
@@ -213,15 +249,24 @@ public class SignUpActivity extends AppCompatActivity {
     void createCardData(String uid, String accountId, String name) {
         Card card = new Card(uid, accountId, "4532 **** **** 3090", name, "12/28", "VISA", 200000);
         db.collection("cards").add(card)
-                .addOnSuccessListener(unused -> {
-                    Toast.makeText(this, getString(R.string.success_account_created),
-                            Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, LoginActivity.class));
-                    finish();
-                })
+                .addOnSuccessListener(unused -> showVerificationDialog())
                 .addOnFailureListener(e ->
                         Toast.makeText(this, getString(R.string.error_card_create_failed)
                                 + ": " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    // shows a dialog explaining email verification instead of going straight to login
+    private void showVerificationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Verify Your Email")
+                .setMessage("A verification link has been sent to your email address. "
+                        + "Please verify your email before logging in.")
+                .setCancelable(false)
+                .setPositiveButton("Go to Login", (dialog, which) -> {
+                    startActivity(new Intent(this, LoginActivity.class));
+                    finish();
+                })
+                .show();
     }
 
     String generateIBAN() {
