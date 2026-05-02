@@ -132,9 +132,17 @@ public class Transaction {
 
     // ── Setters ──────────────────────────────────────────────────
     public void setTxnId(String txnId)                  { this.txnId = txnId; }
-    public void setSenderUid(String uid)                { this.senderUid = uid; this.uid = uid; }
-    public void setUid(String uid)                      { this.uid = uid; this.senderUid = uid; }
-    public void setRecipientUid(String uid)             { this.recipientUid = uid; }
+    // ── Fixed Setters in Transaction.java ──
+
+    public void setSenderUid(String uid) {
+        this.senderUid = uid;
+        // Remove the this.uid = uid line!
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+        // Remove the this.senderUid = uid line!
+    }    public void setRecipientUid(String uid)             { this.recipientUid = uid; }
     public void setRecipientAccountId(String id)        { this.recipientAccountId = id; }
     public void setSenderAccount(String a)              { this.senderAccount = a; }
     public void setRecipientAccount(String a)           { this.recipientAccount = a; }

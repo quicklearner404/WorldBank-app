@@ -180,9 +180,10 @@ public class TransactionRepository {
         // Prepare recipient references if internal
         DocumentReference recAccRef = isInternal ? db.collection(COL_ACCOUNTS).document(recipientAccountId) : null;
         DocumentReference recTxnRef = isInternal ? db.collection(COL_TRANSACTIONS).document() : null;
-
+// Force a local final copy that CANNOT be changed
         return db.runTransaction(tx -> {
-
+            Log.d("TRANSFER_UID_CHECK", "Sender UID: " + senderUid);
+            Log.d("TRANSFER_UID_CHECK", "Recipient UID: " + recipientUid);
             // ── 1. ALL READS MUST HAPPEN FIRST ─────────────────────
             DocumentSnapshot senderSnap = tx.get(senderAccRef);
             DocumentSnapshot recSnap = null;
@@ -234,6 +235,11 @@ public class TransactionRepository {
                 tx.update(recAccRef, "balance", recBalance + amount);
 
                 Transaction credit = new Transaction();
+                // 🔴 TEMPORARY TEST: Manually force the recipient ID from your log
+// credit.setUid(recipientUid);
+                credit.setUid("pdzzwJRbxFeGdRSALQn6iPy3hrp1"); // Paste the Zunnoor ID here directly
+
+                credit.setSenderUid(senderUid);
                 credit.setUid(recipientUid);
                 credit.setSenderUid(senderUid);
                 credit.setRecipientUid(recipientUid);
