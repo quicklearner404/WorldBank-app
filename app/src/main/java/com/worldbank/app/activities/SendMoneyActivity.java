@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -35,10 +36,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.worldbank.app.R;
 import com.worldbank.app.adapters.QuickPayAdapter;
 import com.worldbank.app.models.Account;
-import com.worldbank.app.models.User;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.models.Contact;
 import com.worldbank.app.models.Transaction;
+import com.worldbank.app.models.User;
 import com.worldbank.app.utils.SessionManager;
 import com.worldbank.app.utils.TransactionRepository;
 
@@ -49,6 +50,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     private static final int PICK_CONTACT_REQUEST = 101;
+    private static final String TAG = "SendMoneyActivity";
 
     private ImageButton ibBack;
     private TextView tvCardNumber, tvCardHolder, tvCardExpiry;
@@ -56,7 +58,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private TextView btnChange;
     private Button btnSendMoney;
     private EditText etAmount;
-    
+
     private TransactionRepository repo;
     private FirebaseAuth auth;
     private SessionManager sessionManager;
@@ -72,21 +74,61 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private String selectedTransferType = Transaction.TRANSFER_IBFT;
 
     static final String IBAN_PREFIX = "PK36WBNK";
-    
-    private EditText currentDialogAccEdit, currentDialogNameEdit;
+
+    // Dialog views — kept as fields so all methods can access them
+    private EditText currentDialogAccEdit;
+    private EditText currentDialogNameEdit;
     private AutoCompleteTextView currentDialogBankSpinner;
+    private TextView currentDialogStatus; // NEW: shows "Verifying…" / "✓ Verified" / "✗ Not found"
+
+    // ── Verification state ──────────────────────────────────────────
+    // recipientVerified is set true ONLY when Firestore confirms the account exists.
+    // It is cleared ONLY when the account field content changes meaningfully.
+    private boolean recipientVerified = false;
+
+    // This flag suppresses the TextWatcher when WE are programmatically filling fields.
+    // It does NOT affect recipientVerified — that is managed separately.
+    private boolean isProgrammaticSet = false;
+
+    // Snapshot of what was in the account field when the last lookup was launched.
+    // Used to detect whether the user actually changed the value.
+    private String lastLookedUpValue = "";
+
+    // Debounce
+    private final android.os.Handler lookupHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable pendingLookup = null;
+
+    // ───────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_money);
-
+// 🔴 --- TEMPORARY DATABASE TEST --- 🔴
+        TransactionRepository testRepo = new TransactionRepository();
+        testRepo.findAccountByIban("PK36WBNK9001560255952")
+                .addOnSuccessListener(snapshots -> {
+                    if (!snapshots.isEmpty()) {
+                        String name = snapshots.getDocuments().get(0).getString("accountTitle");
+                        Log.d("DB_TEST", "SUCCESS! Found name: " + name);
+                        Toast.makeText(this, "TEST SUCCESS: " + name, Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.d("DB_TEST", "FAILED! Query returned 0 documents.");
+                        Toast.makeText(this, "TEST FAILED: 0 documents", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB_TEST", "PERMISSION DENIED OR ERROR", e);
+                    Toast.makeText(this, "TEST ERROR: Check Logcat", Toast.LENGTH_LONG).show();
+                });
+        // 🔴 ------------------------------- 🔴
         Intent intent = getIntent();
-        cardId = intent.getStringExtra("cardId");
+        cardId    = intent.getStringExtra("cardId");
         accountId = intent.getStringExtra("accountId");
 
-        repo = new TransactionRepository();
-        auth = FirebaseAuth.getInstance();
+        repo           = new TransactionRepository();
+        auth           = FirebaseAuth.getInstance();
         sessionManager = new SessionManager(this);
 
         bindViews();
@@ -94,14 +136,14 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         setupClickListeners();
         setupAmountWatcher();
 
-        if (intent != null && intent.hasExtra("recipientAccount")) {
+        if (intent.hasExtra("recipientAccount")) {
             setRecipient(
-                intent.getStringExtra("recipientName"),
-                intent.getStringExtra("recipientAccount"),
-                intent.getStringExtra("recipientBank"),
-                intent.getStringExtra("recipientUid"),
-                intent.getStringExtra("recipientAccountId"),
-                ""
+                    intent.getStringExtra("recipientName"),
+                    intent.getStringExtra("recipientAccount"),
+                    intent.getStringExtra("recipientBank"),
+                    intent.getStringExtra("recipientUid"),
+                    intent.getStringExtra("recipientAccountId"),
+                    ""
             );
         }
 
@@ -109,16 +151,16 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     }
 
     private void bindViews() {
-        ibBack = findViewById(R.id.ibBack);
-        tvCardNumber = findViewById(R.id.tvCardNumber);
-        tvCardHolder = findViewById(R.id.tvCardHolder);
-        tvCardExpiry = findViewById(R.id.tvCardExpiry);
-        tvRecipientName = findViewById(R.id.tvRecipientName);
+        ibBack           = findViewById(R.id.ibBack);
+        tvCardNumber     = findViewById(R.id.tvCardNumber);
+        tvCardHolder     = findViewById(R.id.tvCardHolder);
+        tvCardExpiry     = findViewById(R.id.tvCardExpiry);
+        tvRecipientName  = findViewById(R.id.tvRecipientName);
         tvRecipientAccount = findViewById(R.id.tvRecipientAccount);
         tvTransferAmount = findViewById(R.id.tvTransferAmount);
-        btnChange = findViewById(R.id.btnChange);
-        btnSendMoney = findViewById(R.id.btnSendMoney);
-        etAmount = findViewById(R.id.etAmount);
+        btnChange        = findViewById(R.id.btnChange);
+        btnSendMoney     = findViewById(R.id.btnSendMoney);
+        etAmount         = findViewById(R.id.etAmount);
     }
 
     private void loadCardData() {
@@ -145,8 +187,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         etAmount.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int i1, int i2) {}
             @Override public void onTextChanged(CharSequence s, int i, int i1, int i2) {}
-            @Override
-            public void afterTextChanged(Editable s) {
+            @Override public void afterTextChanged(Editable s) {
                 updateAmountDisplay(s.toString());
             }
         });
@@ -167,36 +208,79 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         }
     }
 
+    // ── Recipient picker dialog ─────────────────────────────────────
+
     private void showRecipientPicker() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_recipient_picker);
-        dialog.getWindow().setLayout(android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setLayout(
+                android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                android.view.WindowManager.LayoutParams.WRAP_CONTENT);
 
-        currentDialogAccEdit = dialog.findViewById(R.id.etRecipientAccount);
-        currentDialogNameEdit = dialog.findViewById(R.id.etRecipientName);
+        currentDialogAccEdit     = dialog.findViewById(R.id.etRecipientAccount);
+        currentDialogNameEdit    = dialog.findViewById(R.id.etRecipientName);
         currentDialogBankSpinner = dialog.findViewById(R.id.autoCompleteBanks);
-        
-        Button btnConfirm = dialog.findViewById(R.id.btnConfirmRecipient);
-        ImageButton btnClose = dialog.findViewById(R.id.btnCloseDialog);
-        ImageButton ibPickContact = dialog.findViewById(R.id.ibPickContact);
-        RecyclerView rvContacts = dialog.findViewById(R.id.rvContacts);
+        // NOTE: add a TextView with id tvVerificationStatus to dialog_recipient_picker.xml
+        // showing e.g. "Verifying…" / "✓ Account verified" / "✗ Account not found"
+        // If you haven't added it yet, this reference will just be null and we null-check it.
+        currentDialogStatus      = dialog.findViewById(R.id.tvVerificationStatus);
+
+        Button      btnConfirm     = dialog.findViewById(R.id.btnConfirmRecipient);
+        ImageButton btnClose       = dialog.findViewById(R.id.btnCloseDialog);
+        ImageButton ibPickContact  = dialog.findViewById(R.id.ibPickContact);
+        RecyclerView rvContacts    = dialog.findViewById(R.id.rvContacts);
 
         setupDialogBankDropdown(currentDialogBankSpinner);
         loadContactsIntoDialog(rvContacts);
 
+        // Reset state fresh every time the dialog opens
+        resetVerificationState();
+
+        // Pre-fill the IBAN prefix programmatically
+        isProgrammaticSet = true;
         currentDialogAccEdit.setText(IBAN_PREFIX);
         currentDialogAccEdit.setSelection(IBAN_PREFIX.length());
+        isProgrammaticSet = false;
 
         currentDialogAccEdit.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
             @Override
             public void afterTextChanged(Editable s) {
+                // If WE are filling the field, skip — but DON'T touch recipientVerified here.
+                // recipientVerified is only changed by lookup results or resetVerificationState().
+                if (isProgrammaticSet) return;
+
                 String input = s.toString().trim();
-                // FIX: Change 11 to 10 to catch all variations!
-                if (input.length() >= 10) {
-                    performRecipientLookup(input, currentDialogNameEdit);
+
+                // Only invalidate if the value actually changed from what we last verified.
+                // This prevents the watcher from wiping a successful lookup the moment
+                // Firestore returns and we auto-fill the name field (which can re-trigger this).
+                if (!input.equals(lastLookedUpValue)) {
+                    recipientVerified      = false;
+                    selectedRecipientUid       = "";
+                    selectedRecipientAccountId = "";
+                    showStatus(null); // clear status
+                }
+
+                // Cancel previous debounce
+                if (pendingLookup != null) {
+                    lookupHandler.removeCallbacks(pendingLookup);
+                }
+
+                // Fire lookup once user types past the prefix (IBAN_PREFIX.length = 8)
+                // This is intentionally low so lookup starts the moment real digits arrive.
+                if (input.length() > IBAN_PREFIX.length()) {
+                    showStatus("Verifying…");
+                    pendingLookup = () -> performRecipientLookup(input, currentDialogNameEdit);
+                    lookupHandler.postDelayed(pendingLookup, 600); // 600ms debounce
+                } else if (!input.startsWith(IBAN_PREFIX) && input.length() >= 10) {
+                    // Phone number path
+                    showStatus("Verifying…");
+                    pendingLookup = () -> performRecipientLookup(input, currentDialogNameEdit);
+                    lookupHandler.postDelayed(pendingLookup, 600);
                 }
             }
         });
@@ -206,22 +290,25 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
         btnConfirm.setOnClickListener(v -> {
             String name = currentDialogNameEdit.getText().toString().trim();
-            String acc = currentDialogAccEdit.getText().toString().trim();
+            String acc  = currentDialogAccEdit.getText().toString().trim();
             String bank = currentDialogBankSpinner.getText().toString().trim();
 
-            if (name.isEmpty() || acc.isEmpty()) {
-                Toast.makeText(this, "Recipient details missing", Toast.LENGTH_SHORT).show();
+            if (acc.isEmpty()) {
+                Toast.makeText(this, "Enter account number or IBAN", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Recipient name missing — please wait for verification", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // DO NOT let them click if it is still loading!
-            if (name.equals("Verifying account...")) {
-                Toast.makeText(this, "Please wait, verifying account...", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (Contact.BANK_WORLDBANK.equals(bank) && selectedRecipientAccountId.isEmpty()) {
-                Toast.makeText(this, "This is not a verified World Bank account", Toast.LENGTH_SHORT).show();
+            // For World Bank (internal) transfers, we MUST have verified the account.
+            // For other banks (IBFT/JazzCash/EasyPaisa), no in-app lookup is possible —
+            // we trust the user-entered details, as real banks do.
+            if (Contact.BANK_WORLDBANK.equals(bank) && !recipientVerified) {
+                Toast.makeText(this,
+                        "Account not verified yet — please wait a moment or re-enter",
+                        Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -232,91 +319,194 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         dialog.show();
     }
 
+    // ── Core lookup ─────────────────────────────────────────────────
+
+    /**
+     * Performs the Firestore lookup for a given input string.
+     * IMPORTANT: This method records `input` as `lastLookedUpValue` BEFORE
+     * the async call. That way, if the user hasn't typed anything new by the
+     * time Firestore returns, we know the result is still valid and we can
+     * safely set recipientVerified = true WITHOUT the TextWatcher immediately
+     * clearing it again.
+     */
     private void performRecipientLookup(String input, EditText nameEdit) {
-        // 1. Strip spaces, dashes, and brackets
-        String cleanInput = input.replaceAll("[^0-9+]", "");
+        // 1. Force uppercase instantly so "pk" matches "PK"
+        // 1. Strip all spaces anywhere in the string and force uppercase
+        String cleanInput = input.replaceAll("\\s+", "").toUpperCase();
 
-        // 2. If it starts with "03" (e.g., 03001234567), turn it into +923001234567
-        if (cleanInput.startsWith("03") && cleanInput.length() == 11) {
-            cleanInput = "+92" + cleanInput.substring(1);
-        }
-        // 3. If it starts with just "3" (e.g., 3001234567), turn it into +923001234567
-        else if (cleanInput.startsWith("3") && cleanInput.length() == 10) {
-            cleanInput = "+92" + cleanInput;
-        }
-        // 4. If they somehow typed "923001234567" without the plus, add the plus
-        else if (cleanInput.startsWith("92") && cleanInput.length() == 12) {
-            cleanInput = "+" + cleanInput;
-        }
+        // 🔴 --- STRING COMPARISON DEBUGGER --- 🔴
+        // We only run this debug if you've typed at least 15 characters to avoid spam
+        if (cleanInput.startsWith("PK") && cleanInput.length() >= 15) {
+            String expected = "PK36WBNK9001560255952";
 
-        // 1. Search by IBAN
-        if (cleanInput.startsWith(IBAN_PREFIX) && cleanInput.length() == 24) {
-            repo.findAccountByIban(cleanInput).addOnSuccessListener(snapshots -> {
-                try {
-                    if (!snapshots.isEmpty()) {
-                        Account account = snapshots.getDocuments().get(0).toObject(Account.class);
-                        if (account != null) {
-                            selectedRecipientUid = account.getUid();
-                            selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
-                            nameEdit.setText(account.getAccountTitle());
-                            currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
-                        }
-                    } else {
-                        clearVerification(nameEdit, "Error: No World Bank account found");
+            Log.d("DEBUG_MATCH", "========================================");
+            Log.d("DEBUG_MATCH", "Expected IBAN : [" + expected + "] (Length: " + expected.length() + ")");
+            Log.d("DEBUG_MATCH", "Your UI IBAN  : [" + cleanInput + "] (Length: " + cleanInput.length() + ")");
+            Log.d("DEBUG_MATCH", "Are they a 100% perfect match? : " + expected.equals(cleanInput));
+
+            if (!expected.equals(cleanInput)) {
+                // Find exactly where it went wrong
+                int minLen = Math.min(expected.length(), cleanInput.length());
+                boolean foundDiff = false;
+                for (int i = 0; i < minLen; i++) {
+                    if (expected.charAt(i) != cleanInput.charAt(i)) {
+                        Log.e("DEBUG_MATCH", "❌ ERROR AT POSITION " + (i+1) + ": Expected '" + expected.charAt(i) + "' but your EditText gave '" + cleanInput.charAt(i) + "'");
+                        foundDiff = true;
+                        break;
                     }
-                } catch (Exception e) {
-                    clearVerification(nameEdit, "Error: Data mismatch");
                 }
-            }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Network issue"));
+                if (!foundDiff && expected.length() != cleanInput.length()) {
+                    Log.e("DEBUG_MATCH", "❌ ERROR: The characters match, but your UI text is too " + (cleanInput.length() > expected.length() ? "LONG" : "SHORT") + "!");
+                }
+            } else {
+                Log.d("DEBUG_MATCH", "✅ SUCCESS: The strings are absolutely identical!");
+            }
+            Log.d("DEBUG_MATCH", "========================================");
         }
-        // 2. Search by Phone Number
-        else if (cleanInput.length() >= 10) {
+        // 🔴 ---------------------------------- 🔴
 
-            // FIX: Don't search the database if they explicitly selected JazzCash or EasyPaisa!
-            if (currentDialogBankSpinner != null &&
-                    !Contact.BANK_WORLDBANK.equals(currentDialogBankSpinner.getText().toString())) {
-                return;
+        // Record this as the value we're currently looking up.
+        // The TextWatcher will only reset recipientVerified if the value CHANGES from this.
+        lastLookedUpValue = cleanInput;
+
+        // Clear status if they delete everything
+        if (cleanInput.isEmpty()) {
+            showStatus("");
+            return;
+        }
+
+        if (cleanInput.startsWith(IBAN_PREFIX)) {
+            // ── IBAN lookup ─────────────────────────────────────
+
+            // WAIT until they type the full 21-character IBAN before asking Firestore!
+            // (Change this to 24 if you use real Pakistani IBANs later)
+            if (cleanInput.length() < 21) {
+                showStatus("Typing IBAN...");
+                recipientVerified = false;
+                return; // Stop here! Don't waste a Firebase read.
+            }
+
+            repo.findAccountByIban(cleanInput).addOnSuccessListener(snapshots -> {
+                // Guard: user may have typed more since we launched. Only apply if still current.
+                if (!cleanInput.equals(lastLookedUpValue)) return;
+
+                if (!snapshots.isEmpty()) {
+                    Account account = snapshots.getDocuments().get(0).toObject(Account.class);
+                    if (account != null && account.isActive()) {
+                        selectedRecipientUid       = account.getUid();
+                        selectedRecipientAccountId = snapshots.getDocuments().get(0).getId();
+                        recipientVerified          = true;
+
+                        // Fill name field programmatically (guard so watcher ignores it)
+                        isProgrammaticSet = true;
+                        if (nameEdit != null) nameEdit.setText(account.getAccountTitle());
+                        if (currentDialogBankSpinner != null)
+                            currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+                        isProgrammaticSet = false;
+
+                        showStatus("✓ Account verified: " + account.getAccountTitle());
+                    } else {
+                        recipientVerified = false;
+                        showStatus("✗ Account inactive or not found");
+                    }
+                } else {
+                    recipientVerified = false;
+                    showStatus("✗ No account found for this IBAN");
+                }
+            }).addOnFailureListener(e -> {
+                if (!cleanInput.equals(lastLookedUpValue)) return;
+                recipientVerified = false;
+                showStatus("✗ Lookup failed — check your connection");
+                Log.e(TAG, "IBAN lookup failed", e);
+            });
+
+        } else {
+            // ── Phone number lookup ─────────────────────────────
+
+            // Wait for them to type at least 11 digits (e.g. 03001234567)
+            if (cleanInput.length() < 11) {
+                showStatus("Typing Phone Number...");
+                recipientVerified = false;
+                return; // Wait for them to finish typing!
             }
 
             repo.findUserByPhone(cleanInput).addOnSuccessListener(userSnaps -> {
-                try {
-                    if (!userSnaps.isEmpty()) {
-                        String docId = userSnaps.getDocuments().get(0).getId();
-                        User fetchedUser = userSnaps.getDocuments().get(0).toObject(User.class);
+                if (!cleanInput.equals(lastLookedUpValue)) return;
 
-                        String realUid = (fetchedUser != null && fetchedUser.getUid() != null && !fetchedUser.getUid().isEmpty())
-                                ? fetchedUser.getUid() : docId;
+                if (!userSnaps.isEmpty()) {
+                    String uid = userSnaps.getDocuments().get(0).getId();
+                    repo.getAccountQuery(uid).get().addOnSuccessListener(accSnaps -> {
+                        if (!cleanInput.equals(lastLookedUpValue)) return;
 
-                        repo.getAccountQuery(realUid).get().addOnSuccessListener(accSnaps -> {
-                            try {
-                                if (!accSnaps.isEmpty()) {
-                                    Account account = accSnaps.getDocuments().get(0).toObject(Account.class);
-                                    if (account != null) {
-                                        selectedRecipientUid = realUid;
-                                        selectedRecipientAccountId = accSnaps.getDocuments().get(0).getId();
-                                        nameEdit.setText(account.getAccountTitle());
-                                        currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
-                                    }
-                                } else {
-                                    clearVerification(nameEdit, "Error: User has no World Bank account.");
-                                }
-                            } catch (Exception e) {
-                                clearVerification(nameEdit, "Error: Account data mismatch");
+                        if (!accSnaps.isEmpty()) {
+                            Account account = accSnaps.getDocuments().get(0).toObject(Account.class);
+                            if (account != null && account.isActive()) {
+                                selectedRecipientUid       = uid;
+                                selectedRecipientAccountId = accSnaps.getDocuments().get(0).getId();
+                                recipientVerified          = true;
+
+                                isProgrammaticSet = true;
+                                if (nameEdit != null) nameEdit.setText(account.getAccountTitle());
+                                if (currentDialogBankSpinner != null)
+                                    currentDialogBankSpinner.setText(Contact.BANK_WORLDBANK, false);
+                                isProgrammaticSet = false;
+
+                                showStatus("✓ Account verified: " + account.getAccountTitle());
+                            } else {
+                                recipientVerified = false;
+                                showStatus("✗ Account inactive");
                             }
-                        }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Fetching account failed"));
-                    } else {
-                        clearVerification(nameEdit, "Error: Unregistered phone number");
-                    }
-                } catch (Exception e) {
-                    clearVerification(nameEdit, "Error: Verification failed");
+                        } else {
+                            recipientVerified = false;
+                            showStatus("✗ No World Bank account linked to this number");
+                        }
+                    }).addOnFailureListener(e -> {
+                        if (!cleanInput.equals(lastLookedUpValue)) return;
+                        recipientVerified = false;
+                        showStatus("✗ Lookup failed");
+                        Log.e(TAG, "Account query failed", e);
+                    });
+                } else {
+                    recipientVerified = false;
+                    showStatus("✗ No user found with this phone number");
                 }
-            }).addOnFailureListener(e -> clearVerification(nameEdit, "Error: Network issue"));
+            }).addOnFailureListener(e -> {
+                if (!cleanInput.equals(lastLookedUpValue)) return;
+                recipientVerified = false;
+                showStatus("✗ Lookup failed — check your connection");
+                Log.e(TAG, "Phone lookup failed", e);
+            });
+        }
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────
+
+    /** Resets all verification-related state. Call when dialog opens. */
+    private void resetVerificationState() {
+        recipientVerified      = false;
+        selectedRecipientUid       = "";
+        selectedRecipientAccountId = "";
+        lastLookedUpValue          = "";
+        if (pendingLookup != null) {
+            lookupHandler.removeCallbacks(pendingLookup);
+            pendingLookup = null;
+        }
+    }
+
+    /** Shows a status message in the dialog (null clears it). Null-safe. */
+    private void showStatus(String message) {
+        if (currentDialogStatus == null) return;
+        if (message == null || message.isEmpty()) {
+            currentDialogStatus.setVisibility(View.GONE);
+        } else {
+            currentDialogStatus.setVisibility(View.VISIBLE);
+            currentDialogStatus.setText(message);
         }
     }
 
     private void setupDialogBankDropdown(AutoCompleteTextView spinner) {
         String[] banks = {
-                Contact.BANK_WORLDBANK, Contact.BANK_HBL, Contact.BANK_MEEZAN, 
+                Contact.BANK_WORLDBANK, Contact.BANK_HBL, Contact.BANK_MEEZAN,
                 Contact.BANK_UBL, Contact.BANK_MCB, Contact.BANK_JAZZCASH, Contact.BANK_EASYPAISA
         };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_dropdown_black, banks);
@@ -326,59 +516,68 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private void checkContactsPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
             pickContact();
         }
     }
 
     private void pickContact() {
-        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
         startActivityForResult(intent, PICK_CONTACT_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == PICK_CONTACT_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri contactUri = data.getData();
-            String[] projection = new String[]{
+            String[] projection = {
                     ContactsContract.CommonDataKinds.Phone.NUMBER,
                     ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
             };
-
             try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
-
-                    // 1. Get the column indexes safely
-                    int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                    int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-
-                    // 2. Check if the indexes are valid (>= 0) before getting the strings
-                    if (numberIndex >= 0 && nameIndex >= 0) {
-                        String number = cursor.getString(numberIndex);
-                        String name = cursor.getString(nameIndex);
-
-                        String clean = number.replaceAll("[^0-9]", "");
+                    int numIdx  = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    int nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                    if (numIdx >= 0 && nameIdx >= 0) {
+                        String number = cursor.getString(numIdx);
+                        String name   = cursor.getString(nameIdx);
+                        String clean  = number.replaceAll("[^0-9]", "");
                         if (clean.startsWith("92")) clean = "0" + clean.substring(2);
 
-                        if (currentDialogAccEdit != null) currentDialogAccEdit.setText(clean);
+                        isProgrammaticSet = true;
+                        if (currentDialogAccEdit  != null) currentDialogAccEdit.setText(clean);
                         if (currentDialogNameEdit != null) currentDialogNameEdit.setText(name);
+                        isProgrammaticSet = false;
+
+                        // Trigger lookup manually (watcher was suppressed)
+                        if (clean.length() >= 10) {
+                            showStatus("Verifying…");
+                            performRecipientLookup(clean, currentDialogNameEdit);
+                        }
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Contact pick failed", e);
             }
         }
     }
+
     private void loadContactsIntoDialog(RecyclerView rv) {
-        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
+        String uid = auth.getCurrentUser() != null
+                ? auth.getCurrentUser().getUid()
+                : sessionManager.getUserId();
         if (uid == null || uid.isEmpty() || rv == null) return;
+
         List<Contact> contacts = new ArrayList<>();
         QuickPayAdapter adapter = new QuickPayAdapter(contacts, this);
         rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rv.setAdapter(adapter);
+
         repo.getContactsQuery(uid).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null) return;
             contacts.clear();
@@ -393,86 +592,68 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     @Override
     public void onContactClick(Contact contact) {
-        selectedRecipientUid = "";
-        selectedRecipientAccountId = "";
-
-        if (currentDialogBankSpinner != null) {
-            currentDialogBankSpinner.setText(contact.getBankName(), false);
-        }
-
+        isProgrammaticSet = true;
         if (currentDialogAccEdit != null) {
             currentDialogAccEdit.setText(contact.getAccountNumber());
             currentDialogAccEdit.setSelection(currentDialogAccEdit.getText().length());
         }
+        if (currentDialogNameEdit  != null) currentDialogNameEdit.setText(contact.getName());
+        if (currentDialogBankSpinner != null)
+            currentDialogBankSpinner.setText(contact.getBankName(), false);
+        isProgrammaticSet = false;
 
-        if (currentDialogNameEdit != null) {
-            // FIX: Only verify if it's World Bank!
-            if (Contact.BANK_WORLDBANK.equals(contact.getBankName())) {
-                currentDialogNameEdit.setText("Verifying account...");
-            } else {
-                // If it's JazzCash/EasyPaisa, just put their name in the box. No internet needed!
-                currentDialogNameEdit.setText(contact.getName());
-            }
-        }
+        // Always re-verify even for saved contacts — account may have become inactive
+        showStatus("Verifying…");
+        performRecipientLookup(contact.getAccountNumber(), currentDialogNameEdit);
     }
-    private void clearVerification(EditText nameEdit, String errorMsg) {
-        selectedRecipientUid = "";
-        selectedRecipientAccountId = "";
-        if (nameEdit != null) {
-            nameEdit.setText("");
-            nameEdit.setHint(errorMsg);
-        }
-        // Force a pop-up to show the EXACT error reason!
-        Toast.makeText(this, "SECRET ERROR: " + errorMsg, Toast.LENGTH_LONG).show();
-    }
-    public void setRecipient(String name, String account, String bank, String uid, String accId, String contactId) {
-        selectedRecipientName = name;
-        selectedRecipientAccount = account;
-        selectedRecipientBank = bank;
-        selectedRecipientUid = uid != null ? uid : "";
-        selectedRecipientAccountId = accId != null ? accId : "";
-        
-        tvRecipientName.setText(name);
-        tvRecipientAccount.setText(account);
 
-        if (Contact.BANK_WORLDBANK.equals(bank)) selectedTransferType = Transaction.TRANSFER_INTERNAL;
-        else if (Contact.BANK_JAZZCASH.equals(bank)) selectedTransferType = Transaction.TRANSFER_JAZZCASH;
-        else if (Contact.BANK_EASYPAISA.equals(bank)) selectedTransferType = Transaction.TRANSFER_EASYPAISA;
-        else selectedTransferType = Transaction.TRANSFER_IBFT;
+    public void setRecipient(String name, String account, String bank,
+                             String uid, String accId, String contactId) {
+        selectedRecipientName      = name      != null ? name    : "";
+        selectedRecipientAccount   = account   != null ? account : "";
+        selectedRecipientBank      = bank      != null ? bank    : "";
+        selectedRecipientUid       = uid       != null ? uid     : "";
+        selectedRecipientAccountId = accId     != null ? accId   : "";
+
+        tvRecipientName.setText(selectedRecipientName);
+        tvRecipientAccount.setText(selectedRecipientAccount);
+
+        if      (Contact.BANK_WORLDBANK.equals(bank))   selectedTransferType = Transaction.TRANSFER_INTERNAL;
+        else if (Contact.BANK_JAZZCASH.equals(bank))    selectedTransferType = Transaction.TRANSFER_JAZZCASH;
+        else if (Contact.BANK_EASYPAISA.equals(bank))   selectedTransferType = Transaction.TRANSFER_EASYPAISA;
+        else                                             selectedTransferType = Transaction.TRANSFER_IBFT;
     }
 
     private void goToReview() {
-        if (selectedRecipientAccount.isEmpty()) { Toast.makeText(this, "Add recipient", Toast.LENGTH_SHORT).show(); return; }
-        
-        // Final Foolproof Check for Internal Transfers
-        if (selectedTransferType.equals(Transaction.TRANSFER_INTERNAL) && selectedRecipientAccountId.isEmpty()) {
-            Toast.makeText(this, "Recipient account not verified. Please check the IBAN/Number.", Toast.LENGTH_LONG).show();
+        if (selectedRecipientAccount.isEmpty()) {
+            Toast.makeText(this, "Please add a recipient first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String amtStr = etAmount.getText().toString().trim();
+        if (amtStr.isEmpty()) {
+            etAmount.setError("Enter amount");
             return;
         }
 
-        String amtStr = etAmount.getText().toString().trim();
-        if (amtStr.isEmpty()) { etAmount.setError("Enter amount"); return; }
-
         double amount = Double.parseDouble(amtStr.replaceAll("[^0-9.]", ""));
+        if (amount <= 0) {
+            etAmount.setError("Amount must be greater than 0");
+            return;
+        }
+
         double fee = TransactionRepository.getAdminFee(selectedTransferType);
 
         Intent intent = new Intent(this, ReviewPaymentActivity.class);
-        intent.putExtra("recipientName", selectedRecipientName);
-        intent.putExtra("recipientAccount", selectedRecipientAccount);
-        intent.putExtra("recipientBank", selectedRecipientBank);
-        intent.putExtra("recipientUid", selectedRecipientUid);
+        intent.putExtra("recipientName",      selectedRecipientName);
+        intent.putExtra("recipientAccount",   selectedRecipientAccount);
+        intent.putExtra("recipientBank",      selectedRecipientBank);
+        intent.putExtra("recipientUid",       selectedRecipientUid);
         intent.putExtra("recipientAccountId", selectedRecipientAccountId);
-        intent.putExtra("amount", amount);
-        intent.putExtra("fee", fee);
-        intent.putExtra("transferType", selectedTransferType);
-        intent.putExtra("cardId", cardId);
-        intent.putExtra("accountId", accountId);
+        intent.putExtra("amount",             amount);
+        intent.putExtra("fee",                fee);
+        intent.putExtra("transferType",       selectedTransferType);
+        intent.putExtra("cardId",             cardId);
+        intent.putExtra("accountId",          accountId);
         startActivity(intent);
-    }
-
-    private String getCurrentUserId() {
-        if (SessionManager.DEV_BYPASS) return "dev_user_001";
-        if (auth.getCurrentUser() != null) return auth.getCurrentUser().getUid();
-        return "";
     }
 }

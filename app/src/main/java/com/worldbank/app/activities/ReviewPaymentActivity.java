@@ -2,6 +2,7 @@ package com.worldbank.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -90,7 +91,14 @@ public class ReviewPaymentActivity extends AppCompatActivity {
     private void executeRealTransfer() {
         btnSendPaymentFinal.setEnabled(false);
         btnSendPaymentFinal.setText("Processing...");
-
+// 🔴 --- DEBUG LOG --- 🔴
+        Log.d("TRANSFER_DEBUG", "--- STARTING TRANSFER ---");
+        Log.d("TRANSFER_DEBUG", "Sender UID: " + sessionManager.getUserId());
+        Log.d("TRANSFER_DEBUG", "Sender Account ID: [" + accountId + "]");
+        Log.d("TRANSFER_DEBUG", "Recipient UID: [" + recipientUid + "]");
+        Log.d("TRANSFER_DEBUG", "Recipient Account ID: [" + recipientAccountId + "]");
+        Log.d("TRANSFER_DEBUG", "Amount: " + amount);
+        // 🔴 ------------------ 🔴
         // FIXED: Using all 12 arguments required by the stable TransactionRepository
         repo.sendMoney(
                 sessionManager.getUserId(),

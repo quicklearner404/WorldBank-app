@@ -48,7 +48,7 @@ public class Account {
     public String getAccountType()   { return accountType; }
     public double getBalance()       { return balance; }
     public String getCurrency()      { return currency; }
-    public boolean isActive()        { return isActive; }
+    //public boolean isActive()        { return isActive; }
 
     // ── Setters ──────────────────────────────────────────────────
     public void setAccountId(String accountId)     { this.accountId = accountId; }
@@ -59,8 +59,20 @@ public class Account {
     public void setAccountType(String t)           { this.accountType = t; }
     public void setBalance(double balance)         { this.balance = balance; }
     public void setCurrency(String currency)       { this.currency = currency; }
-    public void setActive(boolean active)          { isActive = active; }
+    //public void setActive(boolean active)          { isActive = active; }
+// Replace your old getter with this:
+// Notice the names are back to isActive and setActive,
+    // but we kept the @PropertyName tags to force Firestore to behave!
 
+    @com.google.firebase.firestore.PropertyName("isActive")
+    public boolean isActive() {
+        return isActive;
+    }
+
+    @com.google.firebase.firestore.PropertyName("isActive")
+    public void setActive(boolean active) {
+        isActive = active;
+    }
     /**
      * Returns a masked version of the account number for display.
      * "PK36WBNK0000001123456702" → "PK36 **** **** 6702"

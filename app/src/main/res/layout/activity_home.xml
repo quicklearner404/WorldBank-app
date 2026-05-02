@@ -23,7 +23,7 @@
             android:orientation="vertical"
             android:paddingTop="16dp">
 
-            <!-- ── TOP BAR (Cleaned: No Search/Bell) ── -->
+            <!-- ── TOP BAR (Clean: Removed Search/Bell) ── -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,7 +51,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvTotalBalanceLabel"
                     tools:text="Rs. 125,000" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- ── LIVE CARD CAROUSEL ── -->
@@ -90,6 +89,7 @@
                 android:gravity="center"
                 android:weightSum="4">
 
+                <!-- Transfer -->
                 <LinearLayout android:id="@+id/btnTransfer" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -100,6 +100,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Transfer" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
+                <!-- Payments -->
                 <LinearLayout android:id="@+id/btnPayments" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -110,6 +111,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payments" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
+                <!-- Top Up -->
                 <LinearLayout android:id="@+id/btnTopUp" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -120,6 +122,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Top Up" android:textColor="@color/black" android:textSize="12sp" android:textStyle="bold" android:layout_marginTop="8dp" />
                 </LinearLayout>
 
+                <!-- Add Card -->
                 <LinearLayout android:id="@+id/btnAddCard" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true">
                     <androidx.cardview.widget.CardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="16dp" app:cardElevation="0dp">
                         <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
