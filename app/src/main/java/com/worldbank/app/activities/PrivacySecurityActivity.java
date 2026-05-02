@@ -1,8 +1,12 @@
 package com.worldbank.app.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.worldbank.app.R;
 
 public class PrivacySecurityActivity extends AppCompatActivity {
@@ -15,6 +19,16 @@ public class PrivacySecurityActivity extends AppCompatActivity {
         ImageButton ibBack = findViewById(R.id.ibBack);
         if (ibBack != null) {
             ibBack.setOnClickListener(v -> finish());
+        }
+
+        LinearLayout llChangePassword = findViewById(R.id.llChangePassword);
+        if (llChangePassword != null) {
+            llChangePassword.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ForgotPasswordActivity.class);
+                // tells ForgotPasswordActivity it was opened from settings
+                intent.putExtra("mode", "change");
+                startActivity(intent);
+            });
         }
     }
 }

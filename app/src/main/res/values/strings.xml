@@ -120,7 +120,7 @@
     <string name="label_history_activities">Transaction History</string>
     <string name="label_history_sub">View and search your activities</string>
     <string name="label_privacy_security">Privacy &amp; Security</string>
-    <string name="label_privacy_sub">Password, Biometric, Security</string>
+    <string name="label_privacy_sub">Password Reset</string>
     <string name="label_about_us">About Us</string>
     <string name="label_about_sub">Learn more about our mission</string>
 
