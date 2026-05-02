@@ -17,6 +17,7 @@
     <string name="hint_full_name">Enter your full name</string>
     <string name="hint_cnic">35201-1234567-1</string>
     <string name="hint_phone">+92 300 1234567</string>
+    <string name="label_location">Location</string>
 
     <!-- Sign Up Validation Errors -->
     <string name="error_fields_empty">All fields are required</string>
@@ -49,8 +50,8 @@
     <string name="label_email">Email</string>
     <string name="label_password">Password</string>
     <string name="label_confirm_password">Confirm password</string>
-    <string name="hint_email">Text your email</string>
-    <string name="hint_password">Text your password</string>
+    <string name="hint_email">Enter your email</string>
+    <string name="hint_password">Enter your password</string>
     <string name="label_remember_me">Remember me</string>
     <string name="link_forgot_password">Forgot password?</string>
     <string name="dont_have_account">Don\'t have an account?</string>
@@ -120,7 +121,7 @@
     <string name="label_history_activities">Transaction History</string>
     <string name="label_history_sub">View and search your activities</string>
     <string name="label_privacy_security">Privacy &amp; Security</string>
-    <string name="label_privacy_sub">Password, Biometric, Security</string>
+    <string name="label_privacy_sub">Password Reset</string>
     <string name="label_about_us">About Us</string>
     <string name="label_about_sub">Learn more about our mission</string>
 
@@ -147,4 +148,18 @@
     <string name="cd_nfc_icon">Contactless payment</string>
     <string name="cd_visa_logo">Visa card</string>
     <string name="label_reference">Reference Number</string>
+    <string name="transaction_receipt">Transaction Receipt</string>
+    <string name="label_success">Success!</string>
+    <string name="label_transfer_completed_successfully">Transfer completed successfully</string>
+    <string name="label_amount_paid">Amount Paid</string>
+    <string name="label_share_receipt">Share Receipt</string>
+    <string name="label_done">Done</string>
+    <string name="label_brand_mantra">Banking made simple</string>
+    <string name="label_edit_profile">Edit Profile</string>
+    <string name="label_search_transactions">Search transactions...</string>
+    <string name="label_top_up_balance">Top Up Balance</string>
+    <string name="label_select_amount_rs">Select Amount (Rs.)</string>
+    <string name="label_other_amount_pkr">Other Amount (PKR)</string>
+    <string name="label_payment_method">Payment Method</string>
+    <string name="label_top_up_now">Top Up Now</string>
 </resources>

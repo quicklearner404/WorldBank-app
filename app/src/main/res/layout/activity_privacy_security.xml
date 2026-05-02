@@ -2,7 +2,6 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray_bg">
@@ -12,7 +11,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- ── TOP BAR ── -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -65,8 +63,8 @@
                         android:orientation="vertical"
                         android:paddingVertical="8dp">
 
-                        <!-- Change Password -->
                         <LinearLayout
+                            android:id="@+id/llChangePassword"
                             android:layout_width="match_parent"
                             android:layout_height="64dp"
                             android:orientation="horizontal"
@@ -75,6 +73,7 @@
                             android:background="?attr/selectableItemBackground"
                             android:clickable="true"
                             android:focusable="true">
+
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -83,56 +82,12 @@
                                 android:textColor="@color/black"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
+
                             <ImageView
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:src="@drawable/ic_chevron_right"
                                 android:tint="@color/gray_divider" />
-                        </LinearLayout>
-
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_divider" android:layout_marginHorizontal="16dp" />
-
-                        <!-- Biometric -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="64dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp">
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Use Fingerprint / Face ID"
-                                android:textColor="@color/black"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-                            <androidx.appcompat.widget.SwitchCompat
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true" />
-                        </LinearLayout>
-
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_divider" android:layout_marginHorizontal="16dp" />
-
-                        <!-- Two Factor -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="64dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp">
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Two-Factor Authentication"
-                                android:textColor="@color/black"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-                            <androidx.appcompat.widget.SwitchCompat
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
                         </LinearLayout>
 
                     </LinearLayout>

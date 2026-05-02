@@ -3,6 +3,7 @@ package com.worldbank.app.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,25 +21,19 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
 
 public class LoginActivity extends AppCompatActivity {
 
-    // firebase auth instance used for sign in
     FirebaseAuth auth;
-
-    // input fields for email and password
     TextInputEditText etEmail, etPassword;
-
-    // main login button
     Button btnLogin;
-
-    // navigation links at the bottom
+    CheckBox cbRememberMe;
     TextView tvForgotPassword, tvRegister;
-
-    // toolbar with back navigation
     Toolbar toolbar;
+    SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,54 +49,68 @@ public class LoginActivity extends AppCompatActivity {
 
         init();
 
-        // set the register link text here since xml left it blank
         tvRegister.setText("Don't have an account? Register");
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Login");
+        }
 
-        // handle back press using modern dispatcher
+        // prefill email if user had remember me on during last login
+        String rememberedEmail = session.getRememberedEmail();
+        if (!rememberedEmail.isEmpty()) {
+            etEmail.setText(rememberedEmail);
+            cbRememberMe.setChecked(true);
+        }
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
-            public void handleOnBackPressed() {
-                finish();
-            }
+            public void handleOnBackPressed() { goToWelcome(); }
         });
 
-        // toolbar back arrow triggers the dispatcher
-        toolbar.setNavigationOnClickListener(v ->
-                getOnBackPressedDispatcher().onBackPressed()
-        );
+        toolbar.setNavigationOnClickListener(v -> goToWelcome());
 
-        btnLogin.setOnClickListener((v) -> {
+        btnLogin.setOnClickListener(v -> {
             String email    = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            // validate both fields before calling firebase
-            if (email.isEmpty()) {
-                etEmail.setError("Email is required");
-                return;
-            }
-            if (password.isEmpty()) {
-                etPassword.setError("Password is required");
-                return;
-            }
+            if (email.isEmpty()) { etEmail.setError("Email is required"); return; }
+            if (password.isEmpty()) { etPassword.setError("Password is required"); return; }
 
             auth.signInWithEmailAndPassword(email, password)
                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
-                            // save session so splash skips login on next open
-                            String uid       = authResult.getUser().getUid();
-                            String userEmail = authResult.getUser().getEmail();
-                            String userName  = authResult.getUser().getDisplayName() != null
-                                    ? authResult.getUser().getDisplayName()
-                                    : "";
+                            FirebaseUser user = authResult.getUser();
 
-                            SessionManager session = new SessionManager(LoginActivity.this);
-                            session.saveSession(uid, userEmail, userName, true);
+                            // block unverified users from entering the app
+                            if (!user.isEmailVerified()) {
+                                auth.signOut();
+                                user.sendEmailVerification();
+                                Toast.makeText(LoginActivity.this,
+                                        "Please verify your email first. A new link has been sent.",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
 
-                            Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            String uid       = user.getUid();
+                            String userEmail = user.getEmail();
+                            String userName  = user.getDisplayName() != null
+                                    ? user.getDisplayName() : "";
+
+                            // save or clear remembered email based on checkbox
+                            if (cbRememberMe.isChecked()) {
+                                session.saveRememberedEmail(userEmail);
+                            } else {
+                                session.clearRememberedEmail();
+                            }
+
+                            // always save active session so home screen works
+                            session.saveSession(uid, userEmail, userName, cbRememberMe.isChecked());
+
+                            Toast.makeText(LoginActivity.this, "Login successful",
+                                    Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                             finish();
                         }
@@ -109,30 +118,33 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(LoginActivity.this, e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     });
         });
 
-        // navigate to forgot password screen
-        tvForgotPassword.setOnClickListener((v) -> {
-            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
-        });
+        tvForgotPassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ForgotPasswordActivity.class)));
 
-        // navigate to sign up screen
-        tvRegister.setOnClickListener((v) -> {
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        tvRegister.setOnClickListener(v ->
+                startActivity(new Intent(this, SignUpActivity.class)));
     }
 
-    // finds all views and initialises firebase
+    private void goToWelcome() {
+        startActivity(new Intent(this, WelcomeActivity.class));
+        finish();
+    }
+
     void init() {
         etEmail          = findViewById(R.id.et_email);
         etPassword       = findViewById(R.id.et_password);
         btnLogin         = findViewById(R.id.btn_login);
+        cbRememberMe     = findViewById(R.id.cb_remember_me);
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
         tvRegister       = findViewById(R.id.tv_register);
         toolbar          = findViewById(R.id.toolbar);
         auth             = FirebaseAuth.getInstance();
+        session          = new SessionManager(this);
     }
 }

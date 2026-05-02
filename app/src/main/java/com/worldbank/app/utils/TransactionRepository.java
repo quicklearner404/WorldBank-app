@@ -248,4 +248,5 @@ public class TransactionRepository {
             default: return 25.0;
         }
     }
+
 }

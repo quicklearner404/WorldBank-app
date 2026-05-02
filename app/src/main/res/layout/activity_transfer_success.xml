@@ -24,7 +24,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_left"
-            android:tint="@color/black"
+            app:tint="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Transaction Receipt"
+            android:text="@string/transaction_receipt"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -68,7 +68,7 @@
                     android:layout_height="36dp"
                     android:layout_gravity="center"
                     android:src="@android:drawable/checkbox_on_background"
-                    android:tint="@color/purple_primary" />
+                    app:tint="@color/purple_primary" />
             </FrameLayout>
 
             <TextView
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:text="Success!"
+                android:text="@string/label_success"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
-                android:text="Transfer completed successfully"
+                android:text="@string/label_transfer_completed_successfully"
                 android:textColor="@color/gray_text"
                 android:textSize="14sp" />
 
@@ -108,7 +108,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Amount Paid"
+                        android:text="@string/label_amount_paid"
                         android:textColor="@color/gray_text"
                         android:textSize="12sp"
                         android:gravity="center" />
@@ -173,7 +173,7 @@
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_white_button"
-            android:text="Share Receipt"
+            android:text="@string/label_share_receipt"
             android:textAllCaps="false"
             android:textColor="@color/black" />
 
@@ -184,7 +184,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_purple_button"
-            android:text="Done"
+            android:text="@string/label_done"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textStyle="bold" />

@@ -28,7 +28,7 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                android:tint="@color/black"
+                app:tint="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -37,7 +37,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Account"
+                android:text="@string/label_your_account"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -78,7 +78,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Full Name"
+                            android:text="@string/label_full_name"
                             android:textColor="@color/gray_text"
                             android:textSize="12sp" />
                         <TextView
@@ -101,7 +101,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Email Address"
+                            android:text="@string/label_email"
                             android:textColor="@color/gray_text"
                             android:textSize="12sp" />
                         <TextView
@@ -124,7 +124,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Phone Number"
+                            android:text="@string/label_phone"
                             android:textColor="@color/gray_text"
                             android:textSize="12sp" />
                         <TextView
@@ -147,7 +147,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Location"
+                            android:text="@string/label_location"
                             android:textColor="@color/gray_text"
                             android:textSize="12sp" />
                         <TextView
@@ -170,7 +170,7 @@
                     android:layout_height="@dimen/button_height"
                     android:layout_marginTop="32dp"
                     android:background="@drawable/bg_purple_button"
-                    android:text="Edit Profile"
+                    android:text="@string/label_edit_profile"
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:textAllCaps="false" />
