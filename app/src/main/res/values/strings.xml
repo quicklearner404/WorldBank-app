@@ -147,4 +147,18 @@
     <string name="cd_nfc_icon">Contactless payment</string>
     <string name="cd_visa_logo">Visa card</string>
     <string name="label_reference">Reference Number</string>
+    <string name="transaction_receipt">Transaction Receipt</string>
+    <string name="label_success">Success!</string>
+    <string name="label_transfer_completed_successfully">Transfer completed successfully</string>
+    <string name="label_amount_paid">Amount Paid</string>
+    <string name="label_share_receipt">Share Receipt</string>
+    <string name="label_done">Done</string>
+    <string name="label_brand_mantra">Banking made simple</string>
+    <string name="label_edit_profile">Edit Profile</string>
+    <string name="label_search_transactions">Search transactions...</string>
+    <string name="label_top_up_balance">Top Up Balance</string>
+    <string name="label_select_amount_rs">Select Amount (Rs.)</string>
+    <string name="label_other_amount_pkr">Other Amount (PKR)</string>
+    <string name="label_payment_method">Payment Method</string>
+    <string name="label_top_up_now">Top Up Now</string>
 </resources>
