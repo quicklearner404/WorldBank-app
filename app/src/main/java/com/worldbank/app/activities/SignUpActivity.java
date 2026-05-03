@@ -174,13 +174,13 @@ public class SignUpActivity extends AppCompatActivity {
             btnSignup.setEnabled(false);
             btnSignup.setText("Checking...");
 
-            // check cnic uniqueness before creating the firebase account
+            // check cnic uniqueness first
             db.collection("users")
                     .whereEqualTo("cnic", cnic)
                     .limit(1)
                     .get()
-                    .addOnSuccessListener(snapshot -> {
-                        if (!snapshot.isEmpty()) {
+                    .addOnSuccessListener(cnicSnapshot -> {
+                        if (!cnicSnapshot.isEmpty()) {
                             btnSignup.setEnabled(true);
                             btnSignup.setText(getString(R.string.btn_sign_up));
                             etCnic.setError("An account with this CNIC already exists");
@@ -191,22 +191,47 @@ public class SignUpActivity extends AppCompatActivity {
                             return;
                         }
 
-                        btnSignup.setText("Creating account...");
+                        // cnic is unique, now check phone uniqueness
+                        db.collection("users")
+                                .whereEqualTo("phone", phone)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener(phoneSnapshot -> {
+                                    if (!phoneSnapshot.isEmpty()) {
+                                        btnSignup.setEnabled(true);
+                                        btnSignup.setText(getString(R.string.btn_sign_up));
+                                        etPhone.setError("An account with this phone already exists");
+                                        etPhone.requestFocus();
+                                        Toast.makeText(this,
+                                                "This phone number is already registered to another account.",
+                                                Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
 
-                        auth.createUserWithEmailAndPassword(email, pass)
-                                .addOnSuccessListener(authResult -> {
-                                    // send verification email so user confirms they own this email
-                                    authResult.getUser().sendEmailVerification()
-                                            .addOnCompleteListener(task -> {
-                                                String uid = authResult.getUser().getUid();
-                                                createNewUserData(uid, name, cnic, phone, email);
+                                    // both cnic and phone are unique, create the account
+                                    btnSignup.setText("Creating account...");
+
+                                    auth.createUserWithEmailAndPassword(email, pass)
+                                            .addOnSuccessListener(authResult -> {
+                                                authResult.getUser().sendEmailVerification()
+                                                        .addOnCompleteListener(task -> {
+                                                            String uid = authResult.getUser().getUid();
+                                                            createNewUserData(uid, name, cnic, phone, email);
+                                                        });
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                btnSignup.setEnabled(true);
+                                                btnSignup.setText(getString(R.string.btn_sign_up));
+                                                Toast.makeText(this, e.getMessage(),
+                                                        Toast.LENGTH_SHORT).show();
                                             });
                                 })
                                 .addOnFailureListener(e -> {
                                     btnSignup.setEnabled(true);
                                     btnSignup.setText(getString(R.string.btn_sign_up));
-                                    Toast.makeText(this, e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this,
+                                            "Could not verify phone: " + e.getMessage(),
+                                            Toast.LENGTH_LONG).show();
                                 });
                     })
                     .addOnFailureListener(e -> {
@@ -255,7 +280,6 @@ public class SignUpActivity extends AppCompatActivity {
                                 + ": " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    // shows a dialog explaining email verification instead of going straight to login
     private void showVerificationDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Verify Your Email")

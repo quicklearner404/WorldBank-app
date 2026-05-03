@@ -15,9 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WorldBank">
         <!--
-         ════════════════════════════════════════════
              AUTH FLOW  — Dev 1 owns these activities
-             ════════════════════════════════════════════
         -->
         <!-- LAUNCHER -->
         <activity
@@ -58,9 +56,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <!--
- ════════════════════════════════════════════
-             MAIN APP FLOW — Dev 2 owns these activities
-             ════════════════════════════════════════════
+             MAIN APP FLOW — Dev 2 owns these activities]
         -->
         <activity
             android:name=".activities.HomeActivity"
