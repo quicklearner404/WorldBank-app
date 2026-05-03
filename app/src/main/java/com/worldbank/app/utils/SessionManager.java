@@ -3,18 +3,7 @@ package com.worldbank.app.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/**
- * SessionManager.java
- * ---------------------
- * Manages user login session using SharedPreferences.
- *
- * DEV BYPASS:
- *   Set DEV_BYPASS = true so Dev 2 can work on main app screens
- *   without needing a real Firebase login. When true, SplashActivity
- *   will skip directly to HomeActivity with fake user data.
- *
- *   ⚠️  Set DEV_BYPASS = false before final build / production release.
- */
+
 public class SessionManager {
 
     // ─── DEV BYPASS FLAG ────────────────────────────────────────────────
