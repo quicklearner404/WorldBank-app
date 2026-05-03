@@ -2,6 +2,8 @@ package com.worldbank.app.activities;
 
 import android.os.Bundle;
 import android.widget.ImageButton;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,4 +66,5 @@ public class PaymentSettingsActivity extends AppCompatActivity implements CardAd
     public void onCardClick(Card card, int position) {
         // Option to remove or set as primary
     }
+
 }

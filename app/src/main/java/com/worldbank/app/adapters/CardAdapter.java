@@ -2,7 +2,6 @@ package com.worldbank.app.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,12 @@ import com.worldbank.app.models.Card;
 
 import java.util.List;
 
+/**
+ * CardAdapter
+ * ───────────
+ * Binds real Firestore card data to the item_card_small layout.
+ * Supports a single-click selection and navigation model.
+ */
 public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_CARD = 1;
@@ -25,8 +30,11 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context context;
     private final List<Card> cards;
-    private int selectedPosition = 0; // Default first card selected
+    private int selectedPosition = 0;
     private OnCardClickListener listener;
+
+    public void setSelectedPosition(int currentSelectedPosition) {
+    }
 
     public interface OnCardClickListener {
         void onCardClick(Card card, int position);
@@ -60,18 +68,24 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (holder instanceof CardViewHolder) {
             Card card = cards.get(position);
             CardViewHolder cardHolder = (CardViewHolder) holder;
-            
-            cardHolder.tvSmallCardName.setText(card.getHolderName());
+
+            boolean isInternal = card.getAccountId() != null && !card.getAccountId().isEmpty();
+
+            cardHolder.tvSmallCardName.setText(card.getHolderName().toUpperCase());
             cardHolder.tvSmallCardNumber.setText(card.getMaskedNumber());
-            cardHolder.tvExpiry.setText("Exp " + card.getExpiry());
-            
-            if ("VISA".equalsIgnoreCase(card.getCardType())) {
-                cardHolder.ivSmallCardLogo.setImageResource(R.drawable.ic_payments);
+
+            // Set Label: Primary for internal, Expiry for external
+            if (isInternal) {
+                cardHolder.tvExpiry.setText("Primary Account");
             } else {
-                cardHolder.ivSmallCardLogo.setImageResource(R.drawable.ic_mastercard);
+                cardHolder.tvExpiry.setText("Exp " + card.getExpiry());
             }
 
-            // Highlighting logic for selection
+            cardHolder.ivSmallCardLogo.setImageResource(
+                    "VISA".equalsIgnoreCase(card.getCardType()) ? R.drawable.ic_payments : R.drawable.ic_mastercard
+            );
+
+            // Selection Styling
             if (selectedPosition == position) {
                 cardHolder.itemView.setAlpha(1.0f);
                 cardHolder.itemView.setScaleX(1.02f);
@@ -82,12 +96,16 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 cardHolder.itemView.setScaleY(1.0f);
             }
 
+            // Simple single click for selection and navigation
             cardHolder.itemView.setOnClickListener(v -> {
                 int oldPos = selectedPosition;
                 selectedPosition = holder.getAdapterPosition();
                 notifyItemChanged(oldPos);
                 notifyItemChanged(selectedPosition);
-                if (listener != null) listener.onCardClick(card, selectedPosition);
+
+                if (listener != null) {
+                    listener.onCardClick(card, selectedPosition);
+                }
             });
 
         } else if (holder instanceof PlusViewHolder) {

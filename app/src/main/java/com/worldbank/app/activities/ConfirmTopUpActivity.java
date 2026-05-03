@@ -27,6 +27,7 @@ public class ConfirmTopUpActivity extends AppCompatActivity {
     private String accountId;
     private double amount;
     private String methodName;
+    private String cardId; // ✅ Added this!
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class ConfirmTopUpActivity extends AppCompatActivity {
         accountId = intent.getStringExtra("accountId");
         amount = intent.getDoubleExtra("amount", 0.0);
         methodName = intent.getStringExtra("methodName");
+        cardId = getIntent().getStringExtra("cardId");
     }
 
     private void bindViews() {
@@ -75,8 +77,9 @@ public class ConfirmTopUpActivity extends AppCompatActivity {
             btnConfirmTopUp.setText("Processing...");
 
             String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
-            
-            repo.topUp(uid, accountId, amount)
+
+            // Change this line:
+            repo.topUp(uid, accountId, cardId, amount)
                 .addOnSuccessListener(ref -> {
                     Intent intent = new Intent(this, TransferSuccessActivity.class);
                     intent.putExtra("amount", amount);

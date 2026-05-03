@@ -115,15 +115,25 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
             if (e != null || snapshots == null) return;
             cardList.clear();
             for (QueryDocumentSnapshot doc : snapshots) {
+
+                // 🛡️ THE FILTER: Skip Internal World Bank Cards
+                // External cards don't have an accountId attached to them
+                String linkedAccountId = doc.getString("accountId");
+                if (linkedAccountId != null && !linkedAccountId.trim().isEmpty()) {
+                    continue; // Skip this card, it's an internal card!
+                }
+
                 Card card = doc.toObject(Card.class);
                 card.setCardId(doc.getId());
                 cardList.add(card);
             }
             cardAdapter.notifyDataSetChanged();
-            
+
             // Default selection to first card if exists
             if (!cardList.isEmpty() && selectedFundingCard == null) {
                 selectedFundingCard = cardList.get(0);
+            } else if (cardList.isEmpty()) {
+                selectedFundingCard = null; // Reset if they have no external cards
             }
         });
     }
@@ -149,29 +159,18 @@ public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCa
         }
 
         if (selectedFundingCard == null) {
-            Toast.makeText(this, "Please select a card to pay from", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select an external card to top up.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        btnTopUpNow.setEnabled(false);
-        btnTopUpNow.setText("Adding PKR...");
-
-        String uid = getCurrentUserId();
-        repo.topUp(uid, currentAccountId, amount)
-                .addOnSuccessListener(ref -> {
-                    Intent intent = new Intent(this, TransferSuccessActivity.class);
-                    intent.putExtra("amount", amount);
-                    intent.putExtra("adminFee", 0.0);
-                    intent.putExtra("referenceNumber", ref);
-                    intent.putExtra("recipientName", "Balance Top-Up");
-                    startActivity(intent);
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    btnTopUpNow.setEnabled(true);
-                    btnTopUpNow.setText("Top Up Now");
-                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        // ✅ Correct Flow: Don't do the database transfer here!
+        // Send the user to the ConfirmTopUpActivity to review it first.
+        Intent intent = new Intent(this, ConfirmTopUpActivity.class);
+        intent.putExtra("accountId", currentAccountId);
+        intent.putExtra("cardId", selectedFundingCard.getCardId());
+        intent.putExtra("amount", amount);
+        intent.putExtra("methodName", selectedFundingCard.getMaskedNumber()); // E.g., "**** **** **** 1234"
+        startActivity(intent);
     }
 
     private String getCurrentUserId() {

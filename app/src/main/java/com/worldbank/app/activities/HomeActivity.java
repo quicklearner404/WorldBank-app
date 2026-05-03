@@ -4,9 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -27,6 +25,7 @@ import com.worldbank.app.utils.TransactionRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
@@ -51,7 +50,8 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
 
     private String currentAccountId = "";
     private String currentCardId = "";
-
+    private double globalAccountBalance = 0.0; // Source of truth for PKR balance
+    private int currentSelectedPosition = 0; // Tracks which card is active
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,32 +69,32 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
     }
 
     private void setupSnapHelper() {
+        // Keeps cards centered, but we'll use clicks for navigation to be stable
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rvCards);
-
-        rvCards.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    View centerView = snapHelper.findSnapView(rvCards.getLayoutManager());
-                    if (centerView != null) {
-                        int pos = rvCards.getLayoutManager().getPosition(centerView);
-                        if (pos < cardList.size()) {
-                            currentCardId = cardList.get(pos).getCardId();
-                        }
-                    }
-                }
-            }
-        });
     }
 
     @Override
     public void onCardClick(Card card, int position) {
         currentCardId = card.getCardId();
+        currentSelectedPosition = position; // Save the position!
+
+        updateBalanceUI(card);
+
         Intent intent = new Intent(this, CardDetailActivity.class);
         intent.putExtra("cardId", card.getCardId());
         startActivity(intent);
+    }
+
+    private void updateBalanceUI(Card card) {
+        boolean isInternal = card.getAccountId() != null && !card.getAccountId().isEmpty();
+        if (isInternal) {
+            // Internal cards show the actual account balance from Firestore
+            tvBalanceAmount.setText(String.format(Locale.getDefault(), "Rs. %,.2f", globalAccountBalance));
+        } else {
+            // External cards show 0.00 since we don't have their balance data
+            tvBalanceAmount.setText("Rs. 0.00");
+        }
     }
 
     @Override
@@ -119,8 +119,14 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
             if (e != null || snapshots == null || snapshots.isEmpty()) return;
             QueryDocumentSnapshot doc = (QueryDocumentSnapshot) snapshots.getDocuments().get(0);
             Account account = doc.toObject(Account.class);
+
             currentAccountId = doc.getId();
-            tvBalanceAmount.setText(account.getFormattedBalance());
+            globalAccountBalance = account.getBalance();
+
+            // Use the saved position instead of always index 0
+            if (!cardList.isEmpty() && currentSelectedPosition < cardList.size()) {
+                updateBalanceUI(cardList.get(currentSelectedPosition));
+            }
         });
 
         cardListener = repo.getCardsQuery(uid).addSnapshotListener((snapshots, e) -> {
@@ -131,12 +137,22 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
                 card.setCardId(doc.getId());
                 cardList.add(card);
             }
-            if (!cardList.isEmpty() && currentCardId.isEmpty()) {
-                currentCardId = cardList.get(0).getCardId();
+
+            if (!cardList.isEmpty()) {
+                // Restore selection if the list is still valid
+                if (currentSelectedPosition >= cardList.size()) currentSelectedPosition = 0;
+
+                Card selectedCard = cardList.get(currentSelectedPosition);
+                currentCardId = selectedCard.getCardId();
+
+                // Sync the adapter's highlight
+                cardAdapter.setSelectedPosition(currentSelectedPosition);
+                updateBalanceUI(selectedCard);
             }
             cardAdapter.notifyDataSetChanged();
         });
 
+        // 3. Transactions Listener
         transactionListener = repo.getTransactionsQuery(uid, 10).addSnapshotListener((snapshots, e) -> {
             if (e != null || snapshots == null) return;
             transactionList.clear();
@@ -227,6 +243,7 @@ public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCar
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         moveTaskToBack(true);
     }
 }

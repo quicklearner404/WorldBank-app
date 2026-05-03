@@ -17,11 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * TransactionRepository.java
- * ───────────────────────────
- * Central class for ALL Firestore banking operations.
- */
+
 public class TransactionRepository {
 
     private static final String TAG          = "TransactionRepo";
@@ -58,14 +54,7 @@ public class TransactionRepository {
                 .get();
     }
 
-    /**
-     * Finds a World Bank user by phone number.
-     * Handles all common Pakistani formats: 03xx, +923xx, 923xx.
-     */
-    /**
-     * Finds a World Bank user by phone number.
-     * Handles all common Pakistani formats: 03xx, +923xx, 923xx, and +92 3xx.
-     */
+
     public Task<QuerySnapshot> findUserByPhone(String phone) {
         String clean = phone.replaceAll("[^0-9]", "");
         List<String> variations = new ArrayList<>();
@@ -113,16 +102,41 @@ public class TransactionRepository {
 
     // ── Top-up ──────────────────────────────────────────────────────
 
-    public Task<String> topUp(String uid, String accountId, double amount) {
-        String referenceNumber    = Transaction.generateReference();
-        DocumentReference accRef  = db.collection(COL_ACCOUNTS).document(accountId);
-        DocumentReference txnRef  = db.collection(COL_TRANSACTIONS).document();
+// ── Top-up ──────────────────────────────────────────────────────
+
+    public Task<String> topUp(String uid, String accountId, String cardId, double amount) {
+        String referenceNumber = Transaction.generateReference();
+        DocumentReference accRef = db.collection(COL_ACCOUNTS).document(accountId);
+        DocumentReference cardRef = db.collection(COL_CARDS).document(cardId);
+        DocumentReference txnRef = db.collection(COL_TRANSACTIONS).document();
 
         return db.runTransaction(tx -> {
+            // 1. ALL READS MUST HAPPEN FIRST
             DocumentSnapshot accSnap = tx.get(accRef);
-            double current = accSnap.contains("balance") ? accSnap.getDouble("balance") : 0;
-            tx.update(accRef, "balance", current + amount);
+            DocumentSnapshot cardSnap = tx.get(cardRef);
 
+            // 2. THE MOCK GATEWAY (VALIDATION)
+            // Fetch limits, default to 50,000 limit and 0 used if missing
+            double monthlyLimit = cardSnap.contains("monthlyLimit") ? cardSnap.getDouble("monthlyLimit") : 50000.0;
+            double monthlyUsed = cardSnap.contains("monthlyUsed") ? cardSnap.getDouble("monthlyUsed") : 0.0;
+
+            if (monthlyUsed + amount > monthlyLimit) {
+                double available = monthlyLimit - monthlyUsed;
+                throw new RuntimeException("Transaction declined by bank. Limit Exceeded. Available to use: Rs. "
+                        + String.format("%,.0f", available));
+            }
+
+            double currentBalance = accSnap.contains("balance") ? accSnap.getDouble("balance") : 0.0;
+
+            // 3. ALL WRITES HAPPEN LAST (Atomic Operation)
+
+            // A. Add the amount to the card's 'monthlyUsed' tracker
+            tx.update(cardRef, "monthlyUsed", monthlyUsed + amount);
+
+            // B. Add the amount to the World Bank Account
+            tx.update(accRef, "balance", currentBalance + amount);
+
+            // C. Create the Success Receipt
             Transaction t = new Transaction();
             t.setUid(uid);
             t.setSenderUid(uid);
@@ -131,28 +145,17 @@ public class TransactionRepository {
             t.setCategory(Transaction.CAT_TOPUP);
             t.setReferenceNumber(referenceNumber);
             t.setTimestamp(Timestamp.now());
-            t.setRecipientName("Self Top-Up");
+            t.setRecipientName("Card Top-Up"); // Looks better on receipt
             t.setStatus(Transaction.STATUS_SUCCESS);
             tx.set(txnRef, t);
+
             return referenceNumber;
         });
     }
 
     // ── Send money (2-way transfer) ─────────────────────────────────
 
-    /**
-     * Performs a complete 2-way money transfer inside a single Firestore transaction:
-     *
-     *  1. Reads sender balance — throws if insufficient.
-     *  2. Deducts (amount + fee) from sender.
-     *  3. Writes a DEBIT transaction record for sender.
-     *  4. If recipient is an internal World Bank account:
-     *       a. Reads recipient balance.
-     *       b. Credits recipient balance.
-     *       c. Writes a CREDIT transaction record for recipient.
-     *
-     * Returns the reference number on success.
-     */
+
     public Task<String> sendMoney(
             String senderUid,
             String senderAccountId,
@@ -235,9 +238,6 @@ public class TransactionRepository {
                 tx.update(recAccRef, "balance", recBalance + amount);
 
                 Transaction credit = new Transaction();
-                // 🔴 TEMPORARY TEST: Manually force the recipient ID from your log
-// credit.setUid(recipientUid);
-                credit.setUid("pdzzwJRbxFeGdRSALQn6iPy3hrp1"); // Paste the Zunnoor ID here directly
 
                 credit.setSenderUid(senderUid);
                 credit.setUid(recipientUid);

@@ -105,24 +105,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_money);
-// 🔴 --- TEMPORARY DATABASE TEST --- 🔴
-        TransactionRepository testRepo = new TransactionRepository();
-        testRepo.findAccountByIban("PK36WBNK9001560255952")
-                .addOnSuccessListener(snapshots -> {
-                    if (!snapshots.isEmpty()) {
-                        String name = snapshots.getDocuments().get(0).getString("accountTitle");
-                        Log.d("DB_TEST", "SUCCESS! Found name: " + name);
-                        Toast.makeText(this, "TEST SUCCESS: " + name, Toast.LENGTH_LONG).show();
-                    } else {
-                        Log.d("DB_TEST", "FAILED! Query returned 0 documents.");
-                        Toast.makeText(this, "TEST FAILED: 0 documents", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("DB_TEST", "PERMISSION DENIED OR ERROR", e);
-                    Toast.makeText(this, "TEST ERROR: Check Logcat", Toast.LENGTH_LONG).show();
-                });
-        // 🔴 ------------------------------- 🔴
+
         Intent intent = getIntent();
         cardId    = intent.getStringExtra("cardId");
         accountId = intent.getStringExtra("accountId");
@@ -334,36 +317,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         // 1. Strip all spaces anywhere in the string and force uppercase
         String cleanInput = input.replaceAll("\\s+", "").toUpperCase();
 
-        // 🔴 --- STRING COMPARISON DEBUGGER --- 🔴
-        // We only run this debug if you've typed at least 15 characters to avoid spam
-        if (cleanInput.startsWith("PK") && cleanInput.length() >= 15) {
-            String expected = "PK36WBNK9001560255952";
 
-            Log.d("DEBUG_MATCH", "========================================");
-            Log.d("DEBUG_MATCH", "Expected IBAN : [" + expected + "] (Length: " + expected.length() + ")");
-            Log.d("DEBUG_MATCH", "Your UI IBAN  : [" + cleanInput + "] (Length: " + cleanInput.length() + ")");
-            Log.d("DEBUG_MATCH", "Are they a 100% perfect match? : " + expected.equals(cleanInput));
-
-            if (!expected.equals(cleanInput)) {
-                // Find exactly where it went wrong
-                int minLen = Math.min(expected.length(), cleanInput.length());
-                boolean foundDiff = false;
-                for (int i = 0; i < minLen; i++) {
-                    if (expected.charAt(i) != cleanInput.charAt(i)) {
-                        Log.e("DEBUG_MATCH", "❌ ERROR AT POSITION " + (i+1) + ": Expected '" + expected.charAt(i) + "' but your EditText gave '" + cleanInput.charAt(i) + "'");
-                        foundDiff = true;
-                        break;
-                    }
-                }
-                if (!foundDiff && expected.length() != cleanInput.length()) {
-                    Log.e("DEBUG_MATCH", "❌ ERROR: The characters match, but your UI text is too " + (cleanInput.length() > expected.length() ? "LONG" : "SHORT") + "!");
-                }
-            } else {
-                Log.d("DEBUG_MATCH", "✅ SUCCESS: The strings are absolutely identical!");
-            }
-            Log.d("DEBUG_MATCH", "========================================");
-        }
-        // 🔴 ---------------------------------- 🔴
 
         // Record this as the value we're currently looking up.
         // The TextWatcher will only reset recipientVerified if the value CHANGES from this.

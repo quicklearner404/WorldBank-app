@@ -56,32 +56,90 @@ public class AddCardActivity extends AppCompatActivity {
     }
 
     private void setupWatchers() {
+        // 1. Auto-format Card Number (1234 5678 9012 3456)
         etCardNumber.addTextChangedListener(new TextWatcher() {
+            private boolean isFormatting = false;
+
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
             @Override
             public void afterTextChanged(Editable s) {
-                String val = s.toString().replaceAll("\\s+", "");
-                if (val.isEmpty()) {
-                    tvPreviewNumber.setText("**** **** **** ****");
-                } else {
-                    // Format for preview: 1234 5678 ...
-                    StringBuilder formatted = new StringBuilder();
-                    for (int i = 0; i < val.length(); i++) {
-                        if (i > 0 && i % 4 == 0) formatted.append("  ");
-                        formatted.append(val.charAt(i));
+                if (isFormatting) return;
+                isFormatting = true;
+
+                // Remove everything except numbers
+                String digits = s.toString().replaceAll("[^0-9]", "");
+
+                // Add spaces every 4 digits
+                StringBuilder formatted = new StringBuilder();
+                for (int i = 0; i < digits.length(); i++) {
+                    if (i > 0 && i % 4 == 0) {
+                        formatted.append(" ");
                     }
-                    tvPreviewNumber.setText(formatted.toString());
+                    formatted.append(digits.charAt(i));
+                }
+
+                etCardNumber.setText(formatted.toString());
+                etCardNumber.setSelection(formatted.length()); // Move cursor to end
+                tvPreviewNumber.setText(formatted.length() == 0 ? "**** **** **** ****" : formatted.toString());
+
+                isFormatting = false;
+                // EARLY ERROR CHECK: Clear error if they reach 16 digits
+                String digitss = s.toString().replaceAll("[^0-9]", "");
+                if (digitss.length() == 16) {
+                    etCardNumber.setError(null);
                 }
             }
         });
 
+        // 2. Auto-format Expiry (MM/YY)
+        etExpiry.addTextChangedListener(new TextWatcher() {
+            private boolean isFormatting = false;
+
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isFormatting) return;
+                isFormatting = true;
+
+                String digits = s.toString().replaceAll("[^0-9]", "");
+
+                // Add slash after 2nd digit
+                StringBuilder formatted = new StringBuilder();
+                for (int i = 0; i < digits.length(); i++) {
+                    if (i == 2) {
+                        formatted.append("/");
+                    }
+                    formatted.append(digits.charAt(i));
+                }
+
+                etExpiry.setText(formatted.toString());
+                etExpiry.setSelection(formatted.length());
+
+                isFormatting = false;
+                // EARLY ERROR CHECK: Validate month logic as they type
+                String digitss = s.toString().replaceAll("[^0-9]", "");
+                if (digits.length() >= 2) {
+                    int month = Integer.parseInt(digitss.substring(0, 2));
+                    if (month > 12 || month < 1) {
+                        etExpiry.setError("Invalid Month (01-12)");
+                    } else {
+                        etExpiry.setError(null);
+                    }
+                }
+            }
+        });
+
+        // 3. Holder Name Auto-Caps Preview
         etHolderName.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                tvPreviewHolder.setText(s.toString().isEmpty() ? "Card Holder" : s.toString().toUpperCase());
+                tvPreviewHolder.setText(s.toString().isEmpty() ? "CARD HOLDER" : s.toString().toUpperCase());
             }
         });
     }
@@ -90,28 +148,63 @@ public class AddCardActivity extends AppCompatActivity {
         ibBack.setOnClickListener(v -> finish());
 
         btnAddCard.setOnClickListener(v -> {
-            String number = etCardNumber.getText().toString().trim().replaceAll("\\s+", "");
+            String number = etCardNumber.getText().toString().replaceAll("\\s+", "");
             String expiry = etExpiry.getText().toString().trim();
             String cvv = etCvv.getText().toString().trim();
             String name = etHolderName.getText().toString().trim();
 
+            // 1. Precise Card Number Error
             if (number.length() < 16) {
-                Toast.makeText(this, "Card number must be 16 digits", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (expiry.isEmpty() || !expiry.contains("/")) {
-                Toast.makeText(this, "Enter valid expiry (MM/YY)", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (cvv.length() < 3) {
-                Toast.makeText(this, "Enter valid CVV", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Enter holder name", Toast.LENGTH_SHORT).show();
+                etCardNumber.setError("Card number must be 16 digits");
+                etCardNumber.requestFocus();
                 return;
             }
 
+            // 2. Precise Expiry Error
+            if (expiry.length() < 5) {
+                etExpiry.setError("Complete the expiry date (MM/YY)");
+                etExpiry.requestFocus();
+                return;
+            }
+
+            try {
+                String[] parts = expiry.split("/");
+                int month = Integer.parseInt(parts[0]);
+                int year = Integer.parseInt(parts[1]);
+
+                if (month < 1 || month > 12) {
+                    etExpiry.setError("Month must be 01-12");
+                    etExpiry.requestFocus();
+                    return;
+                }
+
+                // Block years in the past (e.g., 2023 and below)
+                if (year < 24) {
+                    etExpiry.setError("This card has expired");
+                    etExpiry.requestFocus();
+                    return;
+                }
+            } catch (Exception e) {
+                etExpiry.setError("Invalid format");
+                etExpiry.requestFocus();
+                return;
+            }
+
+            // 3. Precise CVV Error
+            if (cvv.length() < 3) {
+                etCvv.setError("CVV must be 3 or 4 digits");
+                etCvv.requestFocus();
+                return;
+            }
+
+            // 4. Precise Name Error
+            if (name.isEmpty()) {
+                etHolderName.setError("Enter the name printed on the card");
+                etHolderName.requestFocus();
+                return;
+            }
+
+            // Success!
             saveCardToFirestore(number, expiry, name);
         });
     }
