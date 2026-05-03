@@ -2,6 +2,7 @@ package com.worldbank.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -16,19 +17,7 @@ import com.worldbank.app.R;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.utils.SessionManager;
 
-/**
- * CardDetailActivity
- * ───────────────────
- * Owner  : Dev 2
- * Mockup : Page 9
- *
- * Receives "cardId" String from HomeActivity via Intent.
- * Loads card data from Firestore and displays:
- *  - Card widget (same as Home)
- *  - Monthly transfer limit with circular progress
- *  - 4 menu items
- *  - Add Card button
- */
+
 public class CardDetailActivity extends AppCompatActivity {
 
     // ── Views ──────────────────────────────────────────────────────
@@ -87,10 +76,8 @@ public class CardDetailActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // Back button
         ibBack.setOnClickListener(v -> finish());
 
-        // Menu items
         llConnectPayment.setOnClickListener(v ->
                 Toast.makeText(this, "Connect to Payment Service", Toast.LENGTH_SHORT).show()
         );
@@ -100,17 +87,57 @@ public class CardDetailActivity extends AppCompatActivity {
         );
 
         llChangeUsername.setOnClickListener(v ->
-                Toast.makeText(this, "Change Card Username", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show()
         );
 
         llTransactionReport.setOnClickListener(v ->
-                Toast.makeText(this, "Transaction Report", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Report generated", Toast.LENGTH_SHORT).show()
         );
 
-        // Add Card
+
         btnAddCard.setOnClickListener(v ->
-                Toast.makeText(this, "Add Card — coming soon", Toast.LENGTH_SHORT).show()
+                startActivity(new Intent(this, AddCardActivity.class))
         );
+    }
+
+    private void displayCard(Card card) {
+        // 1. Identify if it's Internal or External
+        boolean isInternal = card.getAccountId() != null && !card.getAccountId().isEmpty();
+
+        // 2. Set Card Data
+        tvCardNumber.setText(card.getMaskedNumber());
+        tvCardHolder.setText(card.getHolderName().toUpperCase());
+
+        // 3. UI logic: If internal, show "Primary"; if external, show Expiry
+        tvCardExpiry.setText(isInternal ? "Primary Account" : "Exp " + card.getExpiry());
+
+        // 4. Update Theme: Purple for World Bank cards, Gray for others
+        androidx.cardview.widget.CardView cvCard = findViewById(R.id.cvCard);
+        if (isInternal) {
+            cvCard.setCardBackgroundColor(getColor(R.color.purple_primary));
+        } else {
+            cvCard.setCardBackgroundColor(getColor(R.color.gray_text));
+        }
+
+        // 5. Smart Limit Section
+        // Find the CardView containing the progress bar to hide/show it
+        View limitCard = (View) pbMonthlyLimit.getParent().getParent();
+
+        if (isInternal) {
+            limitCard.setVisibility(View.VISIBLE);
+
+            int percent = card.getLimitPercentage();
+            pbMonthlyLimit.setProgress(percent);
+            tvLimitPercent.setText(percent + "%");
+
+
+            String limitText = String.format(java.util.Locale.getDefault(), "Rs. %,.0f out of %,.0f",
+                    card.getMonthlyUsed(), card.getMonthlyLimit());
+            tvLimitAmount.setText(limitText);
+        } else {
+            // Hide the limit section for external cards (HBL, etc.)
+            limitCard.setVisibility(View.GONE);
+        }
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -141,27 +168,9 @@ public class CardDetailActivity extends AppCompatActivity {
                 );
     }
 
-    private void displayCard(Card card) {
-        // Card widget
-        tvCardNumber.setText(card.getMaskedNumber());
-        tvCardHolder.setText(card.getHolderName());
-        tvCardExpiry.setText("Exp " + card.getExpiry());
 
-        // Circular progress — monthly limit
-        int percent = card.getLimitPercentage();
-        pbMonthlyLimit.setProgress(percent);
-        tvLimitPercent.setText(percent + "%");
 
-        // Limit text e.g. "$6,080 out of 8,000"
-        String limitText = String.format("$%,.0f out of %,.0f",
-                card.getMonthlyUsed(), card.getMonthlyLimit());
-        tvLimitAmount.setText(limitText);
-    }
 
-    /**
-     * Called when no cardId is passed — fills in placeholder text
-     * so the screen still renders during development.
-     */
     private void showDevPlaceholder() {
         tvCardNumber.setText("1253  5432  3521  3090");
         tvCardHolder.setText("Soroush Nasrpour");

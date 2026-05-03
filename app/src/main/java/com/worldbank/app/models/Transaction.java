@@ -3,11 +3,7 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.Timestamp;
 import java.util.UUID;
 import com.google.firebase.firestore.Exclude;
-/**
- * Transaction.java — UPDATED for Pakistani banking
- * ──────────────────────────────────────────────────
- * Represents a money movement in PKR.
- */
+
 public class Transaction {
 
     // ── Type constants ────────────────────────────────────────────

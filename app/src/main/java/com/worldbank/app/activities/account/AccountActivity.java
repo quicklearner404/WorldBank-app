@@ -18,11 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
 
-/**
- * AccountActivity
- * ───────────────
- * Main hub for account settings, profile view, and logout.
- */
+
 public class AccountActivity extends AppCompatActivity {
 
     private static final String TAG = "AccountActivity";

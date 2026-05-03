@@ -11,12 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * TransferSuccessActivity — RECEIPT SCREEN
- * ─────────────────────────────────────────
- * Displays a sleek, light-themed receipt for the transaction.
- * Fixed symbols to match the updated XML layout.
- */
+
 public class TransferSuccessActivity extends AppCompatActivity {
 
     private TextView tvTotalAmount, tvRecipientName, tvTransactionDate, tvReferenceNumber, tvAdminFeeAmount;

@@ -24,6 +24,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvConsumerIdLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_please_enter_the_reference_number_from_your_bill"

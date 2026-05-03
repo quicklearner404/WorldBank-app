@@ -19,18 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * TransactionAdapter
- * ───────────────────
- * Owner : Dev 2
- * Used  : HomeActivity (recent list) + TransactionHistoryActivity (full list)
- *
- * Each row shows:
- *  - Initials box OR category icon
- *  - Transaction name / recipient
- *  - Date + time
- *  - Amount in red (debit) or green (credit)
- */
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
 
     private final Context context;

@@ -23,11 +23,7 @@ import com.worldbank.app.utils.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TopUpActivity — PKR UPDATED & FIXED
- * ──────────────────────────
- * Functional PKR top-up with Rs. 100, Rs. 500, Rs. 2000 quick options.
- */
+
 public class TopUpActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
     private RecyclerView rvCards;

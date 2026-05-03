@@ -30,11 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * BudgetsActivity
- * ───────────────
- * Real-time budget tracker.
- */
+
 public class BudgetsActivity extends AppCompatActivity {
 
     private ProgressBar pbTotalBudget;
@@ -130,13 +126,19 @@ public class BudgetsActivity extends AppCompatActivity {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_consumer_id, null);
 
-        TextView title  = view.findViewById(R.id.tvDialogTitle);
-        EditText input  = view.findViewById(R.id.etConsumerId);
-        Button btn      = view.findViewById(R.id.btnContinuePayment);
-        Button cancel   = view.findViewById(R.id.btnCancelDialog);
+        TextView title    = view.findViewById(R.id.tvDialogTitle);
+        TextView subLabel = view.findViewById(R.id.tvConsumerIdLabel); // Now we can find it!
+        EditText input    = view.findViewById(R.id.etConsumerId);
+        Button btn        = view.findViewById(R.id.btnContinuePayment);
+        Button cancel     = view.findViewById(R.id.btnCancelDialog);
 
+        // Change strings for Budget context
         title.setText("Set New Spending Goal");
-        input.setHint("Enter amount (Rs.)");
+        if (subLabel != null) {
+            subLabel.setText("Enter the maximum amount you want to spend this month.");
+        }
+
+        input.setHint("Goal Amount (Rs.)");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         btn.setText("Update Goal");
 
@@ -144,29 +146,23 @@ public class BudgetsActivity extends AppCompatActivity {
             String val = input.getText().toString();
             if (!val.isEmpty()) {
                 limitTotal = Double.parseDouble(val);
+
+                // Force a data refresh to update the Pie Chart
                 loadRealBudgetData();
-                Toast.makeText(this, "Total goal updated!", Toast.LENGTH_SHORT).show();
+
+                Toast.makeText(this, "Spending goal updated!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
         });
 
         cancel.setOnClickListener(v -> dialog.dismiss());
         dialog.setContentView(view);
-
-        // makes keyboard push the dialog content up instead of covering it
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        }
-
         dialog.show();
     }
 
     private void loadRealBudgetData() {
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : sessionManager.getUserId();
         if (uid == null || uid.isEmpty()) return;
-
-        if (budgetListener != null) budgetListener.remove();
 
         budgetListener = db.collection("transactions")
                 .whereEqualTo("uid", uid)
@@ -180,12 +176,22 @@ public class BudgetsActivity extends AppCompatActivity {
 
                     for (QueryDocumentSnapshot doc : snapshots) {
                         Transaction t = doc.toObject(Transaction.class);
-                        if (t.getAmount() <= 0 || !Transaction.TYPE_DEBIT.equals(t.getType())) continue;
+
+                        // --- FIX START ---
+                        String type = t.getType() != null ? t.getType().toLowerCase() : "";
+
+                        // Broaden the check: Catch "debit", "DEBIT", or "expense"
+                        if (t.getAmount() <= 0 || (!type.equals("debit") && !type.equals("expense"))) {
+                            continue;
+                        }
+                        // --- FIX END ---
 
                         totalSpent += t.getAmount();
+
                         String cat = t.getCategory() != null ? t.getCategory().toLowerCase() : "";
                         String rec = t.getRecipientName() != null ? t.getRecipientName().toLowerCase() : "";
 
+                        // Category sorting
                         if (cat.contains("grocer") || rec.contains("mart") || rec.contains("imtiaz")) {
                             gTxns.add(t);
                         } else if (cat.contains("util") || cat.contains("bill") || rec.contains("lesco") || rec.contains("ke") || rec.contains("ptcl")) {
@@ -200,15 +206,27 @@ public class BudgetsActivity extends AppCompatActivity {
     }
 
     private void updateUI(double total, List<Transaction> g, List<Transaction> u, List<Transaction> d) {
-        int progress = (int) ((total / limitTotal) * 100);
-        pbTotalBudget.setProgress(Math.min(progress, 100));
-        
+        // 1. Calculate percentage using double for precision
+        double percentage = (total / limitTotal) * 100;
+
+        // 2. Round UP for(visual feedback)
+        int progressInt = (int) Math.ceil(percentage);
+
+        // 3. Ensure we don't exceed 100
+        int finalProgress = Math.min(progressInt, 100);
+
+        // Update the Circular Bar (Pie Chart)
+        pbTotalBudget.setMax(100);
+        pbTotalBudget.setProgress(finalProgress);
+
         if (tvSpentPercent != null) {
-            tvSpentPercent.setText(String.format(Locale.getDefault(), "%d%%", Math.min(progress, 100)));
+
+            tvSpentPercent.setText(String.format(Locale.getDefault(), "%d%%", finalProgress));
         }
-        
+
         tvTotalBudgetStats.setText(String.format(Locale.getDefault(), "Rs. %,.0f Spent / Rs. %,.0f Goal", total, limitTotal));
 
+        // Update Category Bars
         updateCategory(itemGroceries, "Groceries", R.drawable.ic_groceries, g, LIMIT_GROCERIES);
         updateCategory(itemUtilities, "Utilities", R.drawable.ic_utilities, u, LIMIT_UTILITIES);
         updateCategory(itemDining, "Dining Out", R.drawable.ic_dining, d, LIMIT_DINING);

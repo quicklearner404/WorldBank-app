@@ -2,14 +2,6 @@ package com.worldbank.app.models;
 
 import com.google.firebase.Timestamp;
 
-/**
- * Contact.java
- * ─────────────
- * A saved recipient / contact that a user frequently sends money to.
- * Shown in the recipient picker in SendMoneyActivity.
- *
- * Firestore collection: contacts/{contactId}
- */
 public class Contact {
 
     public static final String BANK_HBL        = "HBL";

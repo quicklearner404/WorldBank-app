@@ -27,7 +27,7 @@ public class ConfirmTopUpActivity extends AppCompatActivity {
     private String accountId;
     private double amount;
     private String methodName;
-    private String cardId; // ✅ Added this!
+    private String cardId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -33,10 +33,7 @@ import com.worldbank.app.utils.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * PaymentsActivity — Hub for Bills and Quick Transfers.
- * Optimized for easy biller selection and sleek navigation.
- */
+
 public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapter.OnContactClickListener, BillerAdapter.OnBillerClickListener {
 
     private RecyclerView rvQuickPay, rvScheduled;

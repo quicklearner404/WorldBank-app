@@ -1,9 +1,6 @@
 package com.worldbank.app.models;
 
-/**
- * Biller.java
- * Represents a utility company or service provider (e.g., LESCO, PTCL, Netflix).
- */
+
 public class Biller {
     private String id;
     private String name;

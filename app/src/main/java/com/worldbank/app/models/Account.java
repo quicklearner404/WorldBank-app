@@ -1,14 +1,6 @@
 package com.worldbank.app.models;
 
-/**
- * Account.java
- * ─────────────
- * Represents a bank account in PKR.
- * One user can have multiple accounts (savings, current).
- * Each account links to one or more cards.
- *
- * Firestore collection: accounts/{accountId}
- */
+
 public class Account {
 
     public static final String TYPE_SAVINGS = "SAVINGS";

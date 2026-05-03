@@ -79,16 +79,14 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
     private EditText currentDialogAccEdit;
     private EditText currentDialogNameEdit;
     private AutoCompleteTextView currentDialogBankSpinner;
-    private TextView currentDialogStatus; // NEW: shows "Verifying…" / "✓ Verified" / "✗ Not found"
+    private TextView currentDialogStatus;
 
     // ── Verification state ──────────────────────────────────────────
     // recipientVerified is set true ONLY when Firestore confirms the account exists.
     // It is cleared ONLY when the account field content changes meaningfully.
     private boolean recipientVerified = false;
 
-    // This flag suppresses the TextWatcher when WE are programmatically filling fields.
-    // It does NOT affect recipientVerified — that is managed separately.
-    private boolean isProgrammaticSet = false;
+       private boolean isProgrammaticSet = false;
 
     // Snapshot of what was in the account field when the last lookup was launched.
     // Used to detect whether the user actually changed the value.
@@ -204,9 +202,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
         currentDialogAccEdit     = dialog.findViewById(R.id.etRecipientAccount);
         currentDialogNameEdit    = dialog.findViewById(R.id.etRecipientName);
         currentDialogBankSpinner = dialog.findViewById(R.id.autoCompleteBanks);
-        // NOTE: add a TextView with id tvVerificationStatus to dialog_recipient_picker.xml
-        // showing e.g. "Verifying…" / "✓ Account verified" / "✗ Account not found"
-        // If you haven't added it yet, this reference will just be null and we null-check it.
+
         currentDialogStatus      = dialog.findViewById(R.id.tvVerificationStatus);
 
         Button      btnConfirm     = dialog.findViewById(R.id.btnConfirmRecipient);
@@ -232,15 +228,11 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
             @Override
             public void afterTextChanged(Editable s) {
-                // If WE are filling the field, skip — but DON'T touch recipientVerified here.
-                // recipientVerified is only changed by lookup results or resetVerificationState().
+
                 if (isProgrammaticSet) return;
 
                 String input = s.toString().trim();
 
-                // Only invalidate if the value actually changed from what we last verified.
-                // This prevents the watcher from wiping a successful lookup the moment
-                // Firestore returns and we auto-fill the name field (which can re-trigger this).
                 if (!input.equals(lastLookedUpValue)) {
                     recipientVerified      = false;
                     selectedRecipientUid       = "";
@@ -252,9 +244,6 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
                 if (pendingLookup != null) {
                     lookupHandler.removeCallbacks(pendingLookup);
                 }
-
-                // Fire lookup once user types past the prefix (IBAN_PREFIX.length = 8)
-                // This is intentionally low so lookup starts the moment real digits arrive.
                 if (input.length() > IBAN_PREFIX.length()) {
                     showStatus("Verifying…");
                     pendingLookup = () -> performRecipientLookup(input, currentDialogNameEdit);
@@ -304,14 +293,7 @@ public class SendMoneyActivity extends AppCompatActivity implements QuickPayAdap
 
     // ── Core lookup ─────────────────────────────────────────────────
 
-    /**
-     * Performs the Firestore lookup for a given input string.
-     * IMPORTANT: This method records `input` as `lastLookedUpValue` BEFORE
-     * the async call. That way, if the user hasn't typed anything new by the
-     * time Firestore returns, we know the result is still valid and we can
-     * safely set recipientVerified = true WITHOUT the TextWatcher immediately
-     * clearing it again.
-     */
+
     private void performRecipientLookup(String input, EditText nameEdit) {
         // 1. Force uppercase instantly so "pk" matches "PK"
         // 1. Strip all spaces anywhere in the string and force uppercase

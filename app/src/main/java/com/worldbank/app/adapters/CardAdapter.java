@@ -17,12 +17,7 @@ import com.worldbank.app.models.Card;
 
 import java.util.List;
 
-/**
- * CardAdapter
- * ───────────
- * Binds real Firestore card data to the item_card_small layout.
- * Supports a single-click selection and navigation model.
- */
+
 public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_CARD = 1;

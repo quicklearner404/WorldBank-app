@@ -24,13 +24,7 @@ import com.worldbank.app.utils.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TransactionHistoryActivity — UPGRADED
- * ───────────────────────────────────────
- * Now uses real-time snapshot listener — list updates live.
- * Loads up to 50 transactions (vs 10 on Home).
- * PKR amounts displayed correctly.
- */
+
 public class TransactionHistoryActivity extends AppCompatActivity {
 
     private ImageButton ibBack, ibClearSearch;

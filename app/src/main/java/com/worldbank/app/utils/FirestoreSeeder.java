@@ -11,9 +11,7 @@ import com.worldbank.app.models.Transaction;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * FirestoreSeeder.java — FINAL FIX
- */
+
 public class FirestoreSeeder {
 
     private static final String TAG = "FirestoreSeeder";

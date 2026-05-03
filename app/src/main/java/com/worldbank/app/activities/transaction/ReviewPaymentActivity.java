@@ -13,12 +13,7 @@ import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
 import com.worldbank.app.utils.TransactionRepository;
 
-/**
- * ReviewPaymentActivity
- * ──────────────────────
- * Final confirmation screen for outgoing transfers.
- * Fixed: Now correctly calls the stable 12-argument sendMoney method.
- */
+
 public class ReviewPaymentActivity extends AppCompatActivity {
 
     private TextView tvReviewInitials, tvReviewName, tvReviewAmount;
@@ -91,15 +86,7 @@ public class ReviewPaymentActivity extends AppCompatActivity {
     private void executeRealTransfer() {
         btnSendPaymentFinal.setEnabled(false);
         btnSendPaymentFinal.setText("Processing...");
-// 🔴 --- DEBUG LOG --- 🔴
-        Log.d("TRANSFER_DEBUG", "--- STARTING TRANSFER ---");
-        Log.d("TRANSFER_DEBUG", "Sender UID: " + sessionManager.getUserId());
-        Log.d("TRANSFER_DEBUG", "Sender Account ID: [" + accountId + "]");
-        Log.d("TRANSFER_DEBUG", "Recipient UID: [" + recipientUid + "]");
-        Log.d("TRANSFER_DEBUG", "Recipient Account ID: [" + recipientAccountId + "]");
-        Log.d("TRANSFER_DEBUG", "Amount: " + amount);
-        // 🔴 ------------------ 🔴
-        // FIXED: Using all 12 arguments required by the stable TransactionRepository
+
         repo.sendMoney(
                 sessionManager.getUserId(),
                 accountId,
