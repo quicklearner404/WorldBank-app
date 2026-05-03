@@ -9,7 +9,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="88dp"
+        android:paddingBottom="72dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -30,7 +30,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_chevron_left"
                     android:contentDescription="@string/cd_back_button"
-                    android:tint="@color/black"
+                    app:tint="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
@@ -39,7 +39,7 @@
                     android:id="@+id/tvScreenTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Budgets"
+                    android:text="@string/label_budgets"
                     android:textColor="@color/black"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
                 android:layout_marginTop="16dp"
-                android:text="Overview"
+                android:text="@string/overview"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -87,9 +87,8 @@
                             android:layout_height="match_parent"
                             android:indeterminate="false"
                             android:max="100"
-                            android:progress="70"
-                            android:progressDrawable="@drawable/shape_circular_progress"
-                            android:rotation="-90" />
+                            android:progress="0"
+                            android:progressDrawable="@drawable/shape_circular_progress" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -98,12 +97,21 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/tvSpentPercent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/_0"
+                                android:textColor="@color/purple_primary"
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
+
+                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="Total Spending\nvs Budget"
-                                android:textColor="@color/black"
-                                android:textSize="14sp" />
+                                android:text="@string/label_spent"
+                                android:textColor="@color/gray_text"
+                                android:textSize="12sp" />
 
                         </LinearLayout>
                     </FrameLayout>
@@ -113,7 +121,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="$8,450.00 Spent / $12,000.00 Budget"
+                        android:text="@string/label_rs_0_spent_rs_55_000_budget"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -144,7 +152,7 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="32dp"
                 android:background="@drawable/bg_purple_button"
-                android:text="+ Create New Budget"
+                android:text="@string/label_create_new_budget"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="16sp"
@@ -156,7 +164,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="72dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
         app:elevation="8dp"

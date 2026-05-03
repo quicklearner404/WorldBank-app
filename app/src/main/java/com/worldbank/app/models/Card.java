@@ -1,31 +1,35 @@
 package com.worldbank.app.models;
 
 public class Card {
-    private String cardId;
-    private String uid;
-    private String cardNumber;    // full number (store encrypted in real app)
-    private String maskedNumber;  // e.g. "**** **** **** 3090"
-    private String holderName;
-    private String expiry;        // e.g. "09/24"
-    private String cardType;      // "VISA" or "MASTERCARD"
-    private double balance;
-    private double monthlyLimit;
-    private double monthlyUsed;
 
-    public Card() {} // Required for Firestore
+    String cardId;
+    String uid;
+    String accountId;
+    String cardNumber;
+    String maskedNumber;
+    String holderName;
+    String expiry;
+    String cardType;
+    boolean isActive;
+    double balance;
+    double monthlyLimit;
+    double monthlyUsed;
 
-    public Card(String cardId, String uid, String maskedNumber, String holderName,
-                String expiry, String cardType, double balance,
-                double monthlyLimit, double monthlyUsed) {
-        this.cardId = cardId;
+    public Card() {}
+
+    public Card(String uid, String accountId, String maskedNumber,
+                String holderName, String expiry, String cardType,
+                double monthlyLimit) {
         this.uid = uid;
+        this.accountId = accountId;
         this.maskedNumber = maskedNumber;
         this.holderName = holderName;
         this.expiry = expiry;
         this.cardType = cardType;
-        this.balance = balance;
+        this.isActive = true;
+        this.balance = 0;
         this.monthlyLimit = monthlyLimit;
-        this.monthlyUsed = monthlyUsed;
+        this.monthlyUsed = 0;
     }
 
     public String getCardId() { return cardId; }
@@ -33,6 +37,9 @@ public class Card {
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
+
+    public String getAccountId() { return accountId; }
+    public void setAccountId(String accountId) { this.accountId = accountId; }
 
     public String getCardNumber() { return cardNumber; }
     public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
@@ -49,6 +56,9 @@ public class Card {
     public String getCardType() { return cardType; }
     public void setCardType(String cardType) { this.cardType = cardType; }
 
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
+
     public double getBalance() { return balance; }
     public void setBalance(double balance) { this.balance = balance; }
 
@@ -58,7 +68,6 @@ public class Card {
     public double getMonthlyUsed() { return monthlyUsed; }
     public void setMonthlyUsed(double monthlyUsed) { this.monthlyUsed = monthlyUsed; }
 
-    /** Returns usage percentage (0–100) for the circular progress bar */
     public int getLimitPercentage() {
         if (monthlyLimit <= 0) return 0;
         return (int) ((monthlyUsed / monthlyLimit) * 100);

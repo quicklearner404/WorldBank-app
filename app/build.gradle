@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.worldbank.app'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.worldbank.app"
@@ -53,6 +53,10 @@ dependencies {
 
     // Glide — image loading (profile photos)
     implementation libs.glide
+    implementation libs.activity
+    implementation libs.credentials
+    implementation libs.credentials.play.services.auth
+    implementation libs.googleid
     annotationProcessor libs.glide.compiler
 
     // MPAndroidChart — spending chart on CardStatisticActivity
