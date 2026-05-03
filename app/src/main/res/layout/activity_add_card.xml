@@ -27,7 +27,7 @@
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_chevron_left"
-                    android:tint="@color/black"
+                    app:tint="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent" />
@@ -35,7 +35,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add External Card"
+                    android:text="@string/label_add_external_card"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -64,7 +64,7 @@
                         android:id="@+id/tvPreviewNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="**** **** **** ****"
+                        android:text="@string/hint_previewno"
                         android:textColor="@color/white"
                         android:textSize="@dimen/text_card_number"
                         android:letterSpacing="0.08"
@@ -76,7 +76,7 @@
                         android:id="@+id/tvPreviewHolder"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Card Holder"
+                        android:text="@string/label_card_holderr"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -93,11 +93,11 @@
                 android:layout_marginTop="32dp">
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Card Number" android:textColor="@color/black" android:textStyle="bold" />
+                    android:text="@string/label_card_number" android:textColor="@color/black" android:textStyle="bold" />
                 <EditText android:id="@+id/etCardNumber"
                     android:layout_width="match_parent" android:layout_height="@dimen/input_height"
                     android:layout_marginTop="8dp" android:paddingHorizontal="16dp"
-                    android:background="@drawable/bg_input_field" android:hint="0000 0000 0000 0000"
+                    android:background="@drawable/bg_input_field" android:hint="@string/hint_cardno"
                     android:inputType="number" android:textColor="@color/black" />
 
                 <LinearLayout
@@ -114,11 +114,11 @@
                         android:layout_marginEnd="8dp"
                         android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Expiry Date" android:textColor="@color/black" android:textStyle="bold" />
+                            android:text="@string/label_expiry_date" android:textColor="@color/black" android:textStyle="bold" />
                         <EditText android:id="@+id/etExpiry"
                             android:layout_width="match_parent" android:layout_height="@dimen/input_height"
                             android:layout_marginTop="8dp" android:paddingHorizontal="16dp"
-                            android:background="@drawable/bg_input_field" android:hint="MM/YY"
+                            android:background="@drawable/bg_input_field" android:hint="@string/hint_date"
                             android:inputType="date" android:textColor="@color/black" />
                     </LinearLayout>
 
@@ -129,21 +129,21 @@
                         android:layout_marginStart="8dp"
                         android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="CVV" android:textColor="@color/black" android:textStyle="bold" />
+                            android:text="@string/label_cv" android:textColor="@color/black" android:textStyle="bold" />
                         <EditText android:id="@+id/etCvv"
                             android:layout_width="match_parent" android:layout_height="@dimen/input_height"
                             android:layout_marginTop="8dp" android:paddingHorizontal="16dp"
-                            android:background="@drawable/bg_input_field" android:hint="***"
+                            android:background="@drawable/bg_input_field" android:hint="@string/hint_cvv"
                             android:inputType="numberPassword" android:textColor="@color/black" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Card Holder Name" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
+                    android:text="@string/label_card_holder_name" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
                 <EditText android:id="@+id/etHolderName"
                     android:layout_width="match_parent" android:layout_height="@dimen/input_height"
                     android:layout_marginTop="8dp" android:paddingHorizontal="16dp"
-                    android:background="@drawable/bg_input_field" android:hint="Full name"
+                    android:background="@drawable/bg_input_field" android:hint="@string/hint_full_name"
                     android:inputType="textPersonName" android:textColor="@color/black" />
 
             </LinearLayout>
@@ -155,7 +155,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_marginBottom="40dp"
                 android:background="@drawable/bg_purple_button"
-                android:text="Save Card"
+                android:text="@string/label_save_card"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 

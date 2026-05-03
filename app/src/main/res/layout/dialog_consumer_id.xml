@@ -18,7 +18,7 @@
             android:id="@+id/tvDialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enter Consumer ID"
+            android:text="@string/label_enter_consumer_id"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -26,7 +26,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Please enter the reference number from your bill."
+            android:text="@string/label_please_enter_the_reference_number_from_your_bill"
             android:textColor="@color/gray_text"
             android:textSize="14sp"
             android:layout_marginTop="8dp" />
@@ -37,7 +37,7 @@
             android:layout_height="52dp"
             android:layout_marginTop="24dp"
             android:background="@drawable/bg_input_field"
-            android:hint="14 digit Consumer ID"
+            android:hint="@string/label_14_digit_consumer_id"
             android:inputType="number"
             android:paddingHorizontal="16dp"
             android:textColor="@color/black"
@@ -49,7 +49,7 @@
             android:layout_height="@dimen/button_height"
             android:layout_marginTop="32dp"
             android:background="@drawable/bg_purple_button"
-            android:text="Fetch Bill"
+            android:text="@string/label_fetch_bill"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textAllCaps="false" />
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:text="Cancel"
+            android:text="@string/label_cancel"
             android:textColor="@color/gray_text"
             android:textAllCaps="false" />
 

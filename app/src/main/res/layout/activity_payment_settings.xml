@@ -24,7 +24,7 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                android:tint="@color/black"
+                app:tint="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Payment Settings"
+                android:text="@string/label_payment_settings"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -55,7 +55,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Saved Cards"
+                    android:text="@string/label_your_saved_cards"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -71,7 +71,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Preferred Method"
+                    android:text="@string/label_preferred_method"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -94,7 +94,7 @@
                         <RadioButton
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Always use World Bank Balance"
+                            android:text="@string/label_always_use_world_bank_balance"
                             android:checked="true"
                             android:textColor="@color/black"
                             android:buttonTint="@color/purple_primary" />
@@ -104,7 +104,7 @@
                         <RadioButton
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Prompt for source every time"
+                            android:text="@string/label_prompt_for_source_every_time"
                             android:textColor="@color/black"
                             android:buttonTint="@color/purple_primary" />
 

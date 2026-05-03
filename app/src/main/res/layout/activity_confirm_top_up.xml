@@ -23,14 +23,14 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                android:tint="@color/black"
+                app:tint="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Confirm Top Up"
+                android:text="@string/label_confirm_top_up"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -86,7 +86,7 @@
                 android:layout_height="@dimen/button_height"
                 android:layout_marginTop="40dp"
                 android:background="@drawable/bg_purple_button"
-                android:text="Confirm and Top Up"
+                android:text="@string/label_confirm_and_top_up"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:textAllCaps="false" />
@@ -97,7 +97,7 @@
                 android:layout_height="@dimen/button_height"
                 android:layout_marginTop="12dp"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:text="Cancel"
+                android:text="@string/label_cancel"
                 android:textColor="@color/gray_text"
                 android:textAllCaps="false" />
 

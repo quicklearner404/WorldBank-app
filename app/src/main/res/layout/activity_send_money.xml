@@ -226,7 +226,7 @@
                         android:textColor="@color/gray_text" android:textSize="12sp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="16dp"
-                        android:text="IBFT fee: Rs. 25 • Internal transfer: Free" />
+                        android:text="@string/label_ibft_fee_rs_25_internal_transfer_free" />
 
                     <Button android:id="@+id/btnSendMoney"
                         android:layout_width="match_parent"

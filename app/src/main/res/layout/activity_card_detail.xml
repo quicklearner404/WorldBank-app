@@ -77,7 +77,7 @@
                         android:id="@+id/ivNfc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="))))"
+                        android:text="@string/label_bracket"
                         android:textColor="#AAFFFFFF"
                         android:textSize="16sp"
                         android:rotation="-90"
@@ -263,7 +263,7 @@
                         android:layout_height="32dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_chevron_right"
-                        android:tint="@color/black"
+                        app:tint="@color/black"
                         android:contentDescription="@null"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -309,7 +309,7 @@
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
                                 android:src="@android:drawable/ic_menu_share"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 
@@ -326,7 +326,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text"
+                            app:tint="@color/gray_text"
                             android:contentDescription="@null" />
 
                     </LinearLayout>
@@ -359,7 +359,7 @@
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
                                 android:src="@android:drawable/ic_menu_recent_history"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 
@@ -376,7 +376,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text"
+                            app:tint="@color/gray_text"
                             android:contentDescription="@null" />
 
                     </LinearLayout>
@@ -409,7 +409,7 @@
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
                                 android:src="@android:drawable/ic_menu_edit"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 
@@ -426,7 +426,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text"
+                            app:tint="@color/gray_text"
                             android:contentDescription="@null" />
 
                     </LinearLayout>
@@ -459,7 +459,7 @@
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
                                 android:src="@android:drawable/ic_menu_agenda"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 
@@ -476,7 +476,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_text"
+                            app:tint="@color/gray_text"
                             android:contentDescription="@null" />
 
                     </LinearLayout>

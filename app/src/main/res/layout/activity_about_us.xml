@@ -24,7 +24,7 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                android:tint="@color/black"
+                app:tint="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="About Us"
+                android:text="@string/label_about_us"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="World Bank"
+            android:text="@string/label_world_bank"
             android:textColor="@color/purple_primary"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -81,7 +81,7 @@
             android:layout_marginTop="24dp"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
-            android:text="Your trusted partner in digital banking. We provide secure, fast, and reliable financial services to help you manage your money better."
+            android:text="@string/label_brand_desc"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -90,7 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:gravity="center"
-            android:text="Version 1.0.0"
+            android:text="@string/label_version"
             android:textColor="@color/gray_text"
             android:textSize="14sp" />
 

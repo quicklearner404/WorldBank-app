@@ -28,7 +28,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:tint="@color/purple_primary"
+                app:tint="@color/purple_primary"
                 tools:src="@drawable/ic_groceries" />
         </FrameLayout>
 
@@ -74,7 +74,7 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_chevron_right"
             android:rotation="90"
-            android:tint="@color/gray_divider"
+            app:tint="@color/gray_divider"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

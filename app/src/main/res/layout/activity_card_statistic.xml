@@ -255,7 +255,7 @@
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_transfer_home"
                                 android:rotation="-45"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 
@@ -318,7 +318,7 @@
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_transfer_home"
                                 android:rotation="135"
-                                android:tint="@color/white"
+                                app:tint="@color/white"
                                 android:contentDescription="@null" />
                         </FrameLayout>
 

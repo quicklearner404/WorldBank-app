@@ -24,7 +24,7 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
-                android:tint="@color/black"
+                app:tint="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -33,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add New Payee"
+                android:text="@string/label_add_new_payee"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -55,15 +55,15 @@
                 android:paddingTop="24dp">
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Recipient Name" android:textColor="@color/black" android:textStyle="bold" />
+                    android:text="@string/label_recipient_name" android:textColor="@color/black" android:textStyle="bold" />
                 <EditText android:id="@+id/etPayeeName"
                     android:layout_width="match_parent" android:layout_height="52dp"
                     android:layout_marginTop="8dp" android:paddingHorizontal="16dp"
-                    android:background="@drawable/bg_input_field" android:hint="Full Name"
+                    android:background="@drawable/bg_input_field" android:hint="@string/label_full_name"
                     android:textColor="@color/black" android:inputType="textPersonName" />
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Account / IBAN / Phone" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
+                    android:text="@string/label_account_iban_phone" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -73,7 +73,7 @@
                     <EditText android:id="@+id/etPayeeAccount"
                         android:layout_width="0dp" android:layout_height="match_parent"
                         android:paddingHorizontal="16dp"
-                        android:background="@drawable/bg_input_field" android:hint="PK36... or 0300..."
+                        android:background="@drawable/bg_input_field" android:hint="@string/label_pk36_or_0300"
                         android:textColor="@color/black" android:inputType="textCapCharacters"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ibPickContact" />
@@ -89,11 +89,11 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:contentDescription="Pick from contacts" />
+                        android:contentDescription="@string/label_pick_from_contacts" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Bank Name" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
+                    android:text="@string/label_bank_name" android:textColor="@color/black" android:textStyle="bold" android:layout_marginTop="20dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -125,7 +125,7 @@
                     android:layout_height="@dimen/button_height"
                     android:layout_marginTop="40dp"
                     android:background="@drawable/bg_purple_button"
-                    android:text="Save Payee"
+                    android:text="@string/save_payee"
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:textAllCaps="false" />

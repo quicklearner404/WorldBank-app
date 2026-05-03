@@ -221,7 +221,7 @@
 
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_divider" />
+                            app:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -247,7 +247,7 @@
                             android:layout_marginStart="-33dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_nav_budgets"
-                            android:tint="@color/purple_primary" android:contentDescription="@null" />
+                            app:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
@@ -262,7 +262,7 @@
 
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_divider" />
+                            app:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -288,7 +288,7 @@
                             android:layout_marginStart="-33dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_lock"
-                            android:tint="@color/purple_primary" android:contentDescription="@null" />
+                            app:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
@@ -303,7 +303,7 @@
 
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_divider" />
+                            app:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -329,7 +329,7 @@
                             android:layout_marginStart="-33dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_details"
-                            android:tint="@color/purple_primary" android:contentDescription="@null" />
+                            app:tint="@color/purple_primary" android:contentDescription="@null" />
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical"
@@ -344,7 +344,7 @@
 
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_divider" />
+                            app:tint="@color/gray_divider" />
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -372,17 +372,17 @@
                             android:layout_height="20dp"
                             android:layout_marginStart="-32dp"
                             android:src="@android:drawable/ic_lock_power_off"
-                            android:tint="@color/red_debit" />
+                            app:tint="@color/red_debit" />
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="24dp"
-                            android:text="Logout" android:textColor="@color/red_debit"
+                            android:text="@string/label_logout" android:textColor="@color/red_debit"
                             android:textSize="15sp" android:textStyle="bold" />
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/gray_divider" />
+                            app:tint="@color/gray_divider" />
                     </LinearLayout>
 
                 </LinearLayout>

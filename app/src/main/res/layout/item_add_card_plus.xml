@@ -23,12 +23,12 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@android:drawable/ic_input_add"
-            android:tint="@color/gray_text" />
+            app:tint="@color/gray_text" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Card"
+            android:text="@string/label_add_card"
             android:textColor="@color/gray_text"
             android:textSize="10sp"
             android:textStyle="bold"
