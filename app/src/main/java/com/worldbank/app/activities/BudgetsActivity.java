@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -128,17 +129,17 @@ public class BudgetsActivity extends AppCompatActivity {
     private void showBudgetGoalDialog() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_consumer_id, null);
-        
-        TextView title = view.findViewById(R.id.tvDialogTitle);
-        EditText input = view.findViewById(R.id.etConsumerId);
-        Button btn = view.findViewById(R.id.btnContinuePayment);
-        Button cancel = view.findViewById(R.id.btnCancelDialog);
-        
+
+        TextView title  = view.findViewById(R.id.tvDialogTitle);
+        EditText input  = view.findViewById(R.id.etConsumerId);
+        Button btn      = view.findViewById(R.id.btnContinuePayment);
+        Button cancel   = view.findViewById(R.id.btnCancelDialog);
+
         title.setText("Set New Spending Goal");
         input.setHint("Enter amount (Rs.)");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         btn.setText("Update Goal");
-        
+
         btn.setOnClickListener(v -> {
             String val = input.getText().toString();
             if (!val.isEmpty()) {
@@ -148,9 +149,16 @@ public class BudgetsActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
-        
+
         cancel.setOnClickListener(v -> dialog.dismiss());
         dialog.setContentView(view);
+
+        // makes keyboard push the dialog content up instead of covering it
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+
         dialog.show();
     }
 

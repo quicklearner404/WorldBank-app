@@ -1,243 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    activity_send_money.xml — UPDATED
-    Now has an editable amount EditText instead of a static TextView.
-    Owner: Dev 2 | Mockup: Page 11
--->
-<androidx.core.widget.NestedScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/gray_bg">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/gray_bg">
 
-        <!-- ── TOP BAR ── -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:paddingHorizontal="@dimen/screen_horizontal_padding">
-
-            <ImageButton
-                android:id="@+id/ibBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_chevron_left"
-                android:contentDescription="@string/cd_back_button"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                android:id="@+id/tvScreenTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_send_money"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- ── CARD WIDGET ── -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cvCard"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/card_height"
-            android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
-            android:layout_marginTop="8dp"
-            app:cardBackgroundColor="@color/purple_primary"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="6dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_card_purple"
-                android:padding="20dp">
-
-                <TextView android:id="@+id/ivNfc"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="))))" android:textColor="#AAFFFFFF" android:textSize="16sp"
-                    android:rotation="-90"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView android:id="@+id/ivVisa"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="@string/label_visa" android:textColor="@color/white"
-                    android:textSize="22sp" android:textStyle="bold" android:fontFamily="serif"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView android:id="@+id/tvCardNumber"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/white" android:textSize="@dimen/text_card_number"
-                    android:letterSpacing="0.08"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    tools:text="4532 **** **** 3090" />
-
-                <TextView android:id="@+id/tvCardHolder"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/white" android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    tools:text="Ali Hassan" />
-
-                <TextView android:id="@+id/tvCardExpiry"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="#CCFFFFFF" android:textSize="12sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    tools:text="Exp 09/26" />
-
-                <View android:layout_width="120dp" android:layout_height="120dp"
-                    android:background="@drawable/shape_card_circle" android:alpha="0.2"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginEnd="-20dp" android:layout_marginBottom="-20dp" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- ── DOT INDICATORS ── -->
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp" android:gravity="center_vertical">
-            <View android:layout_width="24dp" android:layout_height="8dp" android:background="@drawable/shape_dot_active" />
-            <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
-            <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
-            <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
-        </LinearLayout>
-
-        <!-- ── RECIPIENT + AMOUNT CARD ── -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
+            android:orientation="vertical">
 
-            <LinearLayout
+            <!-- top bar -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding">
+
+                <ImageButton
+                    android:id="@+id/ibBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="@string/cd_back_button"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvScreenTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_send_money"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- card widget -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvCard"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/card_height"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/purple_primary"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="6dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_card_purple"
+                    android:padding="20dp">
+
+                    <TextView android:id="@+id/ivNfc"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="))))" android:textColor="#AAFFFFFF" android:textSize="16sp"
+                        android:rotation="-90"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView android:id="@+id/ivVisa"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/label_visa" android:textColor="@color/white"
+                        android:textSize="22sp" android:textStyle="bold" android:fontFamily="serif"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView android:id="@+id/tvCardNumber"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/white" android:textSize="@dimen/text_card_number"
+                        android:letterSpacing="0.08"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        tools:text="4532 **** **** 3090" />
+
+                    <TextView
+                        android:id="@+id/tvCardHolder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        tools:text="Ali Hassan" />
+
+                    <TextView
+                        android:id="@+id/tvCardExpiry"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:textColor="#CCFFFFFF"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        tools:text="Exp 09/26" />
+
+                    <View android:layout_width="120dp" android:layout_height="120dp"
+                        android:background="@drawable/shape_card_circle" android:alpha="0.2"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="-20dp" android:layout_marginBottom="-20dp" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- dot indicators -->
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp" android:gravity="center_vertical">
+                <View android:layout_width="24dp" android:layout_height="8dp" android:background="@drawable/shape_dot_active" />
+                <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
+                <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
+                <View android:layout_width="8dp" android:layout_height="8dp" android:layout_marginStart="6dp" android:background="@drawable/shape_dot_inactive" />
+            </LinearLayout>
+
+            <!-- recipient and amount card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-                <!-- Recipient label -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="@string/label_recipient"
-                    android:textColor="@color/black" android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <!-- Recipient row -->
                 <LinearLayout
-                    android:id="@+id/llRecipientRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="12dp">
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-                    <ImageView android:id="@+id/ivRecipientAvatar"
-                        android:layout_width="44dp" android:layout_height="44dp"
-                        android:background="@drawable/shape_avatar_circle"
-                        android:contentDescription="@null" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/label_recipient"
+                        android:textColor="@color/black" android:textSize="16sp"
+                        android:textStyle="bold" />
 
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-                        <TextView android:id="@+id/tvRecipientName"
+                    <LinearLayout
+                        android:id="@+id/llRecipientRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="12dp">
+
+                        <ImageView android:id="@+id/ivRecipientAvatar"
+                            android:layout_width="44dp" android:layout_height="44dp"
+                            android:background="@drawable/shape_avatar_circle"
+                            android:contentDescription="@null" />
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+                            <TextView android:id="@+id/tvRecipientName"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textColor="@color/black" android:textSize="14sp"
+                                android:textStyle="bold"
+                                tools:text="Tap 'Change' to select" />
+                            <TextView android:id="@+id/tvRecipientAccount"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textColor="@color/gray_text" android:textSize="12sp"
+                                android:layout_marginTop="2dp"
+                                tools:text="No recipient selected" />
+                        </LinearLayout>
+
+                        <TextView android:id="@+id/btnChange"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:textColor="@color/black" android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="Tap 'Change' to select" />
-                        <TextView android:id="@+id/tvRecipientAccount"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:textColor="@color/gray_text" android:textSize="12sp"
-                            android:layout_marginTop="2dp"
-                            tools:text="No recipient selected" />
+                            android:text="@string/btn_change"
+                            android:textColor="@color/gray_text" android:textSize="13sp"
+                            android:padding="8dp"
+                            android:clickable="true" android:focusable="true" />
                     </LinearLayout>
 
-                    <TextView android:id="@+id/btnChange"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="@string/btn_change"
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginTop="16dp" android:background="@color/gray_divider" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/label_transfer_amount"
                         android:textColor="@color/gray_text" android:textSize="13sp"
-                        android:padding="8dp"
-                        android:clickable="true" android:focusable="true" />
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="16dp" />
+
+                    <EditText
+                        android:id="@+id/etAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="center"
+                        android:hint="0"
+                        android:textColorHint="@color/gray_divider"
+                        android:textColor="@color/black"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:background="@null"
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView android:id="@+id/tvTransferAmount"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/gray_text"
+                        android:textSize="13sp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="4dp"
+                        tools:text="Rs. 0" />
+
+                    <TextView android:id="@+id/tvAdminFeeNote"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/gray_text" android:textSize="12sp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="16dp"
+                        android:text="IBFT fee: Rs. 25 • Internal transfer: Free" />
+
+                    <Button android:id="@+id/btnSendMoney"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/btn_send_money"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_button"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_purple_button"
+                        android:stateListAnimator="@null" />
+
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <!-- Divider -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:layout_marginTop="16dp" android:background="@color/gray_divider" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-                <!-- Amount label -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="@string/label_transfer_amount"
-                    android:textColor="@color/gray_text" android:textSize="13sp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="16dp" />
-
-                <!-- Editable amount input — the key new addition -->
-                <EditText
-                    android:id="@+id/etAmount"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:textColorHint="@color/gray_divider"
-                    android:textColor="@color/black"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:background="@null"
-                    android:inputType="numberDecimal"
-                    android:maxLines="1"
-                    android:layout_marginTop="4dp" />
-
-                <!-- Amount in PKR (live preview below input) -->
-                <TextView android:id="@+id/tvTransferAmount"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/gray_text"
-                    android:textSize="13sp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="4dp"
-                    tools:text="Rs. 0" />
-
-                <!-- Admin fee note -->
-                <TextView android:id="@+id/tvAdminFeeNote"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/gray_text" android:textSize="12sp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="16dp"
-                    android:text="IBFT fee: Rs. 25 • Internal transfer: Free" />
-
-                <!-- Send Money Button -->
-                <Button android:id="@+id/btnSendMoney"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/button_height"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/btn_send_money"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_button"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_purple_button"
-                    android:stateListAnimator="@null" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</LinearLayout>
