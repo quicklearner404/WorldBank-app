@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.account;
 
 import android.os.Bundle;
 import android.widget.ImageButton;

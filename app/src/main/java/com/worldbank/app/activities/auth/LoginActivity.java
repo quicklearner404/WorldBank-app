@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,7 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
-
+import com.worldbank.app.activities.home.HomeActivity;
 public class LoginActivity extends AppCompatActivity {
 
     FirebaseAuth auth;

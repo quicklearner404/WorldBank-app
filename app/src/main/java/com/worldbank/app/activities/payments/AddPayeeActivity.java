@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.payments;
 
 import android.Manifest;
 import android.content.Intent;

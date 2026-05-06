@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.transaction;
 
 import android.os.Bundle;
 import android.text.Editable;

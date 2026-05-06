@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.worldbank.app.R;
-import com.worldbank.app.activities.AddCardActivity;
+import com.worldbank.app.activities.cards.AddCardActivity;
 import com.worldbank.app.models.Card;
 
 import java.util.List;

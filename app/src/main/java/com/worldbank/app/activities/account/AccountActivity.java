@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.account;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,14 +11,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.worldbank.app.activities.payments.PaymentSettingsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
-
-
+import com.worldbank.app.activities.auth.LoginActivity;
+import com.worldbank.app.activities.home.HomeActivity;
+import com.worldbank.app.activities.cards.CardStatisticActivity;
+import com.worldbank.app.activities.budget.BudgetsActivity;
+import com.worldbank.app.activities.transaction.TransactionHistoryActivity;
 public class AccountActivity extends AppCompatActivity {
 
     private static final String TAG = "AccountActivity";

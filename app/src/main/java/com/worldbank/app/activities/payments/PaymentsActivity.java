@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.payments;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -32,8 +32,13 @@ import com.worldbank.app.utils.TransactionRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
+import com.worldbank.app.activities.account.AccountActivity;
+import com.worldbank.app.activities.budget.BudgetsActivity;
+import com.worldbank.app.activities.cards.CardDetailActivity;
+import com.worldbank.app.activities.cards.CardStatisticActivity;
+import com.worldbank.app.activities.payments.AddPayeeActivity;
+import com.worldbank.app.activities.transaction.SendMoneyActivity;
+import com.worldbank.app.activities.transaction.ReviewPaymentActivity;
 public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapter.OnContactClickListener, BillerAdapter.OnBillerClickListener {
 
     private RecyclerView rvQuickPay, rvScheduled;

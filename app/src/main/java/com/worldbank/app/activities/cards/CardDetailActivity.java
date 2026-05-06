@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.cards;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +17,7 @@ import com.worldbank.app.R;
 import com.worldbank.app.models.Card;
 import com.worldbank.app.utils.SessionManager;
 
-
+import com.worldbank.app.activities.transaction.TransactionHistoryActivity;
 public class CardDetailActivity extends AppCompatActivity {
 
     // ── Views ──────────────────────────────────────────────────────

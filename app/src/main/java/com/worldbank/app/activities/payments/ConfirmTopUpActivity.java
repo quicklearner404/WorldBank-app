@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.payments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
 import com.worldbank.app.utils.TransactionRepository;
-
+import com.worldbank.app.activities.transaction.TransferSuccessActivity;
 public class ConfirmTopUpActivity extends AppCompatActivity {
 
     private TextView tvConfirmAmount, tvConfirmMethod, tvConfirmTotal;

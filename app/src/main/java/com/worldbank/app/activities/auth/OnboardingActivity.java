@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +8,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.worldbank.app.R;
 
-/**
- * OnboardingActivity
- * TODO: Implement UI and logic based on project documentation.
- */
+
 public class OnboardingActivity extends AppCompatActivity {
     Button btn_getStarted;
     @Override

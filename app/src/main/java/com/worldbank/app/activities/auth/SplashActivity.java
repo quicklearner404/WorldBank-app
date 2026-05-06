@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.worldbank.app.R;
 import com.worldbank.app.utils.SessionManager;
-
+import com.worldbank.app.activities.home.HomeActivity;
 public class SplashActivity extends AppCompatActivity {
 
     private static final int SPLASH_DELAY_MS = 2000;

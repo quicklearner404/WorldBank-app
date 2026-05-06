@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.transaction;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +10,7 @@ import com.worldbank.app.R;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
+import com.worldbank.app.activities.home.HomeActivity;
 
 public class TransferSuccessActivity extends AppCompatActivity {
 
@@ -86,6 +86,7 @@ public class TransferSuccessActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         goToHome();
     }
 }

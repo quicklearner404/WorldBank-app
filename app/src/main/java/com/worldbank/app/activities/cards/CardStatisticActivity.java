@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.cards;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -37,7 +37,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-
+import com.worldbank.app.activities.payments.PaymentSettingsActivity;
+import com.worldbank.app.activities.account.AccountActivity;
+import com.worldbank.app.activities.budget.BudgetsActivity;
+import com.worldbank.app.activities.home.HomeActivity;
 public class CardStatisticActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
     private static final String TAG = "CardStatisticActivity";

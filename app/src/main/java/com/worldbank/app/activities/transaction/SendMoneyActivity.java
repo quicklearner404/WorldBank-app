@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.transaction;
 
 import android.Manifest;
 import android.app.Dialog;

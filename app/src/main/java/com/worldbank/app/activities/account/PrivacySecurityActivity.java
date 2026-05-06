@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.account;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.worldbank.app.R;
-
+import com.worldbank.app.activities.auth.ForgotPasswordActivity;
 public class PrivacySecurityActivity extends AppCompatActivity {
 
     @Override

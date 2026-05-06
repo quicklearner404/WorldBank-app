@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.home;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,7 +26,15 @@ import com.worldbank.app.utils.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
+import com.worldbank.app.activities.account.AccountActivity;
+import com.worldbank.app.activities.budget.BudgetsActivity;
+import com.worldbank.app.activities.cards.AddCardActivity;
+import com.worldbank.app.activities.cards.CardDetailActivity;
+import com.worldbank.app.activities.cards.CardStatisticActivity;
+import com.worldbank.app.activities.payments.PaymentsActivity;
+import com.worldbank.app.activities.transaction.SendMoneyActivity;
+import com.worldbank.app.activities.transaction.TransactionHistoryActivity;
+import com.worldbank.app.activities.payments.TopUpActivity;
 public class HomeActivity extends AppCompatActivity implements CardAdapter.OnCardClickListener {
 
     private TextView tvBalanceAmount, tvSeeMore;

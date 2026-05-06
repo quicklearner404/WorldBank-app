@@ -1,4 +1,4 @@
-package com.worldbank.app.activities;
+package com.worldbank.app.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
