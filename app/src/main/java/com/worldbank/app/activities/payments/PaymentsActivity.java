@@ -45,7 +45,7 @@ public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapt
     private TextView tvScheduledLabel, tvQuickPayLabel;
     private EditText etSearchPayees;
     private View quickPayContainer;
-    
+
     private QuickPayAdapter quickPayAdapter;
     private TransactionAdapter scheduledAdapter;
     private BillerAdapter billerAdapter;
@@ -88,7 +88,7 @@ public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapt
         tvQuickPayLabel = findViewById(R.id.tvQuickPayLabel);
         etSearchPayees = findViewById(R.id.etSearchPayees);
         quickPayContainer = findViewById(R.id.rvQuickPay);
-        
+
         ImageButton ibBack = findViewById(R.id.ibBack);
         if (ibBack != null) ibBack.setOnClickListener(v -> finish());
 
@@ -225,10 +225,10 @@ public class PaymentsActivity extends AppCompatActivity implements QuickPayAdapt
         btnContinue.setOnClickListener(v -> {
             String cid = etConsumerId.getText().toString().trim();
             if (cid.isEmpty()) { Toast.makeText(this, "Enter Consumer ID", Toast.LENGTH_SHORT).show(); return; }
-            
+
             // Simulating bill fetch from server
             double simulatedBillAmount = 500 + (Math.random() * 4500);
-            
+
             Intent intent = new Intent(this, ReviewPaymentActivity.class);
             intent.putExtra("recipientName", biller.getName());
             intent.putExtra("recipientAccount", "Ref: " + cid);

@@ -20,9 +20,6 @@
             android:name=".activities.admin.AdminUsersActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.admin.MainActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.admin.AdminDashboardActivity"
             android:exported="false" /> <!-- Auth Package -->
         <activity

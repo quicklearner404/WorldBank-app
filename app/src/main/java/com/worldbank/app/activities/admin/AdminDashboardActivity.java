@@ -2,88 +2,78 @@ package com.worldbank.app.activities.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.worldbank.app.R;
 import com.worldbank.app.activities.home.HomeActivity;
-import com.worldbank.app.models.Transaction;
+import com.worldbank.app.utils.SessionManager;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+public class AdminDashboardActivity extends AppCompatActivity {
 
-public class AdminTransactionsActivity extends AppCompatActivity {
-
-    private RecyclerView rvTransactions;
-    private TextView tvEmpty;
+    private TextView tvTotalUsers, tvTotalTransactions, tvActiveAccounts;
     private BottomNavigationView bottomNavView;
 
     private FirebaseFirestore db;
-    private final List<DocumentSnapshot> txnList = new ArrayList<>();
-    private TransactionsAdapter adapter;
+    private FirebaseAuth auth;
+    private SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_transactions);
+        setContentView(R.layout.activity_admin_dashboard);
 
-        db = FirebaseFirestore.getInstance();
+        db      = FirebaseFirestore.getInstance();
+        auth    = FirebaseAuth.getInstance();
+        session = new SessionManager(this);
 
-        rvTransactions = findViewById(R.id.rvTransactions);
-        tvEmpty        = findViewById(R.id.tvEmpty);
-        bottomNavView  = findViewById(R.id.adminBottomNavView);
-
-        adapter = new TransactionsAdapter(txnList);
-        rvTransactions.setLayoutManager(new LinearLayoutManager(this));
-        rvTransactions.setAdapter(adapter);
-
+        bindViews();
+        loadStats();
         setupBottomNav();
-        loadTransactions();
     }
 
-    private void loadTransactions() {
-        db.collection("transactions")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(100)
-                .get()
-                .addOnSuccessListener(snap -> {
-                    txnList.clear();
-                    txnList.addAll(snap.getDocuments());
-                    adapter.notifyDataSetChanged();
+    private void bindViews() {
+        tvTotalUsers        = findViewById(R.id.tvTotalUsers);
+        tvTotalTransactions = findViewById(R.id.tvTotalTransactions);
+        tvActiveAccounts    = findViewById(R.id.tvActiveAccounts);
+        bottomNavView       = findViewById(R.id.adminBottomNavView);
+    }
 
-                    tvEmpty.setVisibility(txnList.isEmpty() ? View.VISIBLE : View.GONE);
-                    rvTransactions.setVisibility(txnList.isEmpty() ? View.GONE : View.VISIBLE);
-                });
+    private void loadStats() {
+        db.collection("users").get()
+                .addOnSuccessListener(snap -> tvTotalUsers.setText(String.valueOf(snap.size())))
+                .addOnFailureListener(e -> tvTotalUsers.setText("--"));
+
+        db.collection("transactions").get()
+                .addOnSuccessListener(snap -> tvTotalTransactions.setText(String.valueOf(snap.size())))
+                .addOnFailureListener(e -> tvTotalTransactions.setText("--"));
+
+        db.collection("accounts")
+                .whereEqualTo("isActive", true)
+                .get()
+                .addOnSuccessListener(snap -> tvActiveAccounts.setText(String.valueOf(snap.size())))
+                .addOnFailureListener(e -> tvActiveAccounts.setText("--"));
     }
 
     private void setupBottomNav() {
-        bottomNavView.setSelectedItemId(R.id.admin_nav_transactions);
+        bottomNavView.setSelectedItemId(R.id.admin_nav_dashboard);
         bottomNavView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
             if (id == R.id.admin_nav_dashboard) {
-                startActivity(new Intent(this, AdminDashboardActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
                 return true;
             } else if (id == R.id.admin_nav_users) {
                 startActivity(new Intent(this, AdminUsersActivity.class));
                 overridePendingTransition(0, 0);
-                finish();
                 return true;
             } else if (id == R.id.admin_nav_transactions) {
+                startActivity(new Intent(this, AdminTransactionsActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.admin_nav_exit) {
                 showExitDialog();
@@ -111,77 +101,8 @@ public class AdminTransactionsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // back press blocked inside admin view
-    }
-
-    // adapter unchanged below this line
-    private static class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.VH> {
-
-        private final List<DocumentSnapshot> list;
-
-        TransactionsAdapter(List<DocumentSnapshot> list) {
-            this.list = list;
-        }
-
-        @Override
-        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = android.view.LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_admin_transaction, parent, false);
-            return new VH(v);
-        }
-
-        @Override
-        public void onBindViewHolder(VH holder, int position) {
-            DocumentSnapshot doc = list.get(position);
-
-            Double amount    = doc.getDouble("amount");
-            String type      = doc.getString("type");
-            String recipient = doc.getString("recipientName");
-            String senderUid = doc.getString("senderUid");
-            String ref       = doc.getString("referenceNumber");
-
-            if (amount == null)    amount    = 0.0;
-            if (type == null)      type      = "";
-            if (recipient == null) recipient = "";
-            if (senderUid == null) senderUid = "";
-            if (ref == null)       ref       = "";
-
-            holder.tvAmount.setText(String.format("Rs. %,.0f", amount));
-            holder.tvRecipient.setText(recipient);
-            holder.tvSender.setText(senderUid);
-            holder.tvRef.setText(ref);
-
-            boolean isCredit = Transaction.TYPE_CREDIT.equals(type);
-            holder.tvType.setText(type);
-            holder.tvType.setTextColor(isCredit
-                    ? holder.itemView.getContext().getColor(R.color.green_credit)
-                    : holder.itemView.getContext().getColor(R.color.red_debit));
-
-            com.google.firebase.Timestamp ts = doc.getTimestamp("timestamp");
-            if (ts != null) {
-                String formatted = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
-                        .format(ts.toDate());
-                holder.tvTimestamp.setText(formatted);
-            } else {
-                holder.tvTimestamp.setText("");
-            }
-        }
-
-        @Override
-        public int getItemCount() { return list.size(); }
-
-        static class VH extends RecyclerView.ViewHolder {
-            TextView tvAmount, tvType, tvRecipient, tvSender, tvRef, tvTimestamp;
-
-            VH(View v) {
-                super(v);
-                tvAmount    = v.findViewById(R.id.tvTxnAmount);
-                tvType      = v.findViewById(R.id.tvTxnType);
-                tvRecipient = v.findViewById(R.id.tvTxnRecipient);
-                tvSender    = v.findViewById(R.id.tvTxnSender);
-                tvRef       = v.findViewById(R.id.tvTxnRef);
-                tvTimestamp = v.findViewById(R.id.tvTxnTimestamp);
-            }
-        }
+        // back press is intentionally blocked inside admin view
+        // admin must use the bottom nav exit button to return to user view
+        super.onBackPressed();
     }
 }
