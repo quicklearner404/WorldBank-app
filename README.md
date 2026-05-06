@@ -4,7 +4,6 @@ World Bank is an Android banking application built for the Pakistani market. It 
 
 ---
 
-## Demo Video: https://youtu.be/1mrV-b5_1yU
 ## Features
 
 **Authentication**
@@ -95,54 +94,9 @@ World Bank is an Android banking application built for the Pakistani market. It 
 app/
   src/main/
     java/com/worldbank/app/
-      activities/
-        auth/
-          SplashActivity
-          WelcomeActivity
-          OnboardingActivity
-          LoginActivity
-          SignUpActivity
-          ForgotPasswordActivity
-        home/
-          HomeActivity
-        cards/
-          CardDetailActivity
-          CardStatisticActivity
-          AddCardActivity
-        transactions/
-          TransactionHistoryActivity
-          TransferSuccessActivity
-          ReviewPaymentActivity
-          SendMoneyActivity
-        payments/
-          PaymentsActivity
-          PaymentSettingsActivity
-          TopUpActivity
-          ConfirmTopUpActivity
-          AddPayeeActivity
-        budget/
-          BudgetsActivity
-        account/
-          AccountActivity
-          UserInfoActivity
-          PrivacySecurityActivity
-          AboutUsActivity
-      adapters/
-        BillerAdapter
-        CardAdapter
-        QuickPayAdapter
-        TransactionAdapter
-      models/
-        Account
-        Biller
-        Card
-        Contact
-        Transaction
-        User
-      utils/
-        FirestoreSeeder
-        SessionManager
-        TransactionRepository
+      activities/       All screens and UI logic
+      models/           Data classes for User, Account, Card, Transaction, Contact
+      utils/            SessionManager, TransactionRepository
     res/
       layout/           XML layouts for all screens and dialogs
       drawable/         Backgrounds, shapes, icons

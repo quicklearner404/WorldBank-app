@@ -13,148 +13,135 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WorldBank">
-
-        <!-- launcher -->
         <activity
-            android:name=".activities.SplashActivity"
+            android:name=".activities.admin.AdminTransactionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.admin.AdminUsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.admin.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.admin.AdminDashboardActivity"
+            android:exported="false" /> <!-- Auth Package -->
+        <activity
+            android:name=".activities.auth.SplashActivity"
             android:exported="true"
             android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.WorldBank.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".activities.OnboardingActivity"
+            android:name=".activities.auth.OnboardingActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.WelcomeActivity"
+            android:name=".activities.auth.WelcomeActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".activities.auth.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.SignUpActivity"
+            android:name=".activities.auth.SignUpActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.ForgotPasswordActivity"
+            android:name=".activities.auth.ForgotPasswordActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
-
+            android:windowSoftInputMode="adjustResize" /> <!-- Home Package -->
         <activity
-            android:name=".activities.HomeActivity"
+            android:name=".activities.home.HomeActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait" /> <!-- Cards Package -->
         <activity
-            android:name=".activities.CardDetailActivity"
+            android:name=".activities.cards.CardDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.CardStatisticActivity"
+            android:name=".activities.cards.CardStatisticActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.BudgetsActivity"
+            android:name=".activities.cards.AddCardActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" /> <!-- Budget Package -->
         <activity
-            android:name=".activities.SendMoneyActivity"
+            android:name=".activities.budget.BudgetsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" /> <!-- Transaction Package -->
+        <activity
+            android:name=".activities.transaction.SendMoneyActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.TransferSuccessActivity"
+            android:name=".activities.transaction.TransferSuccessActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.TransactionHistoryActivity"
+            android:name=".activities.transaction.TransactionHistoryActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.AccountActivity"
+            android:name=".activities.transaction.ReviewPaymentActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait" /> <!-- Payments Package -->
         <activity
-            android:name=".activities.TopUpActivity"
+            android:name=".activities.payments.TopUpActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.PaymentsActivity"
+            android:name=".activities.payments.PaymentsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.AddCardActivity"
+            android:name=".activities.payments.ConfirmTopUpActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.payments.AddPayeeActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.AboutUsActivity"
+            android:name=".activities.payments.PaymentSettingsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" /> <!-- Account Package -->
+        <activity
+            android:name=".activities.account.AccountActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
         <activity
-            android:name=".activities.UserInfoActivity"
+            android:name=".activities.account.AboutUsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.account.UserInfoActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
-            android:name=".activities.ReviewPaymentActivity"
+            android:name=".activities.account.PrivacySecurityActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".activities.ConfirmTopUpActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".activities.AddPayeeActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".activities.PaymentSettingsActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".activities.PrivacySecurityActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
     </application>
 
 </manifest>

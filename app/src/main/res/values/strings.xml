@@ -222,4 +222,30 @@
     <string name="label_world_bank">World Bank</string>
     <string name="label_brand_desc">Your trusted partner in digital banking. We provide secure, fast, and reliable financial services to help you manage your money better.</string>
     <string name="label_version">Version 1.0.0</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <!-- Admin Panel -->
+    <string name="label_admin_panel">Admin Panel</string>
+    <string name="label_admin_dashboard">Dashboard</string>
+    <string name="label_admin_users">All Users</string>
+    <string name="label_admin_transactions">All Transactions</string>
+    <string name="label_total_users">Total Users</string>
+    <string name="label_total_transactions">Total Transactions</string>
+    <string name="label_total_transferred">Total Transferred</string>
+    <string name="label_active_accounts">Active Accounts</string>
+    <string name="label_admin_users_list">Users</string>
+    <string name="label_admin_transactions_list">Transactions</string>
+    <string name="label_admin_logout">Logout</string>
+    <string name="label_joined">Joined</string>
+    <string name="label_cnic_colon">CNIC</string>
+    <string name="label_phone_colon">Phone</string>
+    <string name="label_sender">Sender</string>
+    <string name="label_admin_ref">Ref</string>
+    <string name="label_no_users">No users found</string>
+    <string name="label_no_transactions">No transactions found</string>
+    <string name="label_loading">Loading...</string>
+    <string name="label_overview">Overview</string>
+    <string name="label_rs_prefix">Rs.</string>
 </resources>
