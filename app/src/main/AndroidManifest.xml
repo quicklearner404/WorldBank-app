@@ -16,7 +16,7 @@
 
         <!-- launcher -->
         <activity
-            android:name=".activities.SplashActivity"
+            android:name=".activities.auth.SplashActivity"
             android:exported="true"
             android:noHistory="true"
             android:screenOrientation="portrait"
@@ -28,130 +28,130 @@
         </activity>
 
         <activity
-            android:name=".activities.OnboardingActivity"
+            android:name=".activities.auth.OnboardingActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.WelcomeActivity"
+            android:name=".activities.auth.WelcomeActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".activities.auth.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.SignUpActivity"
+            android:name=".activities.auth.SignUpActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.ForgotPasswordActivity"
+            android:name=".activities.auth.ForgotPasswordActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.HomeActivity"
+            android:name=".activities.home.HomeActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.CardDetailActivity"
+            android:name=".activities.cards.CardDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.CardStatisticActivity"
+            android:name=".activities.cards.CardStatisticActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.BudgetsActivity"
+            android:name=".activities.budget.BudgetsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.SendMoneyActivity"
+            android:name=".activities.transaction.SendMoneyActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.TransferSuccessActivity"
+            android:name=".activities.transaction.TransferSuccessActivity"
             android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.TransactionHistoryActivity"
+            android:name=".activities.transaction.TransactionHistoryActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.AccountActivity"
+            android:name=".activities.account.AccountActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.TopUpActivity"
+            android:name=".activities.payments.TopUpActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.PaymentsActivity"
+            android:name=".activities.payments.PaymentsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.AddCardActivity"
+            android:name=".activities.cards.AddCardActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.AboutUsActivity"
+            android:name=".activities.account.AboutUsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.UserInfoActivity"
+            android:name=".activities.account.UserInfoActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.ReviewPaymentActivity"
+            android:name=".activities.transaction.ReviewPaymentActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.ConfirmTopUpActivity"
+            android:name=".activities.payments.ConfirmTopUpActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.AddPayeeActivity"
+            android:name=".activities.payments.AddPayeeActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.PaymentSettingsActivity"
+            android:name=".activities.payments.PaymentSettingsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activities.PrivacySecurityActivity"
+            android:name=".activities.account.PrivacySecurityActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
